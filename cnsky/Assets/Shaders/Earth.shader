@@ -73,23 +73,16 @@ Shader "cnlohr/Earth"
 				
 				float lambda = atan2( i.vPos.x, i.vPos.z );
 				float phi = atan2( length(i.vPos.xz), i.vPos.y );
-				uv.x = -lambda;
+				uv.x = -lambda/2.0;
 				uv.y = -phi;
 				
 				uv.x = frac( uv.x / 3.14159 + 1 ); 
 				uv.y = frac( uv.y / 3.14159 + 1 ); 
-				//float uvy = uv.y*2.0-1.0;
-				//float uvyraw = abs( uvy );
-				//float uvyrawsign = sign( uvy );
 				
-				//uvy = asin( uvy );
-				//uvy = sin( uvy*1.5707 );
-				//uv.y = uvy*0.5+0.5;
-				
-				float dayness = pow( saturate( dot( normal, normalize(_WorldSpaceLightPos0.xyz) ) ), 0.6);
+				float dayness = saturate( dot( normal, normalize(_WorldSpaceLightPos0.xyz) )  * 6.0);
 				float4 texCol = lerp( tex2D(_MainTexNight, uv), tex2D(_MainTexDay, uv), dayness ) * _Color;
 				clip(texCol.a - _Cutoff);
-
+				
 
 				UNITY_LIGHT_ATTENUATION(attenuation, i, i.wPos.xyz);
 
