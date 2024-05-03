@@ -1,0 +1,3 @@
+[submodule "csgp4"]
+	path = csgp4
+	url = https://github.com/cnlohr/csgp4
