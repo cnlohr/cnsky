@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#define USE_EXR
+//#define USE_EXR
 
 #ifdef USE_EXR
 #define TINYEXR_IMPLEMENTATION
