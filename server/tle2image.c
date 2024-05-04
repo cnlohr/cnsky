@@ -7,7 +7,7 @@
 #include "../csgp4/csgp4.h"
 #include "../csgp4/os_generic.h"
 
-#define TLEEXR
+//#define TLEEXR
 
 #ifdef TLEEXR
 #define TINYEXR_IMPLEMENTATION
@@ -25,7 +25,11 @@
 
 // Assume 24 floats per entry.
 #define FPERE 24
+#ifdef TLEEXR
+#define DATAW 512
+#else
 #define DATAW 2048
+#endif
 #define DATAH 512
 #define USABLE_W (((DATAW)/(FPERE))*(FPERE))
 
@@ -122,7 +126,6 @@ int main( int argc, char ** argv )
 		px[4] = outObjNumber;
 		uint32_t n = 0xff83211f;
 		px[5] = *(float*)&n;
-		
 		outObjNumber++;
 	}
 
@@ -133,63 +136,77 @@ int main( int argc, char ** argv )
 	snprintf( tempfile, sizeof(tempfile)-1, "%s.temp", argv[2] );
 
 #ifdef TLEEXR
+
+/*
 	EXRHeader header;
 	InitEXRHeader(&header);
 	EXRImage image;
 	InitEXRImage(&image);
-    image.num_channels = 4;
+	image.num_channels = 4;
 
-    std::vector<float> images[4];
-    images[0].resize(DATAW * DATAH);
-    images[1].resize(DATAW * DATAH);
-    images[2].resize(DATAW * DATAH);
-    images[3].resize(DATAW * DATAH);
+	std::vector<float> images[4];
+	images[0].resize(DATAW * DATAH);
+	images[1].resize(DATAW * DATAH);
+	images[2].resize(DATAW * DATAH);
+	images[3].resize(DATAW * DATAH);
 
 
 
-    // Split RGBRGBRGB... into R, G and B layer
-    for (int i = 0; i < DATAW * DATAH; i++) {
-      images[0][i] = data[4*i+0];
-      images[1][i] = data[4*i+1];
-      images[2][i] = data[4*i+2];
-      images[3][i] = data[4*i+3];
-    }
+	// Split RGBRGBRGB... into R, G and B layer
+	for (int i = 0; i < DATAW * DATAH; i++) {
+		images[0][i] = data[4*i+0];
+		images[1][i] = data[4*i+1];
+		images[2][i] = data[4*i+2];
+		images[3][i] = data[4*i+3];
+	}
 
-    float* image_ptr[4];
-    image_ptr[0] = &(images[3].at(0)); // A
-    image_ptr[1] = &(images[2].at(0)); // B
-    image_ptr[2] = &(images[1].at(0)); // G
-    image_ptr[3] = &(images[0].at(0)); // R
+	float* image_ptr[4];
+	image_ptr[0] = &(images[3].at(0)); // A
+	image_ptr[1] = &(images[2].at(0)); // B
+	image_ptr[2] = &(images[1].at(0)); // G
+	image_ptr[3] = &(images[0].at(0)); // R
 
-    image.images = (unsigned char**)image_ptr;
-    image.width = DATAW;
-    image.height = DATAH;
+	image.images = (unsigned char**)image_ptr;
+	image.width = DATAW;
+	image.height = DATAH;
 
-    header.num_channels = 4;
+	header.num_channels = 4;
 	header.compression_type = TINYEXR_COMPRESSIONTYPE_ZIP;
-    header.channels = (EXRChannelInfo *)malloc(sizeof(EXRChannelInfo) * header.num_channels);
-    // Must be (A)BGR order, since most of EXR viewers expect this channel order.
-    strncpy(header.channels[0].name, "A", 255); header.channels[0].name[strlen("A")] = '\0';
-    strncpy(header.channels[1].name, "B", 255); header.channels[1].name[strlen("B")] = '\0';
-    strncpy(header.channels[2].name, "G", 255); header.channels[2].name[strlen("G")] = '\0';
-    strncpy(header.channels[3].name, "R", 255); header.channels[3].name[strlen("R")] = '\0';
+	header.channels = (EXRChannelInfo *)malloc(sizeof(EXRChannelInfo) * header.num_channels);
+	// Must be (A)BGR order, since most of EXR viewers expect this channel order.
+	strncpy(header.channels[0].name, "A", 255); header.channels[0].name[strlen("A")] = '\0';
+	strncpy(header.channels[1].name, "B", 255); header.channels[1].name[strlen("B")] = '\0';
+	strncpy(header.channels[2].name, "G", 255); header.channels[2].name[strlen("G")] = '\0';
+	strncpy(header.channels[3].name, "R", 255); header.channels[3].name[strlen("R")] = '\0';
 
-    header.pixel_types = (int *)malloc(sizeof(int) * header.num_channels);
-    header.requested_pixel_types = (int *)malloc(sizeof(int) * header.num_channels);
-    for (int i = 0; i < header.num_channels; i++) {
-      header.pixel_types[i] = TINYEXR_PIXELTYPE_FLOAT; // pixel type of input image
-      header.requested_pixel_types[i] = TINYEXR_PIXELTYPE_FLOAT; // pixel type of output image to be stored in .EXR
-    }
+	header.pixel_types = (int *)malloc(sizeof(int) * header.num_channels);
+	header.requested_pixel_types = (int *)malloc(sizeof(int) * header.num_channels);
+	for (int i = 0; i < header.num_channels; i++) {
+		header.pixel_types[i] = TINYEXR_PIXELTYPE_FLOAT; // pixel type of input image
+		header.requested_pixel_types[i] = TINYEXR_PIXELTYPE_FLOAT; // pixel type of output image to be stored in .EXR
+	}
 
 
 
-    const char* err = NULL; // or nullptr in C++11 or later.
-    r = SaveEXRImageToFile(&image, &header, tempfile, &err);
+	const char* err = NULL; // or nullptr in C++11 or later.
+	r = SaveEXRImageToFile(&image, &header, tempfile, &err);
 	if( r )
 	{
 		fprintf( stderr, "%s\n", err );
 		return -9;
 	}
+*/
+
+	const char* err = NULL; // or nullptr in C++11 or later.
+	r = SaveEXR(data, DATAW, DATAH,
+                   3, 0,
+                   tempfile, &err);
+	if( r )
+	{
+		fprintf( stderr, "%s\n", err );
+		return -9;
+	}
+
 #else
 	r = stbi_write_png( tempfile, DATAW, DATAH, 4, (uint8_t*)data, DATAW*4 );
 	printf( "Write status: %d\n", r );
