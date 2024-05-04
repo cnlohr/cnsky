@@ -71,13 +71,14 @@ Shader "cnlohr/Earth"
 				float3 normal = normalize(i.normal);
 				float2 uv = i.uv;
 				
-				float lambda = atan2( i.vPos.x, i.vPos.z );
+				float lambda = atan2( i.vPos.z, i.vPos.x );
 				float phi = atan2( length(i.vPos.xz), i.vPos.y );
-				uv.x = -lambda/2.0;
+				uv.x = lambda/2.0;
 				uv.y = -phi;
 				
 				uv.x = frac( uv.x / 3.14159 + 1 ); 
 				uv.y = frac( uv.y / 3.14159 + 1 ); 
+				//uv = clamp( uv, 0.0, .99 );
 				
 				float dayness = saturate( dot( normal, normalize(_WorldSpaceLightPos0.xyz) )  * 6.0);
 				float4 texCol = lerp( tex2D(_MainTexNight, uv), tex2D(_MainTexDay, uv), dayness ) * _Color;
