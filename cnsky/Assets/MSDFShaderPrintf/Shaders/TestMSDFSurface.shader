@@ -57,9 +57,8 @@ Shader "Unlit/TestMSDFSurface"
 				
 				float2 smoothUv = inuv*16.0;
 				float2 screenPxRange = MSDFCalcScreenPxRange( smoothUv );
-				float base = MSDFEval(tuv, index, screenPxRange, smoothUv);
-				float shadow = MSDFEval(tuv, index, screenPxRange, smoothUv, 15, 0.3);
-				fixed4 col = float4( base.xxx, shadow.x );
+				float2 font = MSDFEval(tuv, index, screenPxRange, smoothUv);
+				fixed4 col = float4( font.xxx, font.y );
 
 				// apply fog
 				UNITY_APPLY_FOG(i.fogCoord, col);

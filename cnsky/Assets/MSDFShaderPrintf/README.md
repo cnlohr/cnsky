@@ -12,8 +12,8 @@ In here is also `MSDFShaderPrintf.cginc`, which provides:
 
 
 ```c
-// For directly evaluating a given glyph index based on uv, smooth uv, and a possible offset (in intensity/SDF) and sharpness of the resolve.
-float MSDFEval( float2 texCoord, int index, float2 screenPxRange, float2 suv, float offset = 0.0, float sharpness = 1.0 )
+// For directly evaluating a given glyph index based on uv, smooth uv, will return central hit and shadow opacities.
+float2 MSDFEval( float2 texCoord, int index, float2 screenPxRange, float2 suv )
 
 // For printing a char with an outline.
 float2 MSDFPrintChar( int charNum, float2 charUv, float2 smoothUv )

@@ -57,8 +57,6 @@ Shader "Unlit/TestMSDFPrint"
 				float2 uv = inuv * float2( columns, lines );
 				int2 dig = floor( uv );
 
-				
-				
 				if( uv.x < 10 && uv.y <= 13 )
 				{
 					const uint sendarr[130] = { 
