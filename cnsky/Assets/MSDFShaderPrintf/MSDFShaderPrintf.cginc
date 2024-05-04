@@ -98,15 +98,15 @@ float2 MSDFCalcScreenPxRange( float2 suv )
 	return max(screenPxRangeRaw, 1.0);
 }
 
-float MSDFEval( float2 texCoord, int index, float2 screenPxRange, float2 suv, float offset = 0.0, float sharpness = 1.0 )
+float2 MSDFEval( float2 texCoord, int index, float2 screenPxRange, float2 suv )
 {
 	texCoord.y = 1.0 - texCoord.y;
 	float3 msd = _MSDFTex.SampleGrad(sampler_MSDFTex, float3( texCoord, index ), ddx(suv), ddy(suv) );
-	//msd += msd * float3( ( offset * pow(length(fwidth(suv)),0.5)).xxx );
+
 	float sd = max(min(msd.r, msd.g), min(max(msd.r, msd.g), msd.b)); // sd = median
-	sd += (sd*4.0-0.3) * ( ( offset * pow(length(fwidth(suv)),0.5)) );
-	float screenPxDistance = screenPxRange*(sd - 0.5)*sharpness;
-	float opacity = clamp(screenPxDistance + 0.5, 0.0, 1.0);
+	float sdShadow = sd + (sd*4.0-0.3) * ( ( 14 * pow(length(fwidth(suv)),0.5)) );
+	float2 screenPxDistance = screenPxRange*( float2( sd, sdShadow ) - 0.5)*float2( 1.0, 0.3 );
+	float2 opacity = clamp(screenPxDistance + 0.5, 0.0, 1.0);
 	return opacity;
 }
 
@@ -114,9 +114,7 @@ float2 MSDFPrintChar( int charNum, float2 charUv, float2 smoothUv )
 {
 	float2 screenPxRange = MSDFCalcScreenPxRange( smoothUv );
 	charUv = frac(charUv);
-	float base = MSDFEval(charUv, charNum, screenPxRange, smoothUv);
-	float shadow = MSDFEval(charUv, charNum, screenPxRange, smoothUv, 15, 0.3);
-	return float2( base.x, shadow.x );
+	return MSDFEval(charUv, charNum, screenPxRange, smoothUv);
 }
 
 // Print a number on a line
@@ -140,13 +138,17 @@ float2 MSDFPrintNum( float value, float2 texCoord, int numDigits = 10, int numFr
     uint leadingdash = (value<0)?('-'-'0'):(' '-'0');
     value = abs(value);
 
-    if (digit == digitOffset)
+	if ( ( asuint(value) & 0x7fffffff) > 0x7f800000 )
+	{
+		charNum = __N;
+	}
+	else if (digit == digitOffset)
     {
         charNum = __PERIOD;
     }
     else
     {
-        value += 0.5 * pow( 0.1, numFractDigits );
+        value += 0.4999999 * pow( 0.1, numFractDigits );
         int dmfd = (int)digit - (int)digitOffset;
         if (dmfd > 0)
         {
@@ -181,3 +183,25 @@ float2 MSDFPrintNum( float value, float2 texCoord, int numDigits = 10, int numFr
 
 	return MSDFPrintChar( charNum, charUv, smoothUv );
 }
+
+float2 MSDFPrintHex( uint value, float2 texCoord, int numDigits = 10, int offset = 0 )
+{
+	float2 smoothUv = texCoord * float2( numDigits, 1.0 );
+	float2 charUv = frac( smoothUv );
+	int digit =  -1-offset+numDigits-floor( frac( texCoord ) * numDigits );
+	uint tv;
+	if( digit < 0 ) 
+	{
+		tv = __SPACE;
+	}
+	else
+	{
+		tv = (value>>(digit*4)) & 0xf;
+		if( tv > 9 )
+			tv = tv + __a - 10;
+		else
+			tv = tv + __0;
+	}
+	return MSDFPrintChar( tv, charUv, smoothUv );
+}
+

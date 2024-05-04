@@ -8,4 +8,5 @@ For VCC (Creator Companion)
  * VRChat Package Resolver Tool 0.1.28
  * VRChat SDK - Base 3.5.2
  * AudioLink 1.3.0
- 
+ * VideoTXL2.4.6
+
