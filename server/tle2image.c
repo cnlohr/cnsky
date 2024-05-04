@@ -4,11 +4,23 @@
 #include <stdint.h>
 #include <linux/limits.h>
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-
 #include "../csgp4/csgp4.h"
 #include "../csgp4/os_generic.h"
 
+#define TLEEXR
+
+#ifdef TLEEXR
+#define TINYEXR_IMPLEMENTATION
+#define TINYEXR_USE_MINIZ 0
+//#define TINYEXR_USE_STB_ZLIB 1
+
+#include <zlib.h>
+#include "tinyexr.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#endif
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
 // Assume 24 floats per entry.
@@ -17,7 +29,7 @@
 #define DATAH 512
 #define USABLE_W (((DATAW)/(FPERE))*(FPERE))
 
-uint32_t data[2048*2048];
+float data[2048*2048];
 
 int main( int argc, char ** argv )
 {
@@ -108,8 +120,9 @@ int main( int argc, char ** argv )
 		px[2] = dNow - (int)dNow;
 		px[3] = numObjects;
 		px[4] = outObjNumber;
-		px[5] = 0;
-
+		uint32_t n = 0xff83211f;
+		px[5] = *(float*)&n;
+		
 		outObjNumber++;
 	}
 
@@ -118,13 +131,74 @@ int main( int argc, char ** argv )
 	// Assume 32 floats per object.
 	char tempfile[PATH_MAX+1];
 	snprintf( tempfile, sizeof(tempfile)-1, "%s.temp", argv[2] );
-	r = stbi_write_png( tempfile, DATAW, DATAH, 4, data, 4*DATAW );
+
+#ifdef TLEEXR
+	EXRHeader header;
+	InitEXRHeader(&header);
+	EXRImage image;
+	InitEXRImage(&image);
+    image.num_channels = 4;
+
+    std::vector<float> images[4];
+    images[0].resize(DATAW * DATAH);
+    images[1].resize(DATAW * DATAH);
+    images[2].resize(DATAW * DATAH);
+    images[3].resize(DATAW * DATAH);
+
+
+
+    // Split RGBRGBRGB... into R, G and B layer
+    for (int i = 0; i < DATAW * DATAH; i++) {
+      images[0][i] = data[4*i+0];
+      images[1][i] = data[4*i+1];
+      images[2][i] = data[4*i+2];
+      images[3][i] = data[4*i+3];
+    }
+
+    float* image_ptr[4];
+    image_ptr[0] = &(images[3].at(0)); // A
+    image_ptr[1] = &(images[2].at(0)); // B
+    image_ptr[2] = &(images[1].at(0)); // G
+    image_ptr[3] = &(images[0].at(0)); // R
+
+    image.images = (unsigned char**)image_ptr;
+    image.width = DATAW;
+    image.height = DATAH;
+
+    header.num_channels = 4;
+	header.compression_type = TINYEXR_COMPRESSIONTYPE_ZIP;
+    header.channels = (EXRChannelInfo *)malloc(sizeof(EXRChannelInfo) * header.num_channels);
+    // Must be (A)BGR order, since most of EXR viewers expect this channel order.
+    strncpy(header.channels[0].name, "A", 255); header.channels[0].name[strlen("A")] = '\0';
+    strncpy(header.channels[1].name, "B", 255); header.channels[1].name[strlen("B")] = '\0';
+    strncpy(header.channels[2].name, "G", 255); header.channels[2].name[strlen("G")] = '\0';
+    strncpy(header.channels[3].name, "R", 255); header.channels[3].name[strlen("R")] = '\0';
+
+    header.pixel_types = (int *)malloc(sizeof(int) * header.num_channels);
+    header.requested_pixel_types = (int *)malloc(sizeof(int) * header.num_channels);
+    for (int i = 0; i < header.num_channels; i++) {
+      header.pixel_types[i] = TINYEXR_PIXELTYPE_FLOAT; // pixel type of input image
+      header.requested_pixel_types[i] = TINYEXR_PIXELTYPE_FLOAT; // pixel type of output image to be stored in .EXR
+    }
+
+
+
+    const char* err = NULL; // or nullptr in C++11 or later.
+    r = SaveEXRImageToFile(&image, &header, tempfile, &err);
+	if( r )
+	{
+		fprintf( stderr, "%s\n", err );
+		return -9;
+	}
+#else
+	r = stbi_write_png( tempfile, DATAW, DATAH, 4, (uint8_t*)data, DATAW*4 );
 	printf( "Write status: %d\n", r );
 	if( r == 0 )
 	{
 		fprintf( stderr, "Error: failed to write out PNG\n" );
 		return -9;
 	}
+#endif
 	printf( "Building image complete.\n" );
 	// Need to copy file into place to make sure downloads don't get corrutped.
 	r = rename( tempfile, argv[2] );
