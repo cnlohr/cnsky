@@ -28,7 +28,7 @@ For VCC (Creator Companion)
 
 | Pixel | Description |
 | --- | --- |
-| 0,0 R |  Frame #  |
+| 0,0 R |  Frame # (asuint)  |
 | 0,0 G | JD Days |
 | 0,0 B | JD Days (Fractional) |
 | 0,0 A | If wallclock is real |
@@ -39,6 +39,8 @@ For VCC (Creator Companion)
 | 2,0 R | Hours |
 | 2,0 R | Minutes |
 | 2,0 R | Seconds |
+| 0,1 R | Minutes to advance per segment |
+| 0,1 G | Minutes offset from initial segment |
 
 ### Compute CRT
 

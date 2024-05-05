@@ -47,7 +47,7 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				float4 bez2 : BEZ2;
 				float4 bez3 : BEZ3;
 				float4 cppos : CPP;
-				float2 reltime : RELTIME;
+				float3 reltime : RELTIME;
 				UNITY_FOG_COORDS(1)
 			};
 
@@ -89,11 +89,13 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				uint2 thissatImport = uint2( 6 * (thissatno % 85), ((thissatno / 85) % 511) + 1 );
 				uint2 thissatCompute = uint2( 6 * (thissatno % 85), (((thissatno / 85) % 511) + 1)*2 ); 
 
+				float4 InfoBlock = _ManagementTexture.Load( int3( 0, _ManagementTexture_TexelSize.w - 1, 0 ) );
 				float4 ManagementBlock2 = _ManagementTexture.Load( int3( 0, _ManagementTexture_TexelSize.w - 2, 0 ) );
+				float jdDay = InfoBlock.y;
+				float jdFrac = InfoBlock.z;
 
 				float4 tledat0 = _ImportTexture.Load( int3( thissatImport.x + 0, _ImportTexture_TexelSize.w - thissatImport.y - 1, 0 ) );
 				if( tledat0.x < 0.5 ) return;
-				if( operationID > 1 ) return;
 				int seg;
 				
 				float separatingTimePerSegment = ManagementBlock2.x;
@@ -149,7 +151,7 @@ Shader "SatelliteStuff/SatelliteDisplay"
 					};
 					
 					
-					po.reltime = float2( );
+					po.reltime = float3( pos0.w, jdFrac, pos1.w );
 
 					triStream.RestartStrip(); // XXX TODO REMOVE ME!!! THEN ALSO SKIP First 2 of next emission.
 
@@ -200,18 +202,18 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				
 
 				// Comptue actual position
-				float t = frac( _Time.x );
-				
+				//float t = frac( _Time.x );
+				float t = (i.reltime.y - i.reltime.x) / (i.reltime.z - i.reltime.x);
+
+				float aspectRatio = ddx( i.cppos.x ) / ddy (i.cppos.y );
 				float s = 1.0-t;
 				float2 b = bez0*s*s*s + bez1*3.0*s*s*t + bez2*3.0*s*t*t + bez3*t*t*t;
-				//d0 = min(d0,segment_dis_sq(uv, a, b ));
-
-				float satitself = saturate( 1.0 - length( cp - b ) * 0.2 * clamp( i.cppos.w, 1, 7.0 ) / fwidth( cp ) );
+				float satitself = saturate( 1.0 - length( (cp - b) * float2(1, aspectRatio ) ) * 0.2 * clamp( i.cppos.w, 1, 7.0 ) / fwidth( cp ) );
 				satitself =  pow( satitself, .1 );
 				
 				col.a = saturate( saturate( 1.0 - dis.x) * 0.1 + satitself  );
 
-				col.a += 0.1;
+				//col.a += 0.1;
 
 				UNITY_APPLY_FOG(i.fogCoord, col);
 				return col;

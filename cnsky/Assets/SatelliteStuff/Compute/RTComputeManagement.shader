@@ -48,7 +48,7 @@ Shader "SatelliteStuff/RTComputeManagement"
 			struct g2f
 			{
 				float4 vertex		   : SV_POSITION;
-				float4 color			: TEXCOORD0;
+				uint4 color			: TEXCOORD0;
 			};
 
 			v2g vert( appdata_customrendertexture IN )
@@ -73,7 +73,7 @@ Shader "SatelliteStuff/RTComputeManagement"
 				int operationID = geoPrimID * 2 + ( instanceID - batchID );
 				g2f o;
 
-				float UTCDAY = AudioLinkDecodeDataAsUInt( ALPASS_GENERALVU_UNIX_DAYS );
+				float UTCDAY = AudioLinkDecodeDataAsUInt( ALPASS_GENERALVU_UNIX_DAYS )  + SGP4_FROM_EPOCH_DAYS;
 				float UTCDAYf = AudioLinkDecodeDataAsSeconds( ALPASS_GENERALVU_UNIX_SECONDS )/86400.0;
 				float ALROK = 1;
 				// AudioLink Not Running
@@ -99,19 +99,20 @@ Shader "SatelliteStuff/RTComputeManagement"
 					uint2 coordOut;
 					coordOut = uint2( i, operationID+0 );
 					
-					float4 color = 0.0;
+					// Weird as-uint, as-float because otherwise we lose our timer.
+					uint4 color = 0.0;
 					if( operationID == 0 )
 					{
 						switch( i )
 						{
 						case 0:
-							color = float4( (uint)(_SelfTexture2D.Load( int3( 0, 3, 0 ) ).x+1), UTCDAY, UTCDAYf, ALROK);
+							color = asuint( float4( asfloat( asuint(_SelfTexture2D.Load( int3( 0, 3, 0 ) ).x) + 1 ), UTCDAY, UTCDAYf, ALROK) );
 							break;
 						case 1:
-							color = float4( year, mon, day, 0.0 );
+							color = asuint( float4( year, mon, day, 0.0 ) );
 							break;
 						case 2:
-							color = float4( hr, minute, second, 0.0 );
+							color = asuint( float4( hr, minute, second, 0.0 ) );
 							break;
 						default:
 							break;
@@ -122,7 +123,7 @@ Shader "SatelliteStuff/RTComputeManagement"
 						switch( i )
 						{
 						case 0:
-							color = float4( 4.0, 10.0, 0.0, 0.0 );
+							color = asuint( float4( 4.0, -18.0, 0.0, 0.0 ) );
 							break;
 						case 1:
 							color = 0.0;
@@ -138,7 +139,7 @@ Shader "SatelliteStuff/RTComputeManagement"
 
 			float4 frag( g2f IN ) : SV_Target
 			{
-				return IN.color;
+				return asfloat( IN.color );
 			}
 			ENDCG
 		}

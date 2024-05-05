@@ -78,8 +78,11 @@ Shader "SatelliteStuff/RTComputeSatellites"
 				float4 ManagementBlock2 = _ManagementTexture.Load( int3( 0, _ManagementTexture_TexelSize.w - 2, 0 ) );
 				float jdDay = InfoBlock.y;
 				float jdFrac = InfoBlock.z;
+
+				// Can't go super in the past.
+				if( jdDay < 2460281.5 ) return;
 				
-				uint thisop = InfoBlock * 64 + operationID;
+				uint thisop = asuint(InfoBlock.x) * 64 + operationID;
 				const uint totalsat = (511*85); // 85 satellites per line, 511 lines.
 				const uint thissatno = (thisop%totalsat);
 				uint2 thissat = uint2( 6 * (thissatno % 85), ((thissatno / 85) % 511) + 1 );
@@ -92,6 +95,7 @@ Shader "SatelliteStuff/RTComputeSatellites"
 				float jdsatepochF = tledat0.z;
 				precise float computeEpoch = (jdsatepoch) + jdsatepochF;
 				precise float initialTimeMinutes = ( (jdDay - 2433281.5 - jdsatepoch) + jdFrac - jdsatepochF)*24.0 * 60.0;
+				
 				
 				// computeEpoch is used in SGP4 init,
 				// initialTime is 
@@ -107,8 +111,10 @@ Shader "SatelliteStuff/RTComputeSatellites"
 					float3 velocity;
 					float3 altaaltp;
 					
-					float fTargetTimeDeltaMinutes = i * ManagementBlock2.x - ManagementBlock2.y;
-					float fDeltaDayTime = fTargetTimeDeltaMinutes / 60 / 24;
+					float fTargetTimeDeltaMinutes = i * ManagementBlock2.x + ManagementBlock2.y;
+					float fTimeToMeasureMinutes = initialTimeMinutes + fTargetTimeDeltaMinutes;
+					
+					float fDeltaDayTime = fTimeToMeasureMinutes / 60 / 24;
 					
 					//float 
 					//uint2 satellite_in_source = 
@@ -124,21 +130,24 @@ Shader "SatelliteStuff/RTComputeSatellites"
 						tledat2.y, //meanAnomaly
 						tledat2.z, //meanMotion
 						tledat1.z, //rightAscensionOfTheAscendingNode
-						initialTimeMinutes + fTargetTimeDeltaMinutes,
+						fTimeToMeasureMinutes,
 						position,
 						velocity,
 						altaaltp
 						);
+						
+					// We actually want the time of the measurement in our own timebase.
+					float fracDayTimeOfReading = jdFrac + fTargetTimeDeltaMinutes / 60 / 24;
 
 					uint2 coordOut;
 					coordOut = uint2( thissat * uint2( 1, 2 ) + uint2( i, 0) );
 					o.vertex = FlexCRTCoordinateOut( coordOut );
-					o.color = float4( position, tledat1.z );
+					o.color = float4( position, fracDayTimeOfReading );
 					stream.Append(o);
 
 					coordOut.y ++;
 					o.vertex = FlexCRTCoordinateOut( coordOut );
-					o.color = float4( velocity, tledat2.z  );
+					o.color = float4( velocity, 0  );
 					stream.Append(o);
 				}
 			}

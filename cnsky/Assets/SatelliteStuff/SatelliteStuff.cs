@@ -13,6 +13,7 @@ public class SatelliteStuff : UdonSharpBehaviour
 	private VRCImageDownloader _imageDownloader;
 	private IUdonEventReceiver _udonEventReceiver;
 
+	public Texture defaultTexture;
 	private new Renderer renderer;
 	public CustomRenderTexture crt;
 	
@@ -20,6 +21,10 @@ public class SatelliteStuff : UdonSharpBehaviour
 	{
 		// It's important to store the VRCImageDownloader as a variable, to stop it from being garbage collected!
 		_imageDownloader = new VRCImageDownloader();
+
+		Material m = crt.material;
+		m.SetTexture( "_ImportTexture", defaultTexture );
+		crt.Update();
 		
 		
 		// To receive Image and String loading events, 'this' is casted to the type needed
