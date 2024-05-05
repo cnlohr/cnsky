@@ -124,7 +124,7 @@ int main( int argc, char ** argv )
 		float * px =  (float*)&data[oox+ooy*DATAW];
 		px[0] = 7;
 		double dNow = OGGetAbsoluteTime() / 86400.0;
-		px[1] = ((int)dNow) + 2433281.5;
+		px[1] = ((int)dNow) + SGP4_FROM_EPOCH_DAYS;
 		px[2] = dNow - (int)dNow;
 		px[3] = numObjects;
 		px[4] = outObjNumber;
