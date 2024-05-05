@@ -59,7 +59,7 @@ int main( int argc, char ** argv )
 	}
 	printf( "Read in %d objects\n", numObjects );
 
-	int outObjNumber = 1;
+	int outObjNumber = 0;
 
 	int i;
 	for( i = 0; i < numObjects; i++ )
@@ -88,7 +88,7 @@ int main( int argc, char ** argv )
 
 
 		int oox = (outObjNumber * FPERE) % USABLE_W;
-		int ooy = (outObjNumber * FPERE) / USABLE_W;
+		int ooy = 1+((outObjNumber * FPERE) / USABLE_W);
 
 		float * px =  (float*)&data[oox+ooy*DATAW];
 		px[0] = validflags; // valid flags - might be different?
@@ -107,10 +107,14 @@ int main( int argc, char ** argv )
 		px[13] = o->catalogNumber;    // Possibly reserved.
 		memcpy( px+14, o->internationalDesignator, 12 );
 		memcpy( px+17, o->objectName, 24 );
+		//px[17] = 12345.67;
+		//puts( o->objectName );
+		//printf( "%08x\n", *(uint32_t*)(px+19));
+
 
 		outObjNumber++;
 	}
-	printf( "Parsed %d objects\n", outObjNumber-1 );
+	printf( "Parsed %d objects\n", outObjNumber );
 
 
 	{
@@ -119,14 +123,27 @@ int main( int argc, char ** argv )
 		int ooy = (0 * FPERE) / USABLE_W;
 		float * px =  (float*)&data[oox+ooy*DATAW];
 		px[0] = 7;
-		double dNow = OGGetAbsoluteTime() / 1440.0;
-		px[1] = (int)dNow;
+		double dNow = OGGetAbsoluteTime() / 86400.0;
+		px[1] = ((int)dNow) + 2433281.5;
 		px[2] = dNow - (int)dNow;
 		px[3] = numObjects;
 		px[4] = outObjNumber;
+
+		// Junk!!!
 		uint32_t n = 0xff83211f;
 		px[5] = *(float*)&n;
+		px[6] = *(float*)"HELO";
+		px[12] = *(float*)"HEL1";
+		px[14] = *(float*)"HEL2";
 		outObjNumber++;
+
+		// Build color ramp.
+		int j;
+		for( j = 0; j < 256; j++ )
+		{
+			uint32_t word = j | (j<<8) | (j<<16) | (j<<24);
+			px[256+j] = *((float*)&word);
+		}
 	}
 
 

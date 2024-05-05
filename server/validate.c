@@ -51,6 +51,12 @@ int main( int argc, char ** argv )
 	printf( "%f %f %f\n", data[3], data[4], data[5] );
 	printf( "%f %f %08x\n", data[6], data[7], ((uint32_t*)data)[5] );
 
+	printf( "next\n" );
+	printf( "%f %f (%08x) %f\n", data[24], data[25], ((uint32_t*)data)[25], data[26] );
+
+	printf( "next\n" );
+	printf( "%08x %08x %08x\n", ((uint32_t*)data)[256], ((uint32_t*)data)[257], ((uint32_t*)data)[258] );
+
 	free(data); // release memory of image data
 }
 
