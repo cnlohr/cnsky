@@ -4,7 +4,12 @@ Shader "Unlit/TextureMSDFPrint"
 	{
 		_MSDFTex ("MSDF Texture", 2DArray) = "white" {}
 		_CheckTexture ("Check Texture", 2D) = "white" {}
+		[ToggleUI] _CombDisplay( "Combined Display", float ) = 0.0
 		[ToggleUI] _HexDisplay( "Hex Display", float ) = 0.0
+		_SuperLines ("Vertical Pixels", float) = 4.0
+		_SuperColumns ("Horizontal Pixels", float) = 8.0
+		_OffsetX ("Offset X", float) = 0
+		_OffsetY ("Offset Y", float) = 0
 	}
 	SubShader
 	{
@@ -40,7 +45,10 @@ Shader "Unlit/TextureMSDFPrint"
 
 			Texture2D<float4> _CheckTexture;	
 			uniform float4 _CheckTexture_TexelSize;
-			float _HexDisplay;
+			float _HexDisplay, _CombDisplay;
+			float _SuperLines;
+			float _SuperColumns;
+			float _OffsetX, _OffsetY;
 
 			v2f vert (appdata v)
 			{
@@ -55,9 +63,9 @@ Shader "Unlit/TextureMSDFPrint"
 			{
 				float4 col = 0.0;
 				
-				int lines = 12;
+				int lines = _SuperLines * 4;
 				int columns = 10;
-				int supercolumns = 5;
+				int supercolumns = _SuperColumns;
 				float2 inuv = i.uv;
 				inuv.y = 1.0 - inuv.y;
 				float2 uv = inuv * float2( supercolumns * columns, lines );
@@ -70,7 +78,7 @@ Shader "Unlit/TextureMSDFPrint"
 				uint2 dpycoord = floor( fielduv );
 				uint2 tc = dpycoord / uint2( 1.0, 4.0 );
 				
-				uint3 datacoord = uint3( tc.x, _CheckTexture_TexelSize.w - tc.y - 1, 0 );
+				uint3 datacoord = uint3( tc.x + uint(_OffsetX), _CheckTexture_TexelSize.w - tc.y - 1 - uint(_OffsetY), 0 );
 
 				float4 v4 = _CheckTexture.Load( datacoord );
 				float value = 0.0;
@@ -82,22 +90,89 @@ Shader "Unlit/TextureMSDFPrint"
 				case 3: value = v4.w; break;
 				}
 
-				if( _HexDisplay > 0.5 )
+				if( _CombDisplay > 0.5 )
 				{
-					col += MSDFPrintHex( asuint(value), fielduv, 10, 2 ).xxxy;
+					float2 nfuv2 = fielduv * float2( 1.0, 2.0 );
+
+					if( frac( fielduv.y ) > 1.0/2.0 )
+					{
+						uint v = asuint(value);
+						if( frac( fielduv.x ) > 6.0/14.0 )
+						{
+							col += MSDFPrintHex( v, nfuv2, 14, 8, 0 ).xxxy;
+							col.a += 0.2;
+						}
+						else if( frac( fielduv.x ) < 5 / 14.0 && frac( fielduv.x ) > 1.0 / 14.0 )
+						{
+							int thiscell = frac( nfuv2.x  ) * 14.0 - 1.0;
+							v = (v >> (uint(thiscell)*8)) & 0xff;
+							col.a = 1.0;
+							col.rgb = thiscell / 4.0; //(24 - uint(nfuv2.x-1)*8)/32.0;
+							nfuv2.x *= 14.;
+							col = MSDFPrintChar( v, nfuv2, nfuv2 ).xxxy;
+
+//							col += 0.1;
+//							col.x = nfuv2.x;
+							col.a += 0.2;
+						}
+					}
+					else
+					{
+						col += MSDFPrintNum( value, nfuv2, 14, 6, false, 0 ).xxxy;
+					}
+					switch (dpycoord.y & 3) { case 0: col.y = 0; col.z = 0; break; case 1: col.x = 0; col.z = 0; break; case 2: col.x = 0; col.y = 0; break; };
+					//col.y = nfuv2.y/6.0-1.0;
+					//col.a = 1.0;
 				}
 				else
 				{
-					col += MSDFPrintNum( value, fielduv, 14, 6, false, 0 ).xxxy;
+					if( _HexDisplay > 0.5 )
+					{
+						col += MSDFPrintHex( asuint(value), fielduv, 11, 3 ).xxxy;
+					}
+					else
+					{
+						col += MSDFPrintNum( value, fielduv, 11, 5, false, 0 ).xxxy;
+					}
+					switch (dpycoord.y & 3) { case 0: col.y = 0; col.z = 0; break; case 1: col.x = 0; col.z = 0; break; case 2: col.x = 0; col.y = 0; break; };
 				}
-				switch (dpycoord.y & 3) { case 0: col.y = 0; col.z = 0; break; case 1: col.x = 0; col.z = 0; break; case 2: col.x = 0; col.y = 0; break; };
 
 
 				// apply fog
 				UNITY_APPLY_FOG(i.fogCoord, col);
 				return col;
 			}
+			
+			
+			
+			
+/*
+// For splitting into thirds.
+					float2 nfuv2 = fielduv * float2( 1.0, 6.0 );
+					if( frac( fielduv.y ) > 4.0/6.0 )
+					{
+						if( frac( fielduv.x ) > 0.5 )
+						{
+							col += MSDFPrintHex( asuint(value), nfuv2 * float2( 1.0, 1.0/2.0 ) - float2( 1.50/11.0, 0.0 ), 28, 8, 6 ).xxxy;
+							col += 0.1;
+						}
+						else
+						{
+							
+							col = MSDFPrintChar( tv, charUv, smoothUv );
+						}
+					}
+					else
+					{
+						int oddline = int( fielduv.y ) & 1;
+						col += MSDFPrintNum( value, nfuv2 * float2( 1.0, 1.5/6.0 ) - oddline * float2( 0.0, 3.0/6.0), 14, 6, false, 0 ).xxxy;
+					}
+					switch (dpycoord.y & 3) { case 0: col.y = 0; col.z = 0; break; case 1: col.x = 0; col.z = 0; break; case 2: col.x = 0; col.y = 0; break; };
+					//col.y = nfuv2.y/6.0-1.0;
+					//col.a = 1.0;
+					*/
 			ENDCG
 		}
 	}
 }
+

@@ -40,6 +40,14 @@ public class SatelliteStuff : UdonSharpBehaviour
 		m.SetTexture( "_ImportTexture", result.Result );
 		crt.Update();
 	}
+	
+	public override void Interact()
+	{
+		var rgbInfo = new TextureInfo();
+		rgbInfo.GenerateMipMaps = false;
+		_imageDownloader.DownloadImage( stringUrl, crt.material, _udonEventReceiver, rgbInfo);
+		Debug.Log($"Trying download.");
+	}
 
     private void OnDestroy()
     {

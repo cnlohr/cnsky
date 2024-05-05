@@ -6,7 +6,7 @@ CustomRenderTexture:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: FloatImport
+  m_Name: RTComputeSatellites
   m_ImageContentsHash:
     serializedVersion: 2
     Hash: 00000000000000000000000000000000
@@ -15,7 +15,7 @@ CustomRenderTexture:
   m_IsAlphaChannelOptional: 0
   serializedVersion: 5
   m_Width: 512
-  m_Height: 512
+  m_Height: 1024
   m_AntiAliasing: 1
   m_MipCount: -1
   m_DepthStencilFormat: 0
@@ -38,13 +38,13 @@ CustomRenderTexture:
   m_Dimension: 2
   m_VolumeDepth: 1
   m_ShadowSamplingMode: 2
-  m_Material: {fileID: 2100000, guid: 7b76c8bc4abcf824e82c582a0496d9ec, type: 2}
+  m_Material: {fileID: 2100000, guid: 5f2aed769410a7a4dae3168892f71d4d, type: 2}
   m_InitSource: 0
   m_InitMaterial: {fileID: 0}
-  m_InitColor: {r: 0.028301895, g: 0.028301895, b: 0.028301895, a: 1}
+  m_InitColor: {r: 0, g: 0, b: 0, a: 1}
   m_InitTexture: {fileID: 0}
-  m_UpdateMode: 0
-  m_InitializationMode: 2
+  m_UpdateMode: 1
+  m_InitializationMode: 0
   m_UpdateZoneSpace: 0
   m_CurrentUpdateZoneSpace: 0
   m_UpdateZones: []

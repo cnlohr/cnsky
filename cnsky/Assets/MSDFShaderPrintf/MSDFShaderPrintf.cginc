@@ -184,13 +184,13 @@ float2 MSDFPrintNum( float value, float2 texCoord, int numDigits = 10, int numFr
 	return MSDFPrintChar( charNum, charUv, smoothUv );
 }
 
-float2 MSDFPrintHex( uint value, float2 texCoord, int numDigits = 10, int offset = 0 )
+float2 MSDFPrintHex( uint value, float2 texCoord, int numDigitFields = 10, int numDigitShow = 8, int offset = 0 )
 {
-	float2 smoothUv = texCoord * float2( numDigits, 1.0 );
+	float2 smoothUv = texCoord * float2( numDigitFields, 1.0 );
 	float2 charUv = frac( smoothUv );
-	int digit =  -1-offset+numDigits-floor( frac( texCoord ) * numDigits );
+	int digit =  -1-offset+numDigitFields-floor( frac( texCoord ) * numDigitFields );
 	uint tv;
-	if( digit < 0 ) 
+	if( digit < 0 || digit >= numDigitShow ) 
 	{
 		tv = __SPACE;
 	}

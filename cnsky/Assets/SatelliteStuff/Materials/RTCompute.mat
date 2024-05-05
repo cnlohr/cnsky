@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: FloatImport
+  m_Name: RTCompute
   m_Shader: {fileID: 4800000, guid: ff4802af37858fb428cf9a5db2d0af0f, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
@@ -44,7 +44,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 8600000, guid: 52aee7bea85337c479fbf2022ba6ebed, type: 2}
+        m_Texture: {fileID: 8600000, guid: a5c278a2e9225e34e861e4c6935b8fa9, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
