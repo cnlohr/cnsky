@@ -15,7 +15,17 @@ For VCC (Creator Companion)
  * Back-port csgp4_simple.cginc
  * Remove unneeded parameters from csgp4_init.
  * Get rid of "optimization" flag on compute.
- * Fix hull of beziers.
+ * Fix hull of beziers.   DONE.
+ * Try simplifying the bezier to cubic. DONE
+
+## Comments from first test.
+ * Slider for adjusting tail length
+ * Make tails start at nothing when loading and continue to expand with length in instance.
+ * Slider to control tail intensity.
+ * Representation of moon.
+ * FIX THE STUPID BEZIERS BEING IN CLIP SPACE!!! Really eggaguarted 
+ * Get data at specific day in history.
+
 
 ## Long Term TODO
  * Improve Bezier Curve Code.

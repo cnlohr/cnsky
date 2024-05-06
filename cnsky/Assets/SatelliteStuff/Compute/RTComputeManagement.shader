@@ -73,7 +73,7 @@ Shader "SatelliteStuff/RTComputeManagement"
 				int operationID = geoPrimID * 2 + ( instanceID - batchID );
 				g2f o;
 
-				float UTCDAY = AudioLinkDecodeDataAsUInt( ALPASS_GENERALVU_UNIX_DAYS )  + SGP4_FROM_EPOCH_DAYS;
+				float UTCDAY = AudioLinkDecodeDataAsUInt( ALPASS_GENERALVU_UNIX_DAYS );
 				float UTCDAYf = AudioLinkDecodeDataAsSeconds( ALPASS_GENERALVU_UNIX_SECONDS )/86400.0;
 				float ALROK = 1;
 				// AudioLink Not Running
@@ -85,6 +85,10 @@ Shader "SatelliteStuff/RTComputeManagement"
 					UTCDAY = infoblock.y + floor( UTCDAYf );
 					UTCDAYf = frac( UTCDAYf );
 					ALROK = 0;
+				}
+				else
+				{
+					UTCDAY += SGP4_FROM_EPOCH_DAYS;
 				}
 
 				int year, mon, day, hr, minute;

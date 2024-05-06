@@ -54,8 +54,18 @@ public class SatelliteStuff : UdonSharpBehaviour
 		Debug.Log($"Trying download.");
 	}
 
-    private void OnDestroy()
-    {
+	private void OnDestroy()
+	{
 		_imageDownloader.Dispose();
-    }
+		Material m = crt.material;
+		m.SetTexture( "_ImportTexture", defaultTexture );
+	 }
+	
+	
+	void Awake()
+	{
+		//Material m = crt.material;
+		//m.SetTexture( "_ImportTexture", defaultTexture );
+	}
+	
 }

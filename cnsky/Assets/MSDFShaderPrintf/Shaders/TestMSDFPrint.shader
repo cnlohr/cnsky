@@ -2,7 +2,6 @@ Shader "Unlit/TestMSDFPrint"
 {
 	Properties
 	{
-		_MSDFTex ("MSDF Texture", 2DArray) = "white" {}
 	}
 	SubShader
 	{

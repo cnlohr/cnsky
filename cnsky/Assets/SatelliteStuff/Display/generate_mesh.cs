@@ -14,7 +14,7 @@ public class CreateMesh : MonoBehaviour
 		mesh.SetIndices(new int[vertices], MeshTopology.Points, 0, false, 0);
 		AssetDatabase.CreateAsset(mesh, "Assets/SatelliteStuff/Display/pointlist.asset");
 
-		vertices = 3;
+		vertices = 1;
 		mesh = new Mesh();
 		mesh.vertices = new Vector3[1];
 		mesh.bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(100, 100, 100));
