@@ -63,30 +63,40 @@ Shader "SatelliteStuff/RTComputeSatellites"
 				return o;
 			}
 
-			[maxvertexcount(12)]
+			#define INSTANCE_CT 32
+			#define GEOPRIM_CT  2 // Do not change this.
 			
-			[instance(32)]
+			[maxvertexcount(12)] // Position + Velocity, 6 points.
+			
+			[instance(INSTANCE_CT)]
 
 			void geo( point v2g input[1], inout PointStream<g2f> stream,
 				uint instanceID : SV_GSInstanceID, uint geoPrimID : SV_PrimitiveID )
 			{
 				g2f o;
-				int operationID = geoPrimID * 32 + instanceID;
+				int operationID = geoPrimID * INSTANCE_CT + instanceID;
 				// operationID = 0..63
 				
-				float4 InfoBlock = _ManagementTexture.Load( int3( 0, _ManagementTexture_TexelSize.w - 1, 0 ) );
+				float4 InfoBlock0 = _ManagementTexture.Load( int3( 0, _ManagementTexture_TexelSize.w - 1, 0 ) );
+				float4 InfoBlock3 = _ManagementTexture.Load( int3( 3, _ManagementTexture_TexelSize.w - 1, 0 ) );
 				float4 ManagementBlock2 = _ManagementTexture.Load( int3( 0, _ManagementTexture_TexelSize.w - 2, 0 ) );
-				float jdDay = InfoBlock.y;
-				float jdFrac = InfoBlock.z;
+				float jdDay = InfoBlock0.y;
+				float jdFrac = InfoBlock0.z;
 
 				// Can't go super in the past.
 				if( jdDay < 2460281.5 ) return;
 				
-				uint thisop = asuint(InfoBlock.x) * 64 + operationID;
-				const uint totalsat = (511*85); // 85 satellites per line, 511 lines.
+				uint thisop = asuint(InfoBlock0.x) * INSTANCE_CT * GEOPRIM_CT + operationID;
+				const uint totalsat = InfoBlock3.x;
+					//(511*85); // 85 satellites per line, 511 lines.
+					//InfoBlock1.x;
 				const uint thissatno = (thisop%totalsat);
 				uint2 thissat = uint2( 6 * (thissatno % 85), ((thissatno / 85) % 511) + 1 );
 				
+				// Make sure it is a sane number of satellites.
+				if( totalsat < 1 || totalsat >= (511*85) )
+					return;
+
 				float4 tledat0 = _ImportTexture.Load( int3( thissat.x + 0, _ImportTexture_TexelSize.w - thissat.y - 1, 0 ) );
 				float4 tledat1 = _ImportTexture.Load( int3( thissat.x + 1, _ImportTexture_TexelSize.w - thissat.y - 1, 0 ) );
 				float4 tledat2 = _ImportTexture.Load( int3( thissat.x + 2, _ImportTexture_TexelSize.w - thissat.y - 1, 0 ) );

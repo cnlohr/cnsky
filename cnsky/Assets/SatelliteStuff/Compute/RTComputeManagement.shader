@@ -73,6 +73,12 @@ Shader "SatelliteStuff/RTComputeManagement"
 				int operationID = geoPrimID * 2 + ( instanceID - batchID );
 				g2f o;
 
+				float4 infoblock0 = _FloatImport.Load( uint3( 0, _FloatImport_TexelSize.w - 1, 0 ) );
+				float4 infoblock1 = _FloatImport.Load( uint3( 1, _FloatImport_TexelSize.w - 1, 0 ) );
+
+
+				bool bDataValid = infoblock0 == 7;
+
 				float UTCDAY = AudioLinkDecodeDataAsUInt( ALPASS_GENERALVU_UNIX_DAYS );
 				float UTCDAYf = AudioLinkDecodeDataAsSeconds( ALPASS_GENERALVU_UNIX_SECONDS )/86400.0;
 				float ALROK = 1;
@@ -80,15 +86,21 @@ Shader "SatelliteStuff/RTComputeManagement"
 
 				if( UTCDAY == 0 )
 				{
-					float4 infoblock = _FloatImport.Load( uint3( 0, _FloatImport_TexelSize.w - 1, 0 ) );
-					UTCDAYf = infoblock.z + _Time.y/86400.0;
-					UTCDAY = infoblock.y + floor( UTCDAYf );
+					UTCDAYf = infoblock0.z + _Time.y/86400.0;
+					UTCDAY = infoblock0.y + floor( UTCDAYf );
 					UTCDAYf = frac( UTCDAYf );
 					ALROK = 0;
 				}
 				else
 				{
 					UTCDAY += SGP4_FROM_EPOCH_DAYS;
+				}
+				
+				int numSats = infoblock1.x;
+				if( !bDataValid )
+				{
+					numSats = 0;
+					ALROK = -1;
 				}
 
 				int year, mon, day, hr, minute;
@@ -118,6 +130,9 @@ Shader "SatelliteStuff/RTComputeManagement"
 						case 2:
 							color = asuint( float4( hr, minute, second, 0.0 ) );
 							break;
+						case 3:
+							color = asuint( float4( numSats, 0.0, 0.0, 0.0 ) );
+							break;
 						default:
 							break;
 						}
@@ -141,9 +156,9 @@ Shader "SatelliteStuff/RTComputeManagement"
 				}
 			}
 
-			float4 frag( g2f IN ) : SV_Target
+			uint4 frag( g2f IN ) : SV_Target
 			{
-				return asfloat( IN.color );
+				return IN.color;
 			}
 			ENDCG
 		}

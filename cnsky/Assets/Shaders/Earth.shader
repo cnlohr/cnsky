@@ -52,6 +52,9 @@ Shader "cnlohr/Earth"
 			v2f vert(appdata_base v)
 			{
 				v2f o;
+				
+				
+				
 				#ifdef UNITY_PASS_SHADOWCASTER
 				TRANSFER_SHADOW_CASTER_NOPOS(o, o.pos);
 				#else

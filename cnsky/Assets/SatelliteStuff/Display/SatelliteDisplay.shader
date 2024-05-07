@@ -194,7 +194,7 @@ Shader "SatelliteStuff/SatelliteDisplay"
 			{
 				fixed4 col = float4( 1.0, 1.0, 1.0, 1.0 );
 
-				if( length( i.reltime ) < 0.1 )
+				if( length( i.reltime ) < 0.0001 )
 				{
 					float sedge = length(i.cppos.xy);
 					col = 1.0;
