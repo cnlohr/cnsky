@@ -15,14 +15,16 @@ float2 solveCubic2(float3 a)
 	float p3 = p*p*p;
 	float q = a.x*(2.*a.x*a.x-9.*a.y)/27.+a.z;
 	float d = q*q+4.*p3/27.;
-	if(d>.0)
+	//if( p < 10000 && d > 0) return 0;
+	if(d>.0 )
 	{
+		// Original code from Per Bloksgaard has issues in a few cases here.
 		float2 x = (float2(1,-1)*sqrt(d)-q)*.5;
 		return (addv(sign(x)*pow(abs(x),(1./3.)))-a.x/3.).xx;
 	}
 	float v = acos(-sqrt(-27./p3)*q*.5)/3.;
 	float m = cos(v);
-	float n = sin(v)*1.732050808;
+	float n = sin(v)*sqrt(3);
 	return float2(m+m,-n-m)*sqrt(-p/3.)-a.x/3.;
 }
 
@@ -51,11 +53,16 @@ float calculateDistanceToQuadraticBezier3(out float t, float3 p, float3 a, float
 	float3 B = c-b-A;
 	float3 C = p-a;
 	float3 D = A*2.;
-	//A.z = 0;
-	//B.z = 0;
-	//C.z = 0;
-	//D.z = 0;
-	float2 T = clamp((solveCubic2(float3(-3.*dot(A,B),dot(C,B)-2.*dd(A),dot(C,A))/-dd(B))),0.,1.);
+	
+	
+	// Figure out if we are gonna have a bad day.
+	A.z *= 0.1;
+	B.z *= 0.1;
+	C.z *= 0.1;
+	D.z *= 0.1;
+	//GAHHHHHHHHHHHH PULL MY HAIR OUT
+	float ddb = dd(B) + 0.0001;
+	float2 T = clamp((solveCubic2(float3(-3.*dot(A,B),dot(C,B)-2.*dd(A),dot(C,A))/-ddb)),0.,1.);
 
 	// Added to know where you are along the line.
 	float Ma = dd(C-(D+B*T.x)*T.x);

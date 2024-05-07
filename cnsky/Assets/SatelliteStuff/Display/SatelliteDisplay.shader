@@ -283,38 +283,42 @@ Shader "SatelliteStuff/SatelliteDisplay"
 
 
 
-				float3 cp =   i.cppos;///(i.cppos.z);//*(1.0/i.cppos.z);
-				float3 bez0 =  i.bez0;///(i.bez0.z);//*(1.0/i.bez0.z );
-				float3 bez1 =  i.bez1;///(i.bez1.z);//*(1.0/i.bez1.z );
-				float3 bez2 =  i.bez2;///(i.bez2.z);//*(1.0/i.bez2.z );
-			
-				// Transform cp, bez0, bez1, and bez2 in to view-aligned vectors but in world space.
-				float3 viewDir = -UNITY_MATRIX_IT_MV[2].xyz; // Camera Forward. 
-				cp =   cp;
+				float3 cp =   i.cppos;
+				float3 bez0 =  i.bez0;
+				float3 bez1 =  i.bez1;
+				float3 bez2 =  i.bez2;
 				
-//				float3 bezproj0 = projectIntoPlane( cp, bez0 );
-//				float3 bezproj1 = projectIntoPlane( cp, bez1 );
-//				float3 bezproj2 = projectIntoPlane( cp, bez2 );
-
+				// Project bezier onto visual plane (cppos is our "local" view vector)
+				// We can't project it onto the normal view vector otherwise it will warp around.
 				// What if we project cp into bezproj plane instead?
-				
+
+				// Transform cp, bez0, bez1, and bez2 in to view-aligned vectors but in world space.
+				//float3 viewDir = -UNITY_MATRIX_IT_MV[2].xyz; // Camera Forward. 
+
 				// build basis for forward vector.
+				// Need to pick the correct direction otherwise we will get artifacting.
 				float3 forward = normalize( cp );
+				
 				float3 up = float3( 0, 1, 0 );
 				float3 right = cross( forward, up );
 				float3 newup = cross( right, forward ); 
-				float3x3 matr = float4x4( float4( right, 0 ), float4( newup, 0 ),  float4( forward, 0 ), float4( 0, 0, 0, 1 ) );
+				float3x3 matr = float3x3( right, newup,  forward );
 
-				float3 bezproj0 = mul( matr, float4( bez0, 1 ) );
-				float3 bezproj1 = mul( matr, float4( bez1, 1 ) );
-				float3 bezproj2 = mul( matr, float4( bez2, 1 ) );
-				cp = mul( matr, float4( cp, 1.0 ) );
-				
+				bez0 = mul( bez0, matr );
+				bez1 = mul( bez1, matr );
+				bez2 = mul( bez2, matr );
+				cp = mul( cp, matr );
 
 				//float deres = length( fwidth( cp ) );
-
+			
+/*			
+				bez0.z *= 0.0;
+				bez1.z *= 0.0;
+				bez2.z *= 0.0;
+				cp.z   *= 0.0;
+*/
 				float t;
-				float f = calculateDistanceToQuadraticBezier( t, cp, bezproj0, bezproj1, bezproj2 );
+				float f = calculateDistanceToQuadraticBezier3( t, cp, bez0, bez1, bez2 );
 				
 				// compute w divide based on place in curve
 				//float3 ap = lerp( bez0, bez1, t );
@@ -328,7 +332,7 @@ Shader "SatelliteStuff/SatelliteDisplay"
 					(i.reltime.y - i.reltime.x) / (i.reltime.z - i.reltime.x);
 				float tDelta = (t-tT);
 
-				float fDist = f*38;
+				float fDist = f*380;
 				
 				// Get rid of tail in front of satellite.
 				fDist += saturate( tDelta*2000);
@@ -338,10 +342,11 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				col.a *= 0.2;  // Overall fade.
 	
 				//col.a = 1.0;
-				col.a += .03; // for debug
+				//col.a += .03; // for debug
 				
 				//col.a = 1;
-				//col.rgb = normalize(bezproj0);
+				//col.b = 0;
+				//col.rg = abs(bez0+bez2);
 				
 				UNITY_APPLY_FOG(i.fogCoord, col);
 				return col;
