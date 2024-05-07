@@ -44,27 +44,50 @@ float calculateDistanceToQuadraticBezier(out float t, float2 p, float2 a, float2
 	return sqrt(min(Ma,Mb));
 }
 
+float calculateDistanceToQuadraticBezier3(out float t, float3 p, float3 a, float3 b, float3 c)
+{
+	b.xyz += lerp((1e-4).xxx,(0.).xxx,abs(sign(b.xyz*2.-a.xyz-c.xyz)));
+	float3 A = b-a;
+	float3 B = c-b-A;
+	float3 C = p-a;
+	float3 D = A*2.;
+	//A.z = 0;
+	//B.z = 0;
+	//C.z = 0;
+	//D.z = 0;
+	float2 T = clamp((solveCubic2(float3(-3.*dot(A,B),dot(C,B)-2.*dd(A),dot(C,A))/-dd(B))),0.,1.);
+
+	// Added to know where you are along the line.
+	float Ma = dd(C-(D+B*T.x)*T.x);
+	float Mb = dd(C-(D+B*T.y)*T.y);
+	t = (Ma<Mb)?T.x:T.y;
+
+	return sqrt(min(Ma,Mb));
+}
+
 float cross2d( float2 A, float2 B )
 {
 	return A.x * B.y - A.y * B.x;
 }
 
-void ResolveBezierGeometry( out float4 clippos[5], float3 bez[3], float expand)
+void ResolveBezierGeometry( out float3 viewspacepos[5], float3 bez[3], float expand)
 {
-	float4 clippos_base[3] = {
-		UnityObjectToClipPos(bez[0]),
-		UnityObjectToClipPos(bez[1]),
-		UnityObjectToClipPos(bez[2]) };
+	float3 base[3] = {
+		(bez[0]),
+		(bez[1]),
+		(bez[2]) };
 
-	float2 clip2d[3] = {
-		clippos_base[0].xy / clippos_base[0].w,
-		clippos_base[1].xy / clippos_base[1].w,
-		clippos_base[2].xy / clippos_base[2].w,
+	float3 clip2d[3] = {
+		base[0].xyz,
+		base[1].xyz,
+		base[2].xyz,
 	};
 
-	float2 orthos[3];
-	orthos[0] = (clip2d[0] - clip2d[1]).yx * float2( 1.0, -1.0 );
-	orthos[2] = (clip2d[2] - clip2d[1]).yx * float2( 1.0, -1.0 );
+	// Axis to expand from: In X-Y, 
+	
+	float3 orthos[3];
+	orthos[0] = normalize( cross( clip2d[0] - clip2d[1], clip2d[0] ) ); //(clip2d[0] - clip2d[1]).yx * float2( 1.0, -1.0 );
+	orthos[2] = normalize( cross( clip2d[2] - clip2d[1], clip2d[2] ) ); //(clip2d[2] - clip2d[1]).yx * float2( 1.0, -1.0 );
 	orthos[0] = normalize( orthos[0] )*expand;
 	orthos[2] = normalize( orthos[2] )*expand;
 	
@@ -73,9 +96,9 @@ void ResolveBezierGeometry( out float4 clippos[5], float3 bez[3], float expand)
 		
 	float clockwisiness = sign( cross2d( clip2d[2].xy - clip2d[1].xy, clip2d[0].xy - clip2d[1].xy ) );
 	
-	clippos[0] = clippos_base[0] - float4( orthos[0], 0.0, 0.0 ) * clockwisiness;
-	clippos[1] = clippos_base[0] + float4( orthos[0], 0.0, 0.0 ) * clockwisiness;
-	clippos[2] = clippos_base[1] - float4( orthos[1], 0.0, 0.0 ) * clockwisiness;
-	clippos[3] = clippos_base[2] - float4( orthos[2], 0.0, 0.0 ) * clockwisiness;
-	clippos[4] = clippos_base[2] + float4( orthos[2], 0.0, 0.0 ) * clockwisiness;
+	viewspacepos[0] = base[0] - float3( orthos[0] ) * clockwisiness;
+	viewspacepos[1] = base[0] + float3( orthos[0] ) * clockwisiness;
+	viewspacepos[2] = base[1] - float3( orthos[1] ) * clockwisiness;
+	viewspacepos[3] = base[2] - float3( orthos[2] ) * clockwisiness;
+	viewspacepos[4] = base[2] + float3( orthos[2] ) * clockwisiness;
 }

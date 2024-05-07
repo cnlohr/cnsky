@@ -67,6 +67,23 @@ Shader "SatelliteStuff/SatelliteDisplay"
 			}
 			
 			
+			//https://gist.github.com/d4rkc0d3r/886be3b6c233349ea6f8b4a7fcdacab3
+			float4 ClipToViewPos(float4 clipPos)
+			{
+				float4 normalizedClipPos = float4(clipPos.xyz / clipPos.w, 1);
+				normalizedClipPos.z = 1 - normalizedClipPos.z;
+				normalizedClipPos.z = normalizedClipPos.z * 2 - 1;
+				float4x4 invP = unity_CameraInvProjection;
+				// do projection flip on this, found empirically
+				invP._24 *= _ProjectionParams.x;
+				// this is needed for mirrors to work properly, found empirically
+				invP._42 *= -1;
+				float4 viewPos = mul(invP, normalizedClipPos);
+				// and the y coord needs to flip for flipped projection, found empirically
+				viewPos.y *= _ProjectionParams.x;
+				return viewPos;
+			}
+			
 			Texture2D< float4 > _ImportTexture;
 			float4 _ImportTexture_TexelSize;
 			Texture2D< float4 > _ManagementTexture;
@@ -100,6 +117,17 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				float separatingTimePerSegment = ManagementBlock2.x;
 
 				float3 objectCenter = 0;
+
+// I couldn't get this working.				
+//				float4 posfront = _ComputedTexture.Load( int3( thissatCompute.x + 0 + 0, _ComputedTexture_TexelSize.w - ( thissatCompute.y + 0 ) - 1 + 0, 0 ) );
+//				float4 poslast = _ComputedTexture.Load( int3( thissatCompute.x + 0 + 5, _ComputedTexture_TexelSize.w - ( thissatCompute.y + 0 ) - 1 + 0, 0 ) );
+//				float4 poscenterish = _ComputedTexture.Load( int3( thissatCompute.x + 0 + 2, _ComputedTexture_TexelSize.w - ( thissatCompute.y + 0 ) - 1 + 0, 0 ) );
+//				float3 orthoAxis =
+//					normalize( ( mul( UNITY_MATRIX_MV, float4( poscenterish.xyz, 0.0 ) ) ).xyz );
+//					normalize( cross( 
+//						( mul( UNITY_MATRIX_MV, float4( posfront.xyz, 1.0 ) ) -  mul( UNITY_MATRIX_MV, float4( poslast.xyz, 1.0 ) ) ).xyz, 
+//						( mul( UNITY_MATRIX_MV, float4( poscenterish.xyz, 1.0 ) ) ).xyz ) );
+
 				
 				for( seg = 0; seg < 5; seg++ )
 				{
@@ -129,16 +157,31 @@ Shader "SatelliteStuff/SatelliteDisplay"
 					if( jdFrac >= pos0.w && jdFrac <=  pos1.w )
 					{
 						float t = (jdFrac - pos0.w) / (pos1.w - pos0.w);
-						objectCenter = lerp( bez[0].xyz, bez[2].xyz, t );
+
+						// Compute position along curve.
+						float3 a = lerp( bez[0].xyz, bez[1].xyz, t );
+						float3 b = lerp( bez[1].xyz, bez[2].xyz, t ); 
+						objectCenter = lerp( a, b, t );
 					}
 
 					// TODO: Roll this into ResolveBezier
-					po.bez0 = UnityObjectToClipPos( bez[0] );
-					po.bez1 = UnityObjectToClipPos( bez[1] );
-					po.bez2 = UnityObjectToClipPos( bez[2] );
+					po.bez0 = mul( UNITY_MATRIX_MV, float4( bez[0], 1.0 ) );
+					po.bez1 = mul( UNITY_MATRIX_MV, float4( bez[1], 1.0 ) );
+					po.bez2 = mul( UNITY_MATRIX_MV, float4( bez[2], 1.0 ) );
+					
+					bez[0] = po.bez0;
+					bez[1] = po.bez1;
+					bez[2] = po.bez2;
+					
+					po.bez0 = mul( po.bez0, UNITY_MATRIX_IT_MV );
+					po.bez1 = mul( po.bez1, UNITY_MATRIX_IT_MV );
+					po.bez2 = mul( po.bez2, UNITY_MATRIX_IT_MV );
 
-					float4 clippos[5];
-					ResolveBezierGeometry( clippos, bez, _ThicknessGeo);
+//ResolveBezierGeometry
+
+					float3 viewpos[5];
+
+					ResolveBezierGeometry( viewpos, bez, _ThicknessGeo);
 
 					// UNRESOLVED, Handle shape where center is behind one of the other two.
 					
@@ -147,9 +190,10 @@ Shader "SatelliteStuff/SatelliteDisplay"
 					for( vtx = 0; vtx < 5; vtx++ )
 					{
 						//if( seg > 0 && vtx < 0 ) continue;
-						float4 cp = clippos[vtx];
+						
+						float4 cp = mul( UNITY_MATRIX_P, float4( viewpos[vtx], 1.0 ) );
 						po.vertex = cp;
-						po.cppos = po.vertex.xyzw;
+						po.cppos = mul( float4( viewpos[vtx], 1.0 ), UNITY_MATRIX_IT_MV );
 
 						UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po);
 
@@ -203,7 +247,9 @@ Shader "SatelliteStuff/SatelliteDisplay"
 					float distscale = .02 / length( fwidth( i.cppos.xy ) );
 					uv = uv * float2( 8.0, 4.0 ) * clamp( .05 + distscale, 0.1, 1.0 );
 					
+					 // Add offset
 					uv.x += 3.0;
+					uv.y -= 0.0;
 					uint2 textcoord = floor( uv );
 					if( uv.x < 0 || uv.y < 0 || uv.y > 2 || distscale < 0.1 || textcoord.x >= 12 )
 					{
@@ -220,41 +266,51 @@ Shader "SatelliteStuff/SatelliteDisplay"
 						uint char = tledat0[(charno/4)%4];
 						char = (char >> (charno%4) * 8) &0xff;
 						float2 c = MSDFPrintChar( char, uv, uv );
-						col.rgb = lerp( col.rgb, saturate( c.xxx ), distscale );
+						c.x = 1.0 - c.x;
+						col.rgb = lerp( col.rgb, saturate( c.xxx ), saturate( distscale * 2.0 ) );
 					}					
 					
 					col.a *= saturate(2.0-sedge*2.0);
+					col.a += 0.05;
 					return col;
 				}
 
-				float2 cp = i.cppos / i.cppos.w;
-				float2 bez0 = i.bez0 / i.bez0.w;
-				float2 bez1 = i.bez1 / i.bez1.w;
-				float2 bez2 = i.bez2 / i.bez2.w;
 
-				float deres = length( fwidth( cp ) );
+
+				float3 cp =   i.cppos;///(i.cppos.z);//*(1.0/i.cppos.z);
+				float3 bez0 =  i.bez0;///(i.bez0.z);//*(1.0/i.bez0.z );
+				float3 bez1 =  i.bez1;///(i.bez1.z);//*(1.0/i.bez1.z );
+				float3 bez2 =  i.bez2;///(i.bez2.z);//*(1.0/i.bez2.z );
+			
+				
+				//float deres = length( fwidth( cp ) );
 
 				float t;
-				float f = calculateDistanceToQuadraticBezier( t, cp, bez0, bez1, bez2 );
+				float f = calculateDistanceToQuadraticBezier3( t, cp, bez0, bez1, bez2 );
 				
-				// 1.2 controls close-side, bigger = can get closer.
-				// 0.1/deres determine far size.
-				f *= clamp( i.cppos.w, 1.2, .007/deres );
+				// compute w divide based on place in curve
+				//float3 ap = lerp( bez0, bez1, t );
+				//float3 bp = lerp( bez1, bez2, t ); 
+				//float3 p =  lerp( ap, bp, t );
+
+				//f /= deres * 200;
+				//f *= clamp( i.vertex.w, 1.2, .007/deres );
 
 				float tT = 
 					(i.reltime.y - i.reltime.x) / (i.reltime.z - i.reltime.x);
 				float tDelta = (t-tT);
 
-				float fDist = f*400;
+				float fDist = f*4000;
 				
 				// Get rid of tail in front of satellite.
 				fDist += saturate( tDelta*2000);
 
 				col.a = saturate( 1.0-fDist );
-				col.a *= saturate((4.4+tDelta)/4.4); // Fade out tail.  Based on nr segs, and where in the front we expect the satellite to be.
+				//col.a *= saturate((4.4+tDelta)/4.4); // Fade out tail.  Based on nr segs, and where in the front we expect the satellite to be.
 				col.a *= 0.2;  // Overall fade.
 	
-				//col.a += .1; // for debug
+				//col.a = 1.0;
+				col.a += .03; // for debug
 				
 				UNITY_APPLY_FOG(i.fogCoord, col);
 				return col;
