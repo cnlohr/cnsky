@@ -54,13 +54,6 @@ float calculateDistanceToQuadraticBezier3(out float t, float3 p, float3 a, float
 	float3 C = p-a;
 	float3 D = A*2.;
 	
-	
-	// Figure out if we are gonna have a bad day.
-	A.z *= 0.1;
-	B.z *= 0.1;
-	C.z *= 0.1;
-	D.z *= 0.1;
-	//GAHHHHHHHHHHHH PULL MY HAIR OUT
 	float ddb = dd(B) + 0.0001;
 	float2 T = clamp((solveCubic2(float3(-3.*dot(A,B),dot(C,B)-2.*dd(A),dot(C,A))/-ddb)),0.,1.);
 
@@ -71,6 +64,26 @@ float calculateDistanceToQuadraticBezier3(out float t, float3 p, float3 a, float
 
 	return sqrt(min(Ma,Mb));
 }
+
+float calculateDistanceToQuadraticBezier3(out float t, float3 p, float3 a, float3 b, float3 c)
+{
+	b.xyz += lerp((1e-4).xxx,(0.).xxx,abs(sign(b.xyz*2.-a.xyz-c.xyz)));
+	float3 A = b-a;
+	float3 B = c-b-A;
+	float3 C = p-a;
+	float3 D = A*2.;
+	
+	float ddb = dd(B) + 0.0001;
+	float2 T = clamp((solveCubic2(float3(-3.*dot(A,B),dot(C,B)-2.*dd(A),dot(C,A))/-ddb)),0.,1.);
+
+	// Added to know where you are along the line.
+	float Ma = dd(C-(D+B*T.x)*T.x);
+	float Mb = dd(C-(D+B*T.y)*T.y);
+	t = (Ma<Mb)?T.x:T.y;
+
+	return sqrt(min(Ma,Mb));
+}
+
 
 float cross2d( float2 A, float2 B )
 {

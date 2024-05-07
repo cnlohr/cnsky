@@ -28,7 +28,8 @@ Shader "SatelliteStuff/SatelliteDisplay"
 			#pragma target 5.0
 			#pragma multi_compile_fog
 			
-			#include "PerBloksgaard-BezierCode.cginc"
+			#include "IQ-QuadraticBezier.cginc"
+			#include "cnlohr-QuadraticBezier.cginc"
 			#include "Assets/MSDFShaderPrintf/MSDFShaderPrintf.cginc"
 			
 			struct appdata
@@ -311,14 +312,18 @@ Shader "SatelliteStuff/SatelliteDisplay"
 
 				//float deres = length( fwidth( cp ) );
 			
-/*			
 				bez0.z *= 0.0;
 				bez1.z *= 0.0;
 				bez2.z *= 0.0;
 				cp.z   *= 0.0;
-*/
+
 				float t;
-				float f = calculateDistanceToQuadraticBezier3( t, cp, bez0, bez1, bez2 );
+//				float f = calculateDistanceToQuadraticBezier3( t, cp, bez0, bez1, bez2 );
+				float2 outQ;
+				t = sdBezier( cp, bez0, bez1, bez2, outQ );
+				float f = min(outQ.x, outQ.y);
+				f = abs(t);
+
 				
 				// compute w divide based on place in curve
 				//float3 ap = lerp( bez0, bez1, t );
@@ -328,14 +333,14 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				//f /= deres * 200;
 				//f *= clamp( i.vertex.w, 1.2, .007/deres );
 
-				float tT = 
-					(i.reltime.y - i.reltime.x) / (i.reltime.z - i.reltime.x);
-				float tDelta = (t-tT);
+		//		float tT = 
+		//			(i.reltime.y - i.reltime.x) / (i.reltime.z - i.reltime.x);
+		//		float tDelta = (t-tT);
 
 				float fDist = f*380;
 				
 				// Get rid of tail in front of satellite.
-				fDist += saturate( tDelta*2000);
+		//		fDist += saturate( tDelta*2000);
 
 				col.a = saturate( 1.0-fDist );
 				//col.a *= saturate((4.4+tDelta)/4.4); // Fade out tail.  Based on nr segs, and where in the front we expect the satellite to be.
