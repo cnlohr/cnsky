@@ -30,8 +30,8 @@ Shader "SatelliteStuff/SatelliteDisplay"
 			#pragma target 5.0
 			#pragma multi_compile_fog
 			
-			//#include "IQ-QuadraticBezier.cginc"
-			#include "PerBloksgaard-BezierCode.cginc"
+			#include "IQ-QuadraticBezier.cginc"
+			//#include "PerBloksgaard-BezierCode.cginc"
 			#include "cnlohr-QuadraticBezier.cginc"
 			#include "Assets/MSDFShaderPrintf/MSDFShaderPrintf.cginc"
 			
@@ -292,7 +292,7 @@ Shader "SatelliteStuff/SatelliteDisplay"
 
 
 
-				float3 cp =   i.cppos;//i.cppos.z;
+				float3 cp = normalize( i.cppos );//i.cppos.z;
 				float3 bez0 =  i.bez0;//i.cppos.z;
 				float3 bez1 =  i.bez1;//i.cppos.z;
 				float3 bez2 =  i.bez2;//i.cppos.z;
@@ -308,8 +308,7 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				// Need to pick the correct direction otherwise we will get artifacting.
 				float3 forward = normalize( cp );
 				
-				float3 up = 
-					float3( 0, 1, 0 );
+				float3 up = float3( 0, 1, 0 );
 				float3 right = normalize( cross( forward, up ) );
 				float3 newup = normalize( cross( right, forward ) ); 
 				float3x3 matr = float3x3( right, newup, forward );
@@ -321,19 +320,18 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				cp = 0;
 */				
 
-/*
 				bez0 = mul( matr, bez0);
 				bez1 = mul( matr, bez1 );
 				bez2 = mul( matr, bez2  );
 				cp = mul( matr, cp );
-*/
 				//float deres = length( fwidth( cp ) );
 
-				
+	/*			
 				bez0.xyz /= clamppersp(bez0.z );
 				bez1.xyz /= clamppersp(bez1.z );
 				bez2.xyz /= clamppersp(bez2.z );
 				cp.xyz   /= clamppersp(cp.z   );
+*/
 
 				bez0.z *= 0.000;
 				bez1.z *= 0.000;
@@ -347,13 +345,13 @@ Shader "SatelliteStuff/SatelliteDisplay"
 
 
 				float t;
-				float f = calculateDistanceToQuadraticBezier3( t, cp, bez0, bez1, bez2 );
+				//float f = calculateDistanceToQuadraticBezier3( t, cp, bez0, bez1, bez2 );
 				
-/*				float2 outQ;
+				float2 outQ;
 				t = sdBezier( cp, bez0, bez1, bez2, outQ );
 				float f = min(outQ.x, outQ.y);
 				f = abs(t);
-*/
+
 				
 				// compute w divide based on place in curve
 				//float3 ap = lerp( bez0, bez1, t );
@@ -367,7 +365,7 @@ Shader "SatelliteStuff/SatelliteDisplay"
 					(i.reltime.y - i.reltime.x) / (i.reltime.z - i.reltime.x);
 				float tDelta = (t-tT);
 
-				float fDist = f*380;
+				float fDist = f*38;
 				
 				// Get rid of tail in front of satellite.
 				fDist += saturate( tDelta*2000);

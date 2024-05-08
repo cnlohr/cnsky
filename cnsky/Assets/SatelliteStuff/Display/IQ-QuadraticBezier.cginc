@@ -27,10 +27,10 @@ float sdBezier( in float2 pos, in float2 A, in float2 B, in float2 C, out float2
     float2 c = a * 2.0;
     float2 d = A - pos;
 
-    float kk = 1.0/dot(b,b);
-    float kx = kk * dot(a,b);
+    float kk = 1.0/(dot(b,b));
+    float kx = kk * (dot(a,b));
     float ky = kk * (2.0*dot(a,a)+dot(d,b))/3.0;
-    float kz = kk * dot(d,a);      
+    float kz = kk * dot(d,a); 
 
     float res = 0.0;
     float sgn = 0.0;
@@ -41,12 +41,15 @@ float sdBezier( in float2 pos, in float2 A, in float2 B, in float2 C, out float2
     float q2 = q*q;
     float h  = q2 + 4.0*p3;
 
+// q2 + 4.0*p3 - kx*(2.0*kx*kx - 3.0*ky) + kz
+
     if( h>=0.0 ) 
     {   // 1 root
         h = sqrt(h);
         float2 x = (float2(h,-h)-q)/2.0;
+		//if( abs(x.x) < 120 || abs(x.y)<120 ) return 1.0;
 
-        #if 0
+        #if 1
         // When p≈0 and p<0, h-q has catastrophic cancelation. So, we do
         // h=√(q²+4p³)=q·√(1+4p³/q²)=q·√(1+w) instead. Now we approximate
         // √ by a linear Taylor expansion into h≈q(1+½w) so that the q's
@@ -62,6 +65,7 @@ float sdBezier( in float2 pos, in float2 A, in float2 B, in float2 C, out float2
         #endif
 
         float2 uv = sign(x)*pow(abs(x), (1.0/3.0));
+		if( abs(uv.x) < 1 || abs(uv.y) < 1 ) return 1.0; //<<< Where this is true, is where bad things happen
         float t = clamp( uv.x+uv.y-kx, 0.0, 1.0 );
         float2  w = d+(c+b*t)*t;
         outQ = w + pos;

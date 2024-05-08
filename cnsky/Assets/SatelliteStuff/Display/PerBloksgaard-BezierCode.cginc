@@ -22,8 +22,12 @@ float2 solveCubic2(float3 a)
 		float2 x = (float2(1,-1)*sqrt(d)-q)*.5;
 		float2 midval = sign(x)*pow(abs(x),(1./3.));
 		float addvval = addv(midval) -a.x/3.;
-		//if( abs( midval.y )/abs(a.x) < .02 || abs(midval.x)/abs(a.x)<.02 ) //<<<<<<<<<<<<<<<<<<<<<<<
-		//	return 0;
+//		if( abs( midval.y )/abs(a.x) < .02 || abs(midval.x)/abs(a.x)<.02 ) //<<<<<<<<<<<<<<<<<<<<<<<
+
+//		{
+//			//return .01;
+//			midval = -midval;
+//		}
 		return (addv(midval)-a.x/3.).xx;
 	}
 	float v = acos(-sqrt(-27./p3)*q*.5)/3.;
@@ -58,7 +62,11 @@ float calculateDistanceToQuadraticBezier3(out float t, float3 p, float3 a, float
 	float3 C = p-a;
 	float3 D = A*2.;
 	
-	float ddb = dd(B)+0.000005;
+	//float3 ac = a-c;
+	//float3 ab = a-b;
+	//if( length(cross(ac,ab))< 0.001 ) return 0;
+	
+	float ddb = dd(B);//+0.00005;
 
 	float2 T = clamp((solveCubic2(float3(-3.*dot(A,B),dot(C,B)-2.*dd(A),dot(C,A))/-ddb)),0.,1.);
 
