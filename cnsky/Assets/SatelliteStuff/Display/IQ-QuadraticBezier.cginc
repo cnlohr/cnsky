@@ -41,8 +41,6 @@ float sdBezier( in float2 pos, in float2 A, in float2 B, in float2 C, out float2
     float q2 = q*q;
     float h  = q2 + 4.0*p3;
 
-	if( abs(kk)> 100000. ) return 0;
-	
     if( h>=0.0 ) 
     {   // 1 root
         h = sqrt(h);

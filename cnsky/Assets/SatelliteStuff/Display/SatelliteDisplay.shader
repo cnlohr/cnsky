@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
+
 Shader "SatelliteStuff/SatelliteDisplay"
 {
 	Properties
@@ -28,7 +30,8 @@ Shader "SatelliteStuff/SatelliteDisplay"
 			#pragma target 5.0
 			#pragma multi_compile_fog
 			
-			#include "IQ-QuadraticBezier.cginc"
+			//#include "IQ-QuadraticBezier.cginc"
+			#include "PerBloksgaard-BezierCode.cginc"
 			#include "cnlohr-QuadraticBezier.cginc"
 			#include "Assets/MSDFShaderPrintf/MSDFShaderPrintf.cginc"
 			
@@ -166,9 +169,9 @@ Shader "SatelliteStuff/SatelliteDisplay"
 					}
 
 					// TODO: Roll this into ResolveBezier
-					po.bez0 = mul( UNITY_MATRIX_MV, float4( bez[0], 1.0 ) );
-					po.bez1 = mul( UNITY_MATRIX_MV, float4( bez[1], 1.0 ) );
-					po.bez2 = mul( UNITY_MATRIX_MV, float4( bez[2], 1.0 ) );
+					po.bez0 = ( mul( UNITY_MATRIX_MV, float4( bez[0], 1.0 ) ) );
+					po.bez1 = ( mul( UNITY_MATRIX_MV, float4( bez[1], 1.0 ) ) );
+					po.bez2 = ( mul( UNITY_MATRIX_MV, float4( bez[2], 1.0 ) ) );
 					
 					bez[0] = po.bez0;
 					bez[1] = po.bez1;
@@ -194,7 +197,7 @@ Shader "SatelliteStuff/SatelliteDisplay"
 						
 						float4 cp = mul( UNITY_MATRIX_P, float4( viewpos[vtx], 1.0 ) );
 						po.vertex = cp;
-						po.cppos = float4( viewpos[vtx], 1.0 );
+						po.cppos = ( float4( viewpos[vtx], 1.0  ));
 
 						UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po);
 
@@ -240,6 +243,11 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				n = normalize( n );
 				return cross( n, cross( b, n ) ) + n * dot( n, b );
 			}
+			
+			float clamppersp( float f )
+			{
+				return f > -0.01 ? -0.01 : f;
+			}
 
 			fixed4 frag (g2f i) : SV_Target
 			{
@@ -284,46 +292,68 @@ Shader "SatelliteStuff/SatelliteDisplay"
 
 
 
-				float3 cp =   i.cppos;
-				float3 bez0 =  i.bez0;
-				float3 bez1 =  i.bez1;
-				float3 bez2 =  i.bez2;
+				float3 cp =   i.cppos;//i.cppos.z;
+				float3 bez0 =  i.bez0;//i.cppos.z;
+				float3 bez1 =  i.bez1;//i.cppos.z;
+				float3 bez2 =  i.bez2;//i.cppos.z;
 				
 				// Project bezier onto visual plane (cppos is our "local" view vector)
 				// We can't project it onto the normal view vector otherwise it will warp around.
 				// What if we project cp into bezproj plane instead?
 
 				// Transform cp, bez0, bez1, and bez2 in to view-aligned vectors but in world space.
-				//float3 viewDir = -UNITY_MATRIX_IT_MV[2].xyz; // Camera Forward. 
+				float3 viewDir = -UNITY_MATRIX_IT_MV[2].xyz; // Camera Forward. 
 
 				// build basis for forward vector.
 				// Need to pick the correct direction otherwise we will get artifacting.
 				float3 forward = normalize( cp );
 				
-				float3 up = float3( 0, 1, 0 );
-				float3 right = cross( forward, up );
-				float3 newup = cross( right, forward ); 
-				float3x3 matr = float3x3( right, newup,  forward );
+				float3 up = 
+					float3( 0, 1, 0 );
+				float3 right = normalize( cross( forward, up ) );
+				float3 newup = normalize( cross( right, forward ) ); 
+				float3x3 matr = float3x3( right, newup, forward );
 
-				bez0 = mul( bez0, matr );
-				bez1 = mul( bez1, matr );
-				bez2 = mul( bez2, matr );
-				cp = mul( cp, matr );
+/*
+				bez0 -= cp;
+				bez1 -= cp;
+				bez2 -= cp;
+				cp = 0;
+*/				
 
+/*
+				bez0 = mul( matr, bez0);
+				bez1 = mul( matr, bez1 );
+				bez2 = mul( matr, bez2  );
+				cp = mul( matr, cp );
+*/
 				//float deres = length( fwidth( cp ) );
-			
-				bez0.z *= 0.0;
-				bez1.z *= 0.0;
-				bez2.z *= 0.0;
-				cp.z   *= 0.0;
+
+				
+				bez0.xyz /= clamppersp(bez0.z );
+				bez1.xyz /= clamppersp(bez1.z );
+				bez2.xyz /= clamppersp(bez2.z );
+				cp.xyz   /= clamppersp(cp.z   );
+
+				bez0.z *= 0.000;
+				bez1.z *= 0.000;
+				bez2.z *= 0.000;
+				cp.z   *= 0.000;
+				
+				
+//				bez2.xy = bez0.xy;
+//				bez1.xy = bez1.xy;
+//				bez0.xy = bez2.xy;
+
 
 				float t;
-//				float f = calculateDistanceToQuadraticBezier3( t, cp, bez0, bez1, bez2 );
-				float2 outQ;
+				float f = calculateDistanceToQuadraticBezier3( t, cp, bez0, bez1, bez2 );
+				
+/*				float2 outQ;
 				t = sdBezier( cp, bez0, bez1, bez2, outQ );
 				float f = min(outQ.x, outQ.y);
 				f = abs(t);
-
+*/
 				
 				// compute w divide based on place in curve
 				//float3 ap = lerp( bez0, bez1, t );
@@ -333,14 +363,14 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				//f /= deres * 200;
 				//f *= clamp( i.vertex.w, 1.2, .007/deres );
 
-		//		float tT = 
-		//			(i.reltime.y - i.reltime.x) / (i.reltime.z - i.reltime.x);
-		//		float tDelta = (t-tT);
+				float tT = 
+					(i.reltime.y - i.reltime.x) / (i.reltime.z - i.reltime.x);
+				float tDelta = (t-tT);
 
 				float fDist = f*380;
 				
 				// Get rid of tail in front of satellite.
-		//		fDist += saturate( tDelta*2000);
+				fDist += saturate( tDelta*2000);
 
 				col.a = saturate( 1.0-fDist );
 				//col.a *= saturate((4.4+tDelta)/4.4); // Fade out tail.  Based on nr segs, and where in the front we expect the satellite to be.
@@ -352,6 +382,8 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				//col.a = 1;
 				//col.b = 0;
 				//col.rg = abs(bez0+bez2);
+				
+				//col.rgb = abs(bez2);
 				
 				UNITY_APPLY_FOG(i.fogCoord, col);
 				return col;

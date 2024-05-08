@@ -15,12 +15,16 @@ float2 solveCubic2(float3 a)
 	float p3 = p*p*p;
 	float q = a.x*(2.*a.x*a.x-9.*a.y)/27.+a.z;
 	float d = q*q+4.*p3/27.;
-	//if( p < 10000 && d > 0) return 0;
+
 	if(d>.0 )
 	{
 		// Original code from Per Bloksgaard has issues in a few cases here.
 		float2 x = (float2(1,-1)*sqrt(d)-q)*.5;
-		return (addv(sign(x)*pow(abs(x),(1./3.)))-a.x/3.).xx;
+		float2 midval = sign(x)*pow(abs(x),(1./3.));
+		float addvval = addv(midval) -a.x/3.;
+		//if( abs( midval.y )/abs(a.x) < .02 || abs(midval.x)/abs(a.x)<.02 ) //<<<<<<<<<<<<<<<<<<<<<<<
+		//	return 0;
+		return (addv(midval)-a.x/3.).xx;
 	}
 	float v = acos(-sqrt(-27./p3)*q*.5)/3.;
 	float m = cos(v);
@@ -54,71 +58,16 @@ float calculateDistanceToQuadraticBezier3(out float t, float3 p, float3 a, float
 	float3 C = p-a;
 	float3 D = A*2.;
 	
-	float ddb = dd(B) + 0.0001;
+	float ddb = dd(B)+0.000005;
+
 	float2 T = clamp((solveCubic2(float3(-3.*dot(A,B),dot(C,B)-2.*dd(A),dot(C,A))/-ddb)),0.,1.);
 
 	// Added to know where you are along the line.
 	float Ma = dd(C-(D+B*T.x)*T.x);
 	float Mb = dd(C-(D+B*T.y)*T.y);
+	
 	t = (Ma<Mb)?T.x:T.y;
-
+	if( min(Ma,Mb)<=0 )
+		return 1.0;
 	return sqrt(min(Ma,Mb));
-}
-
-float calculateDistanceToQuadraticBezier3(out float t, float3 p, float3 a, float3 b, float3 c)
-{
-	b.xyz += lerp((1e-4).xxx,(0.).xxx,abs(sign(b.xyz*2.-a.xyz-c.xyz)));
-	float3 A = b-a;
-	float3 B = c-b-A;
-	float3 C = p-a;
-	float3 D = A*2.;
-	
-	float ddb = dd(B) + 0.0001;
-	float2 T = clamp((solveCubic2(float3(-3.*dot(A,B),dot(C,B)-2.*dd(A),dot(C,A))/-ddb)),0.,1.);
-
-	// Added to know where you are along the line.
-	float Ma = dd(C-(D+B*T.x)*T.x);
-	float Mb = dd(C-(D+B*T.y)*T.y);
-	t = (Ma<Mb)?T.x:T.y;
-
-	return sqrt(min(Ma,Mb));
-}
-
-
-float cross2d( float2 A, float2 B )
-{
-	return A.x * B.y - A.y * B.x;
-}
-
-void ResolveBezierGeometry( out float3 viewspacepos[5], float3 bez[3], float expand)
-{
-	float3 base[3] = {
-		(bez[0]),
-		(bez[1]),
-		(bez[2]) };
-
-	float3 clip2d[3] = {
-		base[0].xyz,
-		base[1].xyz,
-		base[2].xyz,
-	};
-
-	// Axis to expand from: In X-Y, 
-	
-	float3 orthos[3];
-	orthos[0] = normalize( cross( clip2d[0] - clip2d[1], clip2d[0] ) ); //(clip2d[0] - clip2d[1]).yx * float2( 1.0, -1.0 );
-	orthos[2] = normalize( cross( clip2d[2] - clip2d[1], clip2d[2] ) ); //(clip2d[2] - clip2d[1]).yx * float2( 1.0, -1.0 );
-	orthos[0] = normalize( orthos[0] )*expand;
-	orthos[2] = normalize( orthos[2] )*expand;
-	
-	// TODO: Try to expand from point on line from A--B orthogonal to center point.
-	orthos[1] = normalize( orthos[0] - orthos[2] ) * expand;
-		
-	float clockwisiness = sign( cross2d( clip2d[2].xy - clip2d[1].xy, clip2d[0].xy - clip2d[1].xy ) );
-	
-	viewspacepos[0] = base[0] - float3( orthos[0] ) * clockwisiness;
-	viewspacepos[1] = base[0] + float3( orthos[0] ) * clockwisiness;
-	viewspacepos[2] = base[1] - float3( orthos[1] ) * clockwisiness;
-	viewspacepos[3] = base[2] - float3( orthos[2] ) * clockwisiness;
-	viewspacepos[4] = base[2] + float3( orthos[2] ) * clockwisiness;
 }
