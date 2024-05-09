@@ -5,6 +5,7 @@ ShaderImporter:
   defaultTextures:
   - _MainTexDay: {instanceID: 0}
   - _MainTexNight: {instanceID: 0}
+  - _ManagementTexture: {instanceID: 0}
   nonModifiableTextures: []
   userData: 
   assetBundleName: 

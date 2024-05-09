@@ -2,7 +2,7 @@ Shader "Unlit/TestPoint"
 {
 	Properties
 	{
-		_Thickness ("Thickness", float) = 0.1
+		_TailThick ("Tail Thickness", float) = 0.01
 	}
 	SubShader
 	{
@@ -23,7 +23,8 @@ Shader "Unlit/TestPoint"
 			#pragma target 5.0
 			#pragma multi_compile_fog
 			
-			#include "PerBloksgaard-BezierCode.cginc"
+			#include "IQ-QuadradicBezier.cginc"
+			#include "cnlohr-QuadradicBezier.cginc"
 			
 			struct appdata
 			{
@@ -46,7 +47,6 @@ Shader "Unlit/TestPoint"
 				UNITY_FOG_COORDS(1)
 			};
 
-			float _Thickness;
 			
 			v2g vert (appdata v, uint id : SV_VertexID, uint iid : SV_InstanceID  )
 			{
@@ -71,9 +71,9 @@ Shader "Unlit/TestPoint"
 				bez[1].x = cos( 20*_Time.x )*.2+1;
 				bez[1].z = sin( 20*_Time.x )*.2+1;
 
-				bez[0] += offset;
-				bez[1] += offset;
-				bez[2] += offset;				
+				bez[0].xyz += offset;
+				bez[1].xyz += offset;
+				bez[2].xyz += offset;				
 				
 				g2f po;
 				
@@ -82,17 +82,18 @@ Shader "Unlit/TestPoint"
 				po.bez1 = UnityObjectToClipPos( bez[1] );
 				po.bez2 = UnityObjectToClipPos( bez[2] );
 
-				float4 clippos[5];
-				ResolveBezierGeometry( clippos, bez, _Thickness );
+				float3 viewpos[5];
+				ResolveBezierGeometry( viewpos, bez );
 
 				// UNRESOLVED, Handle shape where center is behind one of the other two.
 				
 				int vtx;
 				for( vtx = 0; vtx < 5; vtx++ )
 				{
-					float4 cp = clippos[vtx];
+				
+					float4 cp = mul( UNITY_MATRIX_P, float4( viewpos[vtx], 1.0 ) );
 					po.vertex = cp;
-					po.cppos = po.vertex.xyzw;
+					po.cppos = ( float4( viewpos[vtx], 1.0  ));
 
 					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po);
 
@@ -106,26 +107,58 @@ Shader "Unlit/TestPoint"
 			{
 				fixed4 col = float4( 1.0, 1.0, 1.0, 1.0 );
 
-				float2 cp = i.cppos / i.cppos.w;
-				float2 bez0 = i.bez0 / i.bez0.w;
-				float2 bez1 = i.bez1 / i.bez1.w;
-				float2 bez2 = i.bez2 / i.bez2.w;
+				float3 cp = i.cppos;
+				float3 bez0 =  i.bez0;
+				float3 bez1 =  i.bez1;
+				float3 bez2 =  i.bez2;
+				
+				// Project bezier onto visual plane (cppos is our "local" view vector)
+				// We can't project it onto the normal view vector otherwise it will warp around.
+				// What if we project cp into bezproj plane instead?
 
-				float deres = length( fwidth( cp ) );
+				// build basis for forward vector.
+				// Need to pick the correct direction otherwise we will get artifacting.
+				float3 forward = normalize( cp );
+				
+				float3 up = float3( 0, 1, 0 );
+				float3 right = normalize( cross( forward, up ) );
+				float3 newup = normalize( cross( right, forward ) ); 
+				float3x3 matr = float3x3( right, newup, forward );
+
+				bez0 = mul( matr, bez0);
+				bez1 = mul( matr, bez1 );
+				bez2 = mul( matr, bez2  );
+				cp = mul( matr, cp );
+				float3 cpbase = cp;
+				cp = normalize( cp );
+				
+				bez0.z *= 0.000;
+				bez1.z *= 0.000;
+				bez2.z *= 0.000;
+				cp.z   *= 0.000;
+				
 
 				float t;
-				float f = calculateDistanceToQuadraticBezier( t, cp, bez0, bez1, bez2 );
-				f *= clamp( i.cppos.w, 0.5, .01/deres );
+				float2 outQ;
+				float f = sdBezierMod( cp, bez0, bez1, bez2, outQ, t );
+				f = abs(f);
 
-				float tT = frac( _Time.y );
-				float tDelta = (t-tT);
-				tDelta *= clamp( i.cppos.w, 0.5, .01/deres );
+				//float tT = (i.reltime.y - i.reltime.x) / (i.reltime.z - i.reltime.x);
+				//float tDelta = (t-tT);
+
+				float fLoD = length( fwidth( cpbase.xy ) );
+				//float fDist = f*ComputeTailThickness( cpbase.z );
 				
-				float satDist = length( float2( tDelta, f) );
-				satDist *= 50.0;
-				float fDist = f*100;
-				col.a = saturate( 1.0-fDist ) * 0.5 + saturate( 1.0-satDist ) + .03;
-				
+				// Get rid of tail in front of satellite.
+				//fDist += saturate( tDelta*2000);
+				//col.a = saturate( 1.0-fDist );
+				// Fade out tail.  Based on nr segs, and where in the front we expect the satellite to be.
+				//col.a *= saturate((4.5+tDelta)/4.5); 
+				col.a *= 0.2;  // Overall fade.
+
+				col.a += 0.01;
+
+		
 				UNITY_APPLY_FOG(i.fogCoord, col);
 				return col;
 			}

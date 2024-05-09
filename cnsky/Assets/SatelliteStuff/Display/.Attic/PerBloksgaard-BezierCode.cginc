@@ -1,9 +1,33 @@
 // Copyright Per Bloksgaard, 2014 - https://perbloksgaard.dk
 // I was inspired by https://www.shadertoy.com/view/XsX3zf but instead of a fast 
 // distance approximation, I wanted the exact distance to a quadratic bezier spline.
+//
+//
+// This code is not in use in this project, it took 30ms on the refrence, IQ took 25ms, spalmer took 30ms.
 
 //Blog article about this shader below. (In danish)
 //http://www.hinnerup.net/permanent/2014/01/23/bezier_spline_shader/
+
+// GENERAL NOTE: This has the same two issues as IQ's quadratic bezier code, and is slower.
+// I decided to abandon this and jump to the IQ code.
+
+/* reference
+
+#if 1
+				float f = calculateDistanceToQuadraticBezier3( t, cp, bez0, bez1, bez2 );
+#elif 1
+				float2 outQ;
+				t = sdBezier( cp, bez0, bez1, bez2, outQ );
+				float f = min(outQ.x, outQ.y);
+				f = abs(t);
+#else
+				float2 outQ;
+				float nd2;
+				t = bezierSpalmer(cp, bez0, bez1, bez2, outQ, nd2);
+				float f = min(outQ.x, outQ.y);
+				//f = abs(t);
+#endif
+*/
 
 #define dd(a) dot(a,a)
 float addv(float2 a) { return a.x + a.y; }

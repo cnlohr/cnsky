@@ -142,7 +142,7 @@ Shader "SatelliteStuff/RTComputeManagement"
 						switch( i )
 						{
 						case 0:
-							color = asuint( float4( 4.0, -18.0, 0.0, 0.0 ) );
+							color = asuint( float4( 3.0, -13.5, 0.0, 0.0 ) );
 							break;
 						case 1:
 							color = 0.0;

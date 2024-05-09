@@ -4,13 +4,12 @@ Shader "SatelliteStuff/SatelliteDisplay"
 {
 	Properties
 	{
-		_TailThick ("Tail Thickness", float) = 0.01
+		_ThicknessGeo ("Thickness", float) = 0.01
 		_ComputedTexture("Compute Satellites", 2D) = "white" {}
 		_ManagementTexture("Compute Management", 2D) = "white" {}
 		_ImportTexture("Compute Download", 2D) = "white" {}
 		_InverseScale("InverseScale", float) = 6000
 		_SatSize("Satellite Size", float)=0.01
-		_BaseSizeUpscale("Base Size Upscale", float)=1.0
 	}
 	SubShader
 	{
@@ -31,8 +30,8 @@ Shader "SatelliteStuff/SatelliteDisplay"
 			#pragma target 5.0
 			#pragma multi_compile_fog
 			
-			#include "IQ-QuadradicBezier.cginc"
-			#include "cnlohr-QuadradicBezier.cginc"
+			#include "IQ-QuadraticBezier.cginc"
+			#include "cnlohr-QuadraticBezier.cginc"
 			#include "Assets/MSDFShaderPrintf/MSDFShaderPrintf.cginc"
 			
 			struct appdata
@@ -44,12 +43,10 @@ Shader "SatelliteStuff/SatelliteDisplay"
 			{
 				uint id : ID;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
-				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
 			struct g2f
 			{
-				UNITY_VERTEX_OUTPUT_STEREO
 				float4 vertex : SV_POSITION;
 				float4 bez0 : BEZ0;
 				float4 bez1 : BEZ1;
@@ -59,8 +56,12 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				UNITY_FOG_COORDS(1)
 			};
 
+			float _ThicknessGeo;
 			float _InverseScale;
-			float _SatSize;
+			
+			float ComputeGeometryWidthIncrease()
+			{
+			}
 
 			v2g vert (appdata v, uint id : SV_VertexID, uint iid : SV_InstanceID  )
 			{
@@ -78,22 +79,8 @@ Shader "SatelliteStuff/SatelliteDisplay"
 			float4 _ManagementTexture_TexelSize;
 			Texture2D< float4 > _ComputedTexture;
 			float4 _ComputedTexture_TexelSize;
-
-			float ComputeTailThickness( float dist )
-			{
-				float fInvScale = 
-					_TailThick * (abs(dist) +.5*_BaseSizeUpscale) / _ScreenParams.x * 100.0
-					+ 0.8 * abs(dist)  / _ScreenParams.x; // Increase size of distant ones.
-				return 1./fInvScale;
-			}
-
-			float ComputeSatelliteSize( float dist )
-			{
-				return
-					_SatSize * (abs(dist) +10*_BaseSizeUpscale) / _ScreenParams.x
-					+ 2.0 * abs(dist)  / _ScreenParams.x; // Increase size of distant ones.
-			}
-
+			
+			float _SatSize;
 			
 			[maxvertexcount(36)]
 			void geo(point v2g p[1], inout TriangleStream<g2f> triStream, uint pid : SV_PrimitiveID )
@@ -129,10 +116,8 @@ Shader "SatelliteStuff/SatelliteDisplay"
 //					normalize( cross( 
 //						( mul( UNITY_MATRIX_MV, float4( posfront.xyz, 1.0 ) ) -  mul( UNITY_MATRIX_MV, float4( poslast.xyz, 1.0 ) ) ).xyz, 
 //						( mul( UNITY_MATRIX_MV, float4( poscenterish.xyz, 1.0 ) ) ).xyz ) );
-				g2f po;
-				UNITY_INITIALIZE_OUTPUT(g2f, po);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(g2f);
 
+				
 				for( seg = 0; seg < 5; seg++ )
 				{
 					float4 pos0 = _ComputedTexture.Load( int3( thissatCompute.x + 0 + seg, _ComputedTexture_TexelSize.w - ( thissatCompute.y + 0 ) - 1 + 0, 0 ) );
@@ -152,7 +137,10 @@ Shader "SatelliteStuff/SatelliteDisplay"
 					int i;
 					for( i = 0; i < 3; i++ )
 						bez[i] /= _InverseScale;
-						
+			
+					
+					g2f po;
+					
 					po.reltime = float3( pos0.w, jdFrac, pos1.w );
 					
 					if( jdFrac >= pos0.w && jdFrac <=  pos1.w )
@@ -174,9 +162,15 @@ Shader "SatelliteStuff/SatelliteDisplay"
 					bez[1] = po.bez1;
 					bez[2] = po.bez2;
 					
+					po.bez0 = po.bez0;
+					po.bez1 = po.bez1;
+					po.bez2 = po.bez2;
+
+//ResolveBezierGeometry
+
 					float3 viewpos[5];
 
-					ResolveBezierGeometry( viewpos, bez );
+					ResolveBezierGeometry( viewpos, bez, _ThicknessGeo);
 
 					// UNRESOLVED, Handle shape where center is behind one of the other two.
 					
@@ -204,14 +198,13 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				// Emit special block at end.
 				//reltime
 				float4 csCenter = UnityObjectToClipPos( objectCenter );
-				float3 csWorldCenter = mul( UNITY_MATRIX_M, float4( objectCenter, 1.0 ) );
 
-
+				g2f po;
 				po.reltime = 0.0;
 				po.bez0 = 0;
 				po.bez1 = 0;
 				po.bez2 = float4( thissatImport+0.5, 0.0, 0.0 );
-				float4 rsize = float4( _ScreenParams.y/_ScreenParams.x, 1, 0, 1. ) * ComputeSatelliteSize( length( csWorldCenter - _WorldSpaceCameraPos ) );
+				float4 rsize = float4( _ScreenParams.y/_ScreenParams.x, 1, 0, 1. ) * _SatSize;
 				float4 vtx_ofs[4] = {
 					{-1, -1, 0, 0},
 					{ 1, -1, 0, 0},
@@ -236,6 +229,11 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				return cross( n, cross( b, n ) ) + n * dot( n, b );
 			}
 			
+			float clamppersp( float f )
+			{
+				return f > -0.01 ? -0.01 : f;
+			}
+
 			fixed4 frag (g2f i) : SV_Target
 			{
 				fixed4 col = float4( 1.0, 1.0, 1.0, 1.0 );
@@ -273,20 +271,23 @@ Shader "SatelliteStuff/SatelliteDisplay"
 					}					
 					
 					col.a *= saturate(2.0-sedge*2.0);
-					//col.a += 0.05;
+					col.a += 0.05;
 					return col;
 				}
 
 
 
-				float3 cp = i.cppos;
-				float3 bez0 =  i.bez0;
-				float3 bez1 =  i.bez1;
-				float3 bez2 =  i.bez2;
+				float3 cp = normalize( i.cppos );//i.cppos.z;
+				float3 bez0 =  i.bez0;//i.cppos.z;
+				float3 bez1 =  i.bez1;//i.cppos.z;
+				float3 bez2 =  i.bez2;//i.cppos.z;
 				
 				// Project bezier onto visual plane (cppos is our "local" view vector)
 				// We can't project it onto the normal view vector otherwise it will warp around.
 				// What if we project cp into bezproj plane instead?
+
+				// Transform cp, bez0, bez1, and bez2 in to view-aligned vectors but in world space.
+				float3 viewDir = -UNITY_MATRIX_IT_MV[2].xyz; // Camera Forward. 
 
 				// build basis for forward vector.
 				// Need to pick the correct direction otherwise we will get artifacting.
@@ -297,40 +298,73 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				float3 newup = normalize( cross( right, forward ) ); 
 				float3x3 matr = float3x3( right, newup, forward );
 
+/*
+				bez0 -= cp;
+				bez1 -= cp;
+				bez2 -= cp;
+				cp = 0;
+*/				
+
 				bez0 = mul( matr, bez0);
 				bez1 = mul( matr, bez1 );
 				bez2 = mul( matr, bez2  );
 				cp = mul( matr, cp );
-				float3 cpbase = cp;
-				cp = normalize( cp );
-				
+				//float deres = length( fwidth( cp ) );
+
+	/*			
+				bez0.xyz /= clamppersp(bez0.z );
+				bez1.xyz /= clamppersp(bez1.z );
+				bez2.xyz /= clamppersp(bez2.z );
+				cp.xyz   /= clamppersp(cp.z   );
+*/
+
 				bez0.z *= 0.000;
 				bez1.z *= 0.000;
 				bez2.z *= 0.000;
 				cp.z   *= 0.000;
 				
+				
+//				bez2.xy = bez0.xy;
+//				bez1.xy = bez1.xy;
+//				bez0.xy = bez2.xy;
+
 
 				float t;
 				float2 outQ;
 				float f = sdBezierMod( cp, bez0, bez1, bez2, outQ, t );
 				f = abs(f);
+				
+				col.r = t * 1000.0;
+				
+				// compute w divide based on place in curve
+				//float3 ap = lerp( bez0, bez1, t );
+				//float3 bp = lerp( bez1, bez2, t ); 
+				//float3 p =  lerp( ap, bp, t );
+				//f /= deres * 200;
+				//f *= clamp( i.vertex.w, 1.2, .007/deres );
 
-				float tT = (i.reltime.y - i.reltime.x) / (i.reltime.z - i.reltime.x);
+				float tT = 
+					(i.reltime.y - i.reltime.x) / (i.reltime.z - i.reltime.x);
 				float tDelta = (t-tT);
 
-				float fLoD = length( fwidth( cpbase.xy ) );
-				float fDist = f*ComputeTailThickness( cpbase.z );
+				float fDist = f*38;
 				
 				// Get rid of tail in front of satellite.
 				fDist += saturate( tDelta*2000);
+
 				col.a = saturate( 1.0-fDist );
-				// Fade out tail.  Based on nr segs, and where in the front we expect the satellite to be.
-				col.a *= saturate((4.5+tDelta)/4.5); 
+				//col.a *= saturate((4.4+tDelta)/4.4); // Fade out tail.  Based on nr segs, and where in the front we expect the satellite to be.
 				col.a *= 0.2;  // Overall fade.
-
-				//col.a += 0.01;
-
-		
+	
+				//col.a = 1.0;
+				//col.a += .03; // for debug
+				
+				//col.a = 1;
+				//col.b = 0;
+				//col.rg = abs(bez0+bez2);
+				
+				//col.rgb = abs(bez2);
+				
 				UNITY_APPLY_FOG(i.fogCoord, col);
 				return col;
 			}

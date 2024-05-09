@@ -27,6 +27,7 @@ Shader "Custom/FloorShader"
 		_ZAxisDashColor ("Z Axis Dash Color", Color) = (0,0,0.5,1)
 		_AxisDashScale ("Axis Dash Scale", Float) = 1.33
 		_CenterColor ("Axis Center Color", Color) = (1,1,1,1)
+		_Fade ("Fade", Float) = 0.0
 	}
 	SubShader
 	{
@@ -41,6 +42,8 @@ Shader "Custom/FloorShader"
 		// Use shader model 3.0 target, to get nicer looking lighting
 		#pragma target 3.0
 
+		#include "Assets/cnlohr/hashwithoutsine/hashwithoutsine.cginc"
+		
 		sampler2D _MainTex;
 
 		struct Input
@@ -56,6 +59,7 @@ Shader "Custom/FloorShader"
 		half _Glossiness;
 		half _Metallic;
 		fixed4 _Color, _ColorFloor;
+		float _Fade;
 
 		float _GridScale, _MajorGridDiv;
 
@@ -77,6 +81,18 @@ Shader "Custom/FloorShader"
 
 		void surf (Input IN, inout SurfaceOutputStandard o)
 		{
+		#if defined(USING_STEREO_MATRICES)
+			float3 PlayerCenterCamera = ( unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1] ) / 2;
+		#else
+			float3 PlayerCenterCamera = _WorldSpaceCameraPos.xyz;
+		#endif
+			float4 col = 0.0;
+			
+			float bright = 1;
+			float cutoff = ( .1 + chash13( float3( IN.worldPos.xy * 40, _Time.x*10 ) ) )* ( (  length(IN.worldPos-PlayerCenterCamera) - _Fade)); 
+			if( _Fade > 0 ) 
+				clip(bright - cutoff);
+			
 			float div = max(2.0, round(_MajorGridDiv));
 
 			// trick to reduce visual artifacts when far from the world origin
@@ -178,7 +194,7 @@ Shader "Custom/FloorShader"
 
 			half4 axisLines = lerp(bAxisColor * axisLines2.y, aAxisColor, axisLines2.x);
 
-			half4 col = lerp(baseColor, minorLineColor, minorGrid *  minorLineColor.a);
+			col = lerp(baseColor, minorLineColor, minorGrid *  minorLineColor.a);
 			col = lerp(col, majorLineColor, majorGrid * majorLineColor.a);
 			col = col * (1.0 - axisLines.a) + axisLines;
 
@@ -186,7 +202,6 @@ Shader "Custom/FloorShader"
 			col = half4(LinearToGammaSpace(col.rgb), col.a);
 		#endif
 
-			
 			// Albedo comes from a texture tinted by color
 			//fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
 			

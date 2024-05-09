@@ -11,6 +11,9 @@ Shader "cnlohr/Earth"
 		[hdr] _Color("Albedo", Color) = (1,1,1,1)
 		[Gamma] _Metallic("Metallic", Range(0, 1)) = 0
 		_Smoothness("Smoothness", Range(0, 1)) = 0
+		_EarthMidnightRotation("Earth Midnight Rotation", float) = 0
+		_ManagementTexture ("Management", 2D) = "white" {}
+		[UIToggle] _RayTrace ("Ray Trace", float) = 1.0
 	}
 	SubShader
 	{
@@ -31,17 +34,27 @@ Shader "cnlohr/Earth"
 			uniform float4 _Color;
 			uniform float _Metallic;
 			uniform float _Smoothness;
+			float _RayTrace;
 			uniform sampler2D _MainTexDay, _MainTexNight;
+			//uniform sampler2D _MainTexDay, _MainTexNight;
 			uniform float4 _MainTexDay_ST;
-			uniform float _Cutoff;
+			uniform float _Cutoff, _EarthMidnightRotation;
+			float4 _ManagementTexture_TexelSize;
+			Texture2D< float4 > _ManagementTexture;
 
 			struct v2f
 			{
+				float3 objectOrigin : OBP;
+				float3 rayOrigin : RAYORIGIN;
+				float3 rayDir : RAYDIR;
+
 				#ifndef UNITY_PASS_SHADOWCASTER
 				float4 pos : SV_POSITION;
 				float3 normal : NORMAL;
 				float3 wPos : WPOSC;
 				float3 vPos : VPOSC;
+				
+				
 				SHADOW_COORDS(3)
 				#else
 				V2F_SHADOW_CASTER;
@@ -52,7 +65,29 @@ Shader "cnlohr/Earth"
 			v2f vert(appdata_base v)
 			{
 				v2f o;
+				o.objectOrigin = mul(unity_ObjectToWorld, float4(0.0,0.0,0.0,1.0) );
+				// Thanks ben dot com.
+				// I saw these ortho shadow substitutions in a few places, but bgolus explains them
+				// https://bgolus.medium.com/rendering-a-sphere-on-a-quad-13c92025570c
+				float howOrtho = UNITY_MATRIX_P._m33; // instead of unity_OrthoParams.w
+				float3 worldSpaceCameraPos = UNITY_MATRIX_I_V._m03_m13_m23; // instead of _WorldSpaceCameraPos
+				float3 worldPos = mul(unity_ObjectToWorld, v.vertex);
+				float3 cameraToVertex = worldPos - worldSpaceCameraPos;
+				float3 orthoFwd = -UNITY_MATRIX_I_V._m02_m12_m22; // often seen: -UNITY_MATRIX_V[2].xyz;
+				float3 orthoRayDir = orthoFwd * dot(cameraToVertex, orthoFwd);
+				// start from the camera plane (can also just start from o.vertex if your scene is contained within the geometry)
+				float3 orthoCameraPos = worldPos - orthoRayDir;
+
+				o.rayOrigin = lerp(worldSpaceCameraPos, orthoCameraPos, howOrtho );
+				o.rayDir = normalize( lerp( cameraToVertex, orthoRayDir, howOrtho ) );
 				
+				// Switch to view
+				o.rayOrigin = mul( UNITY_MATRIX_V, float4( o.rayOrigin, 1.0 ) );
+				o.rayDir = mul( UNITY_MATRIX_V, float4( o.rayDir, 0.0 ) );
+				
+				// Switch back to object.
+				o.rayOrigin = mul( float4( o.rayOrigin, 1.0 ), UNITY_MATRIX_IT_MV );
+				o.rayDir = mul( float4( o.rayDir, 0.0 ), UNITY_MATRIX_IT_MV ); //?!?!?! Why broke?
 				
 				
 				#ifdef UNITY_PASS_SHADOWCASTER
@@ -73,22 +108,73 @@ Shader "cnlohr/Earth"
 			{
 				float3 normal = normalize(i.normal);
 				float2 uv = i.uv;
+				float2 uvbase = uv;
+				float3 wPos = i.wPos.xyz;
+				float3 vPos = i.vPos.xyz;
 				
-				float lambda = atan2( i.vPos.z, i.vPos.x );
-				float phi = atan2( length(i.vPos.xz), i.vPos.y );
-				uv.x = lambda/2.0;
+				float4 InfoBlock0 = _ManagementTexture.Load( int3( 0, _ManagementTexture_TexelSize.w - 1, 0 ) );
+				float fFTime = InfoBlock0.z;
+				
+				float lambda;
+				float phi;
+				
+				if( _RayTrace )
+				{
+					float3 rayOrigin = i.rayOrigin;
+					float3 rayDir = normalize( vPos - rayOrigin );//(i.rayDir);
+
+					float4 sphere = float4( 0, 0, 0, 0.5 );
+					float bestHitDistance = 1e20;
+					float3 bestHitNormal = 0.0;
+					float3 bestHitPosition = 0.0;
+					// Calculate distance along the ray where the sphere is intersected
+					float3 d = rayOrigin - sphere.xyz;
+					float p1 = -dot(rayDir, d);
+					float p2sqr = p1 * p1 - dot(d, d) + sphere.w * sphere.w;
+					if (p2sqr < 0)
+						discard;
+					float p2 = sqrt(p2sqr);
+					float t = p1 - p2 > 0 ? p1 - p2 : p1 + p2;
+					if (t > 0 && t < bestHitDistance)
+					{
+						bestHitPosition = rayOrigin + t * rayDir;
+						bestHitNormal = normalize(bestHitPosition - sphere.xyz);
+						bestHitDistance = t;
+					}
+					else
+					{
+						discard;
+					}
+
+	
+					lambda = atan2( bestHitPosition.z, bestHitPosition.x );
+					phi = atan2( length(bestHitPosition.xz), bestHitPosition.y );
+					vPos = bestHitPosition;
+					wPos = mul( UNITY_MATRIX_M, float4( bestHitPosition, 1.0 ) );
+					normal = normalize( mul( UNITY_MATRIX_M, float4( bestHitNormal, 0.0 ) ) );
+				}
+				else
+				{
+					lambda = atan2( i.vPos.z, i.vPos.x );
+					phi = atan2( length(i.vPos.xz), i.vPos.y );
+				}
+				
+				lambda -= fFTime/3.1415926535/2 + _EarthMidnightRotation;
+				
+				uv.x = (lambda/2.0);
 				uv.y = -phi;
 				
-				uv.x = frac( uv.x / 3.14159 + 1 ); 
-				uv.y = frac( uv.y / 3.14159 + 1 ); 
+				uv.x = frac( uv.x / 3.1415926535 + 1 ); 
+				uv.y = frac( uv.y / 3.1415926535 + 1 ); 
 				//uv = clamp( uv, 0.0, .99 );
 				
+				
 				float dayness = saturate( dot( normal, normalize(_WorldSpaceLightPos0.xyz) )  * 6.0);
-				float4 texCol = lerp( tex2D(_MainTexNight, uv), tex2D(_MainTexDay, uv), dayness ) * _Color;
+				float4 texCol = lerp( tex2Dgrad(_MainTexNight, uv, ddx(uvbase), ddy(uvbase) ), tex2Dgrad(_MainTexDay, uv, ddx(uvbase), ddy(uvbase)), dayness ) * _Color;
 				clip(texCol.a - _Cutoff);
 				
 
-				UNITY_LIGHT_ATTENUATION(attenuation, i, i.wPos.xyz);
+				UNITY_LIGHT_ATTENUATION(attenuation, i, wPos);
 
 				float3 specularTint;
 				float oneMinusReflectivity;
@@ -97,7 +183,7 @@ Shader "cnlohr/Earth"
 					texCol, _Metallic, specularTint, oneMinusReflectivity
 				);
 				
-				float3 viewDir = normalize(_WorldSpaceCameraPos - i.wPos);
+				float3 viewDir = normalize(_WorldSpaceCameraPos - wPos);
 				UnityLight light;
 				light.color = attenuation * _LightColor0.rgb;
 				light.dir = normalize(UnityWorldSpaceLightDir(i.wPos));

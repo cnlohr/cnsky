@@ -8,6 +8,12 @@
 //
 // and iquilezles.org/articles/distfunctions2d
 
+// This code is refernece timed to 25ms (compared to 30 for spalmer, and 30 for Per Bloksgaard)
+//
+//
+//
+
+XXX DO NOT COMPILE THIS - this file is left as reference to when I fixed the IQ implementation.
 
 // 0: exact, using a cubic colver
 // 1: approximated
@@ -22,12 +28,13 @@ float cos_acos_3( float x ) { x=sqrt(0.5+0.5*x); return x*(x*(x*(x*-0.008972+0.0
 // signed distance to a quadratic bezier
 float sdBezier( in float2 pos, in float2 A, in float2 B, in float2 C, out float2 outQ )
 {    
+	// Does not perfectly match IQ code - see two "FIX"es below.
     float2 a = B - A;
     float2 b = A - 2.0*B + C;
     float2 c = a * 2.0;
     float2 d = A - pos;
 
-    float kk = 1.0/(dot(b,b)+0.0001);
+    float kk = 1.0/(dot(b,b)+0.00003); // FIX1 - near collinearity.
     float kx = kk * (dot(a,b));
     float ky = kk * (2.0*dot(a,a)+dot(d,b))/3.0;
     float kz = kk * dot(d,a); 
@@ -41,32 +48,26 @@ float sdBezier( in float2 pos, in float2 A, in float2 B, in float2 C, out float2
     float q2 = q*q;
     float h  = q2 + 4.0*p3;
 
-// q2 + 4.0*p3 - kx*(2.0*kx*kx - 3.0*ky) + kz
-
     if( h>=0.0 ) 
     {   // 1 root
         h = sqrt(h);
         float2 x = (float2(h,-h)-q)/2.0;
-		//if( abs(x.x) < 120 || abs(x.y)<120 ) return 1.0;
 
-		// The important place to go gets very big the more important.
-		//if(abs(q)<10000.5 ) return 1.0;
-		
-		//if( abs(q) > 10 ) return 1.0;
-		
-
+		float2 xabs = abs(x);
+			
         #if 1
+		// OLD NOTE:
         // When p≈0 and p<0, h-q has catastrophic cancelation. So, we do
         // h=√(q²+4p³)=q·√(1+4p³/q²)=q·√(1+w) instead. Now we approximate
         // √ by a linear Taylor expansion into h≈q(1+½w) so that the q's
         // cancel each other in h-q. Expanding and simplifying further we
         // get x=float2(p³/q,-p³/q-q). And using a second degree Taylor
         // expansion instead: x=float2(k,-k-q) with k=(1-p³/q²)·p³/q
-       // if( abs(x.x)<1 || abs(x.y)<1 )
-
-
-		if( ( abs(x.x) < 1 || abs(x.y) < 1 ) && abs(q) > 10  )
-		//if( abs(p)*abs(h) > 50000000 ) return 1.0;
+		//
+		// NEW NOTE: (From charlesl) FIX2
+		// I don't really know why, but this tracks the singularity this is 
+		// fixing perfectly.
+		if( min(xabs.x,xabs.y) * 1000000000.0 < (q2) )
         {
           //  float k = p3/q;              // linear approx
           float k = (1.0-p3/q2)*p3/q;  // quadratic approx 
@@ -75,7 +76,6 @@ float sdBezier( in float2 pos, in float2 A, in float2 B, in float2 C, out float2
         #endif
 
         float2 uv = sign(x)*pow(abs(x), (1.0/3.0));
-//		if( abs(uv.x) < 1 || abs(uv.y) < 1 ) return 1.0; //<<< Where this is true, is where bad things happen
         float t = clamp( uv.x+uv.y-kx, 0.0, 1.0 );
         float2  w = d+(c+b*t)*t;
         outQ = w + pos;
