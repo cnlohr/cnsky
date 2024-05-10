@@ -17,14 +17,13 @@ public class SatelliteStuff : UdonSharpBehaviour
 	private new Renderer renderer;
 	public CustomRenderTexture crt;
 	
+	public bool doInitial;
+	
 	void Start()
 	{
 		// It's important to store the VRCImageDownloader as a variable, to stop it from being garbage collected!
 		_imageDownloader = new VRCImageDownloader();
 
-		Material m = crt.material;
-		m.SetTexture( "_ImportTexture", defaultTexture );
-		crt.Update();
 		
 		
 		// To receive Image and String loading events, 'this' is casted to the type needed
@@ -33,8 +32,16 @@ public class SatelliteStuff : UdonSharpBehaviour
 
 		var rgbInfo = new TextureInfo();
 		rgbInfo.GenerateMipMaps = false;
-		_imageDownloader.DownloadImage( stringUrl, crt.material, _udonEventReceiver, rgbInfo);
-		Debug.Log($"Trying download.");
+		
+		// Only one should be initial.
+		if( doInitial )
+		{
+			Material m = crt.material;
+			m.SetTexture( "_ImportTexture", defaultTexture );
+			crt.Update();
+			_imageDownloader.DownloadImage( stringUrl, crt.material, _udonEventReceiver, rgbInfo);
+			Debug.Log($"Trying download.");
+		}
 	}
 	
 	public override void OnImageLoadSuccess(IVRCImageDownload result)

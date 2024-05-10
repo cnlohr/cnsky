@@ -56,6 +56,9 @@ Shader "Unlit/TestMSDFPrint"
 				float2 uv = inuv * float2( columns, lines );
 				int2 dig = floor( uv );
 
+				float2 gradval = uv;
+				float4 grad = float4( ddx(gradval), ddy(gradval) );
+
 				if( uv.x < 10 && uv.y <= 13 )
 				{
 					const uint sendarr[130] = { 
@@ -76,7 +79,7 @@ Shader "Unlit/TestMSDFPrint"
 
 					dig = floor( uv );
 					int val = sendarr[dig.x + dig.y * 10];
-					col = MSDFPrintChar( val, uv, uv ).xxxy;
+					col = MSDFPrintChar( val, uv,  grad ).xxxy;
 				}
 				else
 				{
@@ -232,7 +235,7 @@ Shader "Unlit/TestMSDFPrint"
 					// Get fielduv back into the 0..1 over the whole text field.
 					float2 fielduv = ( uv + float2(-10., 0.0 ) ) * float2( 1.0/11.0, 1.0 );
 					
-					col += MSDFPrintNum( value, fielduv, 11.0, 10, leadingzero, -xoffset ).xxxy;
+					col += MSDFPrintNum( value, fielduv, grad, 11.0, 10, leadingzero, -xoffset ).xxxy;
 					//col = float4( fielduv, 0.0, 1. );
 				}
 				

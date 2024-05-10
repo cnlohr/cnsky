@@ -89,28 +89,28 @@
 UNITY_DECLARE_TEX2DARRAY( _UdonMSDFPrintf );
 uniform float4 _UdonMSDFPrintf_TexelSize;
 
-float2 MSDFCalcScreenPxRange( float2 suv )
+float2 MSDFCalcScreenPxRange( float4 suv )
 {
-	float2 screenTexSize = (1.0)/fwidth(suv);
+	float2 screenTexSize = (1.0)/length(suv);
 	const float2 pxRange = 8.0;  // Was 4.
 	float2 unitRange = (pxRange)/float2(_UdonMSDFPrintf_TexelSize.zw);
 	float2 screenPxRangeRaw = 0.5*dot(unitRange, screenTexSize);
 	return max(screenPxRangeRaw, 1.0);
 }
 
-float2 MSDFEval( float2 texCoord, int index, float2 screenPxRange, float2 suv )
+float2 MSDFEval( float2 texCoord, int index, float2 screenPxRange, float4 grad )
 {
 	texCoord.y = 1.0 - texCoord.y;
-	float3 msd = _UdonMSDFPrintf.SampleGrad(sampler_UdonMSDFPrintf, float3( texCoord, index ), ddx(suv), ddy(suv) );
+	float3 msd = _UdonMSDFPrintf.SampleGrad(sampler_UdonMSDFPrintf, float3( texCoord, index ), grad.xy, grad.zw );
 
 	float sd = max(min(msd.r, msd.g), min(max(msd.r, msd.g), msd.b)); // sd = median
-	float sdShadow = sd + (sd*4.0-0.3) * ( ( 14 * pow(length(fwidth(suv)),0.5)) );
+	float sdShadow = sd + (sd*4.0-0.3) * ( ( 14 * pow(length(grad),0.5)) );
 	float2 screenPxDistance = screenPxRange*( float2( sd, sdShadow ) - 0.5)*float2( 1.0, 0.3 );
 	float2 opacity = clamp(screenPxDistance + 0.5, 0.0, 1.0);
 	return opacity;
 }
 
-float2 MSDFPrintChar( int charNum, float2 charUv, float2 smoothUv )
+float2 MSDFPrintChar( int charNum, float2 charUv, float4 smoothUv )
 {
 	float2 screenPxRange = MSDFCalcScreenPxRange( smoothUv );
 	charUv = frac(charUv);
@@ -127,12 +127,11 @@ float2 MSDFPrintChar( int charNum, float2 charUv, float2 smoothUv )
 // numFractDigits   (uint) Number of digits to round to after the decimal
 //
 // TODO: Please, someone figure out how to improve the rounding here.
-float2 MSDFPrintNum( float value, float2 texCoord, int numDigits = 10, int numFractDigits = 4, bool leadZero = false, int offset = 0 )
+float2 MSDFPrintNum( float value, float2 texCoord, float4 grad, int numDigits = 10, int numFractDigits = 4, bool leadZero = false, int offset = 0 )
 {
 	int digitOffset = numDigits - numFractDigits - 1;
-	float2 smoothUv = texCoord * float2( numDigits, 1.0 );
-	float2 charUv = frac( smoothUv );
 	int digit = floor( frac( texCoord ) * numDigits ) + offset;
+	float2 charUv = frac( texCoord * float2( numDigits, 1.0 ) );
 	
     uint charNum;
     uint leadingdash = (value<0)?('-'-'0'):(' '-'0');
@@ -181,13 +180,12 @@ float2 MSDFPrintNum( float value, float2 texCoord, int numDigits = 10, int numFr
         charNum += '0';
     }
 
-	return MSDFPrintChar( charNum, charUv, smoothUv );
+	return MSDFPrintChar( charNum, charUv, grad );
 }
 
-float2 MSDFPrintHex( uint value, float2 texCoord, int numDigitFields = 10, int numDigitShow = 8, int offset = 0 )
+float2 MSDFPrintHex( uint value, float2 texCoord, float4 grad, int numDigitFields = 10, int numDigitShow = 8, int offset = 0 )
 {
-	float2 smoothUv = texCoord * float2( numDigitFields, 1.0 );
-	float2 charUv = frac( smoothUv );
+	float2 charUv = frac( texCoord * float2( numDigitFields, 1.0 ) );
 	int digit =  -1-offset+numDigitFields-floor( frac( texCoord ) * numDigitFields );
 	uint tv;
 	if( digit < 0 || digit >= numDigitShow ) 
@@ -202,6 +200,6 @@ float2 MSDFPrintHex( uint value, float2 texCoord, int numDigitFields = 10, int n
 		else
 			tv = tv + __0;
 	}
-	return MSDFPrintChar( tv, charUv, smoothUv );
+	return MSDFPrintChar( tv, charUv, grad );
 }
 

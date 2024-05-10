@@ -246,12 +246,14 @@ Shader "SatelliteStuff/SatelliteDisplay"
 					col = 1.0;
 					float2 uv = i.cppos+0.5;
 					
-					float distscale = .02 / length( fwidth( i.cppos.xy ) );
-					uv = uv * float2( 8.0, 4.0 ) * clamp( .05 + distscale, 0.1, 1.0 );
+					float distscale = .025 / length( fwidth( i.cppos.xy ) );
 					
 					 // Add offset
-					uv.x += 3.0;
+					uv.x += 0.33;
 					uv.y -= 0.0;
+
+					uv = uv * float2( 8.0, 4.0 ) * clamp( .05 + distscale, 0.1, 1.0 );
+
 					uint2 textcoord = floor( uv );
 					if( uv.x < 0 || uv.y < 0 || uv.y > 2 || distscale < 0.1 || textcoord.x >= 12 )
 					{
@@ -267,9 +269,11 @@ Shader "SatelliteStuff/SatelliteDisplay"
 						uint4 tledat0 = asuint(_ImportTexture.Load( int3( thissatImport.x + 4 + (charno/16), _ImportTexture_TexelSize.w - thissatImport.y - 1, 0 ) ));
 						uint char = tledat0[(charno/4)%4];
 						char = (char >> (charno%4) * 8) &0xff;
-						float2 c = MSDFPrintChar( char, uv, uv );
+						float4 grad = float4( ddx(uv), ddy(uv) );
+						float2 c = MSDFPrintChar( char, uv, grad );
 						c.x = 1.0 - c.x;
-						col.rgb = lerp( col.rgb, saturate( c.xxx ), saturate( distscale * 2.0 ) );
+						col.rgb = c.xxx;
+						//col.rgb = lerp( col.rgb, saturate( c.xxx ), saturate( distscale * 2.0 ) );
 					}					
 					
 					col.a *= saturate(2.0-sedge*2.0);

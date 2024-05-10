@@ -92,34 +92,38 @@ Shader "Unlit/TextureMSDFPrint"
 				case 3: value = v4.w; break;
 				}
 				float2 nfuv2;
+
+				// Two rows.
+				nfuv2 = fielduv * float2( 1.0, 2.0 );
+				
+				float2 gradval = nfuv2 * float2( 14.0, 1.0 );
+				float4 grad = float4( ddx(gradval), ddy(gradval) );
+				
 				if( _CombDisplay > 0.5 )
 				{
-					nfuv2 = fielduv * float2( 1.0, 2.0 );
-
 					if( frac( fielduv.y ) > 1.0/2.0 )
 					{
 						uint v = asuint(value);
 						if( frac( fielduv.x ) > 6.0/14.0 )
 						{
-							col += MSDFPrintHex( v, nfuv2, 14, 8, 0 ).xxxy;
+							col = MSDFPrintHex( v, nfuv2, grad, 14, 8, 0 ).xxxy;
 						}
 						else if( frac( fielduv.x ) < 5 / 14.0 && frac( fielduv.x ) > 1.0 / 14.0 )
 						{
 							int thiscell = frac( nfuv2.x  ) * 14.0 - 1.0;
 							v = (v >> (uint(thiscell)*8)) & 0xff;
-							//col.a = 1.0;
-							//col.rgb = thiscell / 4.0; //(24 - uint(nfuv2.x-1)*8)/32.0;
 							float2 thisuv2 = float2( 14.0, 1.0 ) * nfuv2;
-							col += MSDFPrintChar( v, thisuv2, nfuv2 ).xxxy;
-
-//							col += 0.1;
-//							col.x = nfuv2.x;
-//							col.a += 0.2;
+							col = MSDFPrintChar( v, thisuv2, grad ).xxxy;
+						}
+						else
+						{
+							float2 thisuv2 = float2( 14.0, 1.0 ) * nfuv2;
+							col = MSDFPrintChar( 32, thisuv2, grad ).xxxy;
 						}
 					}
 					else
 					{
-						col += MSDFPrintNum( value, nfuv2, 14, 6, false, 0 ).xxxy;
+						col = MSDFPrintNum( value, nfuv2, grad, 14, 6, false, 0 ).xxxy;
 					}
 					switch (dpycoord.y & 3) { case 0: col.y = 0; col.z = 0; break; case 1: col.x = 0; col.z = 0; break; case 2: col.x = 0; col.y = 0; break; };
 					//col.y = nfuv2.y/6.0-1.0;
@@ -127,20 +131,19 @@ Shader "Unlit/TextureMSDFPrint"
 				}
 				else
 				{
-					nfuv2 = fielduv * float2( 1.0, 2.0 );
-
 					if( _HexDisplay > 0.5 )
 					{
-						col += MSDFPrintHex( asuint(value), fielduv, 11, 3 ).xxxy;
+						col = MSDFPrintHex( asuint(value), nfuv2, grad, 11, 3 ).xxxy;
 					}
 					else
 					{
-						col += MSDFPrintNum( value, fielduv, 11, 5, false, 0 ).xxxy;
+						col = MSDFPrintNum( value, nfuv2, grad, 11, 5, false, 0 ).xxxy;
 					}
 					switch (dpycoord.y & 3) { case 0: col.y = 0; col.z = 0; break; case 1: col.x = 0; col.z = 0; break; case 2: col.x = 0; col.y = 0; break; };
 				}
 
-				col.a = lerp( 0, col.a, saturate(2-4 * saturate( length( fwidth( nfuv2 ) ) ) ) );
+//				col.a = lerp( 0, col.a, saturate(2-4 * saturate( length( fwidth( nfuv2 ) ) ) ) );
+//				col.a = 1.0;
 
 				// apply fog
 				UNITY_APPLY_FOG(i.fogCoord, col);
