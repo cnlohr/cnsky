@@ -5,6 +5,8 @@ Shader "SatelliteStuff/SatelliteDisplay"
 	Properties
 	{
 		_TailThick ("Tail Thickness", float) = 0.01
+		_TailAlpha("Tail Alpha", float)=1.0
+		_SatelliteAlpha("Satellite Alpha", float)=1.0
 		_ComputedTexture("Compute Satellites", 2D) = "white" {}
 		_ManagementTexture("Compute Management", 2D) = "white" {}
 		_ImportTexture("Compute Download", 2D) = "white" {}
@@ -61,6 +63,8 @@ Shader "SatelliteStuff/SatelliteDisplay"
 
 			float _InverseScale;
 			float _SatSize;
+			float _TailAlpha;
+			float _SatelliteAlpha;
 
 			v2g vert (appdata v, uint id : SV_VertexID, uint iid : SV_InstanceID  )
 			{
@@ -131,7 +135,7 @@ Shader "SatelliteStuff/SatelliteDisplay"
 //						( mul( UNITY_MATRIX_MV, float4( poscenterish.xyz, 1.0 ) ) ).xyz ) );
 				g2f po;
 				UNITY_INITIALIZE_OUTPUT(g2f, po);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(g2f);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(po);
 
 				for( seg = 0; seg < 5; seg++ )
 				{
@@ -276,7 +280,7 @@ Shader "SatelliteStuff/SatelliteDisplay"
 						//col.rgb = lerp( col.rgb, saturate( c.xxx ), saturate( distscale * 2.0 ) );
 					}					
 					
-					col.a *= saturate(2.0-sedge*2.0);
+					col.a *= saturate(2.0-sedge*2.0) * _SatelliteAlpha;
 					//col.a += 0.05;
 					return col;
 				}
@@ -329,7 +333,7 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				fDist += saturate( tDelta*2000);
 				col.a = saturate( 1.0-fDist );
 				// Fade out tail.  Based on nr segs, and where in the front we expect the satellite to be.
-				col.a *= saturate((4.5+tDelta)/4.5); 
+				col.a *= saturate((4.5+tDelta)/4.5) * _TailAlpha; 
 				col.a *= 0.2;  // Overall fade.
 
 				//col.a += 0.01;
