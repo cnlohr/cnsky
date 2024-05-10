@@ -159,7 +159,7 @@ Shader "cnlohr/Earth"
 					phi = atan2( length(i.vPos.xz), i.vPos.y );
 				}
 				
-				lambda -= fFTime/3.1415926535/2 + _EarthMidnightRotation;
+				lambda -= fFTime*3.1415926535*2 + _EarthMidnightRotation;
 				
 				uv.x = (lambda/2.0);
 				uv.y = -phi;
