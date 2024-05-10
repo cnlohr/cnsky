@@ -5,9 +5,11 @@ tle2image : tle2image.c
 
 download :
 	wget -O active_satellites.tle "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle"
+	wget -O full_catalog.tle "https://celestrak.org/NORAD/elements/catalog.txt"
 
 update : tle2image
 	./tle2image active_satellites.tle /var/www/html/cnsky/lastsat.png
+	./tle2image full_catalog.tle /var/www/html/cnsky/fullcatalog.png
 
 validate : validate.c
 	gcc -o $@ $^ -O2 -lm -g -lz
