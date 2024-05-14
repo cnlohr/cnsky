@@ -14,5 +14,23 @@ update : tle2image
 validate : validate.c
 	gcc -o $@ $^ -O2 -lm -g -lz
 
+
+#################################################
+# Stars
+#################################################
+
+stars_texture_maker : star_texture_maker.c
+	gcc -o $@ $^ -O2 -lm -g
+
+constellationship.fab :
+	wget https://raw.githubusercontent.com/Stellarium/stellarium/3989f74f5d1ec0ad233c9b2c635a1d4f13d3302b/skycultures/modern/constellationship.fab -O constellationship.fab
+
+hip2.dat :
+	wget http://cdsarc.u-strasbg.fr/ftp/I/311/hip2.dat.gz -O hip2.dat.gz
+	gunzip hip2.dat.gz
+
+initial : hip2.dat constellationship.fab star_texture_maker
+	./star_texture_maker hip2.dat constellationship.fab /var/www/html/cnsky/hip2.png /var/www/html/cnsky/constallationship.png
+
 clean :
-	rm -rf tle2image
+	rm -rf tle2image hip2.dat constellationship.fab star_texture_maker
