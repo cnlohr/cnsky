@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEditor;
 
-public class CreateMesh : MonoBehaviour
+public class CreateMeshSatellites : MonoBehaviour
 {
 	[MenuItem("Tools/Create Display Meshes")]
 	static void CreateMesh_()

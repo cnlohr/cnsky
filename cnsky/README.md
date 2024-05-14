@@ -18,6 +18,14 @@ For VCC (Creator Companion)
  * Fix hull of beziers.   DONE.
  * Try simplifying the bezier to cubic. DONE
 
+ * Make sure the shader is not double rendering - this code looks dubious:
+```
+				uint operationID = pid;
+				uint thisop = operationID;
+				const uint totalsat = (511*85); // 85 satellites per line, 511 lines.
+				const uint thissatno = (thisop%totalsat); 
+```
+
 ## Comments from first test.
  * Slider for adjusting tail length
  * Make tails start at nothing when loading and continue to expand with length in instance.

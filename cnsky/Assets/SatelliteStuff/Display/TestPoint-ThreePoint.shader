@@ -34,7 +34,7 @@ Shader "Unlit/TestPoint"
 			struct v2g
 			{
 				uint id : ID;
-				UNITY_VERTEX_INPUT_INSTANCE_ID
+				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
 			struct g2f
@@ -44,6 +44,7 @@ Shader "Unlit/TestPoint"
 				float4 bez1 : BEZ1;
 				float4 bez2 : BEZ2;
 				float4 cppos : CPP;
+				UNITY_VERTEX_OUTPUT_STEREO
 				UNITY_FOG_COORDS(1)
 			};
 
