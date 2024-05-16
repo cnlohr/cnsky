@@ -90,6 +90,10 @@ Field   Do we care    Star data near
 		int16_t bvcolor_mag1000; \
 		int16_t vicolor_mag1000; \
 		uint32_t star_hip_id; \
+		float parallax; \
+		float magnitude; \
+		float bv; \
+		float vi; \
 	} flat_star; );
 
 	cnrbtree_intint * hip_to_line = cnrbtree_intint_create();
@@ -106,9 +110,14 @@ Field   Do we care    Star data near
 		flat_star * s = &fs[outstars];
 		memset( s, 0, sizeof( *s ));
 		double tmp;
-		RBA( hip_to_line, hc ) = i;
+		RBA( hip_to_line, hc ) = outstars;
 		s->rascention_bams =  ( ( tmp = atof( fields[4] ) )/6.28318530718)*4294967295;
 		s->declination_bams = ( ( tmp = atof( fields[5] ) )/3.14159265359)*2147483647;
+
+		s->parallax = atof( fields[6] );
+		s->magnitude = atof( fields[19] );
+		s->bv = atof( fields[23] );
+		s->vi = atof( fields[25] );
 		s->parallax_10uas = ( tmp = atof( fields[6] ) ) * 100;
 		s->magnitude_mag1000 = ( tmp = atof( fields[19] ) ) * 1000;
 		s->bvcolor_mag1000 = ( tmp = atof( fields[23] ) ) * 1000;
@@ -136,15 +145,15 @@ Field   Do we care    Star data near
 	{
 		if( id >= outstars ) break;
 		uint32_t * pos = &out_image[x+y*w];
-		printf( "%d %d\n", id, fs[id].declination_bams );
+		//printf( "%d %d\n", id, fs[id].declination_bams );
 		pos[0] = fs[id].rascention_bams;
 		pos[1] = fs[id].declination_bams;
-		pos[2] = *((uint32_t*)&fs[id].parallax_10uas);
-		pos[3] = *((uint32_t*)&fs[id].bvcolor_mag1000); // LSB: BV, MSB: VI
-		pos[4] = 0xAA55AAAA;
-		pos[5] = 0xFF0000FF;
-		pos[6] = fs[id].star_hip_id;
-		pos[7] = 0x00000000;
+		pos[2] = fs[id].star_hip_id;// *((uint32_t*)&fs[id].parallax_10uas);
+		pos[3] = 0;// *((uint32_t*)&fs[id].bvcolor_mag1000); // LSB: BV, MSB: VI
+		pos[4] = *(uint32_t*)&fs[id].parallax;
+		pos[5] = *(uint32_t*)&fs[id].magnitude;
+		pos[6] = *(uint32_t*)&fs[id].bv;
+		pos[7] = *(uint32_t*)&fs[id].vi;
 		id++;
 	}
 	int r = stbi_write_png( argv[3], w, h, 4, out_image, w*4 );
