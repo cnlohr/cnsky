@@ -128,7 +128,7 @@ Field   Do we care    Star data near
 	int h = (outstars * 8 + w-1) / w;
 	uint32_t out_image[w*h];
 	memset( out_image, 0, w*h*4 );
-	// Format: [RGBA]-rasecention  [RGBA]-declination   [RGBA]-parallax-max   [RGBA]-bvcolor-bicolor
+	// Format: [RGBA]-rasecention  [RGBA]-declination   [RGBA]-parallax-max   [RGBA]-bvcolor-vicolor
 	int x, y;
 	int id = 0;
 	for( y = 0; y < h; y++ )
@@ -140,7 +140,7 @@ Field   Do we care    Star data near
 		pos[0] = fs[id].rascention_bams;
 		pos[1] = fs[id].declination_bams;
 		pos[2] = *((uint32_t*)&fs[id].parallax_10uas);
-		pos[3] = *((uint32_t*)&fs[id].bvcolor_mag1000);
+		pos[3] = *((uint32_t*)&fs[id].bvcolor_mag1000); // LSB: BV, MSB: VI
 		pos[4] = 0xAA55AAAA;
 		pos[5] = 0xFF0000FF;
 		pos[6] = fs[id].star_hip_id;
