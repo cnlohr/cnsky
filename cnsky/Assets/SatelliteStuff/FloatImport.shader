@@ -5,6 +5,7 @@ Shader "SatelliteStuff/FloatImport"
 	Properties
 	{
 		_ImportTexture ("ImportTexture", 2D) = "white" {}
+		[ToggleUI] _DoNotSRGBConvert ("Don't SRGB Convert", float) = 0.0
 	}
 	SubShader
 	{
@@ -30,6 +31,7 @@ Shader "SatelliteStuff/FloatImport"
 			#include "UnityCG.cginc"
 			
 			Texture2D<float4> _ImportTexture;
+			float _DoNotSRGBConvert;
 			
 			/*
 			inline float GammaToLinearSpaceExact (float value)
@@ -45,6 +47,7 @@ Shader "SatelliteStuff/FloatImport"
 			
 			float4 ColorCorrect4( float4 value )
 			{
+				if( _DoNotSRGBConvert > 0.5 ) return value;
 				return float4(
 					LinearToGammaSpaceExact( value.x + 0.0001),
 					LinearToGammaSpaceExact( value.y + 0.0001),

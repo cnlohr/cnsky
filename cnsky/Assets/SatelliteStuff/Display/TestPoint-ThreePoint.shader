@@ -78,6 +78,7 @@ Shader "Unlit/TestPoint"
 				
 				g2f po;
 				
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(po);
 				// TODO Roll this into the resolve bezier geo.
 				po.bez0 = UnityObjectToClipPos( bez[0] );
 				po.bez1 = UnityObjectToClipPos( bez[1] );
