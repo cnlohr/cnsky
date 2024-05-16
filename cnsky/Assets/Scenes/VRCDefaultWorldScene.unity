@@ -5783,7 +5783,7 @@ Transform:
   m_GameObject: {fileID: 1353450249}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 0, z: 0.13304001}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: -1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -8287,17 +8287,18 @@ MonoBehaviour:
   useAssignedLayers: 0
   DynamicPrefabs: []
   DynamicMaterials:
+  - {fileID: 2100000, guid: 0f19dab2300578b4d87b7662da0e74a4, type: 2}
+  - {fileID: 2100000, guid: 8429b93c9834c424ba855fb4288c90aa, type: 2}
+  - {fileID: 2100000, guid: e1a6e59d5b7a5f041acf4da9a46e2577, type: 2}
+  - {fileID: 2100000, guid: 9afc4b106e391b84e881d5363ac12413, type: 2}
+  - {fileID: 2100000, guid: 8daeef7906b79b84596db75fe1d0896d, type: 2}
   - {fileID: 2100000, guid: 5aeb8f73fca7b8444af85d525415ed2b, type: 2}
   - {fileID: 2100000, guid: 5c715e9c7c1c4e0448f7ecf0f478a217, type: 2}
   - {fileID: 2100000, guid: 072cc739f70ee504098bc36ae291c507, type: 2}
   - {fileID: 2100000, guid: d95fc552403df0e418cef3aa0a311fd0, type: 2}
   - {fileID: 2100000, guid: 3fcfa401d817cba47a56de24fc1cad54, type: 2}
   - {fileID: 2100000, guid: 9374bde289fa0ca478ece319ca559e7e, type: 2}
-  - {fileID: 2100000, guid: 9afc4b106e391b84e881d5363ac12413, type: 2}
   - {fileID: 2100000, guid: 32e8ab006d01bd548adecd20efa8619d, type: 2}
-  - {fileID: 2100000, guid: e1a6e59d5b7a5f041acf4da9a46e2577, type: 2}
-  - {fileID: 2100000, guid: 8429b93c9834c424ba855fb4288c90aa, type: 2}
-  - {fileID: 2100000, guid: 0f19dab2300578b4d87b7662da0e74a4, type: 2}
   - {fileID: 2100000, guid: 49a5420801b4cbd4eb6fb89d1d10dad8, type: 2}
   - {fileID: 2100000, guid: ec87e299c3dfd1f4f9c495932ac759e9, type: 2}
   - {fileID: 2100000, guid: 60c2590da17629449916045f86443352, type: 2}
@@ -8307,7 +8308,6 @@ MonoBehaviour:
   - {fileID: 2100000, guid: b6da5469a6b434847baba8350644713a, type: 2}
   - {fileID: 2100000, guid: 781436ec053c7bd4ca0ada51d7d9d217, type: 2}
   - {fileID: 2100000, guid: 2ccf53311e5dbed45b1c6f630dee1be8, type: 2}
-  - {fileID: 2100000, guid: 8daeef7906b79b84596db75fe1d0896d, type: 2}
   - {fileID: 2100000, guid: c6c332e4aa5e68c43997e0b224b0963c, type: 2}
   - {fileID: 2100000, guid: 7503532fcb44a5a4599b40d604115608, type: 2}
   - {fileID: 2100000, guid: a9d016f733dc4d948900a58d65a2d715, type: 2}

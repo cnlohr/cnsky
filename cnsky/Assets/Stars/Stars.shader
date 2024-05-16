@@ -183,7 +183,7 @@ Shader "Unlit/Stars"
 			{
 				float initialmag = (15.-i.starinfo.y)/16;
 				float mag = exp(-i.starinfo.y);
-				float bright = mag*200.+.2;
+				float bright = mag*200.+.15;
 				
 				fixed4 col = float4( i.starcolor, 1.0 );
 				
