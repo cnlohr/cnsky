@@ -13,6 +13,13 @@ public class CreateMeshStars : MonoBehaviour
 		mesh.bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(10000, 10000, 10000));
 		mesh.SetIndices(new int[vertices], MeshTopology.Points, 0, false, 0);
 		AssetDatabase.CreateAsset(mesh, "Assets/Stars/starpoints.asset");
+		
+		vertices = 1024; // Generate line points
+		mesh = new Mesh();
+		mesh.vertices = new Vector3[1];
+		mesh.bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(10000, 10000, 10000));
+		mesh.SetIndices(new int[vertices], MeshTopology.Points, 0, false, 0);
+		AssetDatabase.CreateAsset(mesh, "Assets/Stars/constellationpoints.asset");
 	}
 }
 #endif
