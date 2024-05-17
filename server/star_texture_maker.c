@@ -118,10 +118,25 @@ Field   Do we care    Star data near
 		s->magnitude = atof( fields[19] );
 		s->bv = atof( fields[23] );
 		s->vi = atof( fields[25] );
-		s->parallax_10uas = ( tmp = atof( fields[6] ) ) * 100;
-		s->magnitude_mag1000 = ( tmp = atof( fields[19] ) ) * 1000;
-		s->bvcolor_mag1000 = ( tmp = atof( fields[23] ) ) * 1000;
-		s->vicolor_mag1000 = ( tmp = atof( fields[25] ) ) * 1000;
+
+		float para100uas = atof( fields[6] ) * 100;
+		float mag1000 = atof( fields[19] ) * 1000;
+		float bv1000 = atof( fields[23] ) * 1000;
+		float vi1000 = atof( fields[25] ) * 1000;
+		if( para100uas < 0 ) para100uas = 0;
+		if( mag1000 < 0 ) mag1000 = 0;
+		if( bv1000 < 0 ) bv1000 = 0;
+		if( vi1000 < 0 ) vi1000 = 0;
+
+		if( para100uas > 65535 ) para100uas = 65535;
+		if( mag1000 > 65535 ) mag1000 = 65535;
+		if( bv1000 > 65535 ) bv1000 = 65535;
+		if( vi1000 > 65535 ) vi1000 = 65535;
+
+		s->parallax_10uas = para100uas;
+		s->magnitude_mag1000 = mag1000;
+		s->bvcolor_mag1000 = bv1000;
+		s->vicolor_mag1000 = vi1000;
 		s->star_hip_id = hc;
 		fprintf( flatstarscsv, "%s,%f,%f,%s,%s,%s,%s\n", fields[0], atof( fields[4] )/6.28318530718*360.0, atof( fields[5] )/6.28318530718*360.0, fields[6], fields[19], fields[23], fields[25] );
 		fwrite( s, sizeof(*s), 1, flatstars );
@@ -148,12 +163,12 @@ Field   Do we care    Star data near
 		//printf( "%d %d\n", id, fs[id].declination_bams );
 		pos[0] = fs[id].rascention_bams;
 		pos[1] = fs[id].declination_bams;
-		pos[2] = fs[id].star_hip_id;// *((uint32_t*)&fs[id].parallax_10uas);
-		pos[3] = 0;// *((uint32_t*)&fs[id].bvcolor_mag1000); // LSB: BV, MSB: VI
-		pos[4] = *(uint32_t*)&fs[id].parallax;
-		pos[5] = *(uint32_t*)&fs[id].magnitude;
-		pos[6] = *(uint32_t*)&fs[id].bv;
-		pos[7] = *(uint32_t*)&fs[id].vi;
+		pos[2] = *((uint32_t*)&fs[id].parallax_10uas);
+		pos[3] = *((uint32_t*)&fs[id].bvcolor_mag1000); // LSB: BV, MSB: VI
+		pos[4] = fs[id].star_hip_id;// *(uint32_t*)&fs[id].parallax;  // Replace with star_hip_id
+		pos[5] = 0;// *(uint32_t*)&fs[id].magnitude;
+		pos[6] = 0;// *(uint32_t*)&fs[id].bv;
+		pos[7] = 0;// *(uint32_t*)&fs[id].vi;
 		id++;
 	}
 	int r = stbi_write_png( argv[3], w, h, 4, out_image, w*4 );
