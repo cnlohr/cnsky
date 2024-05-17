@@ -2,6 +2,7 @@
 float ComputeGeometryWidthIncrease( float z );
 float _TailThick;
 float _BaseSizeUpscale;
+float _TailThickHullOffset;
 
 float ComputeGeometryWidthIncrease( float dist )
 {
@@ -10,7 +11,7 @@ float ComputeGeometryWidthIncrease( float dist )
 	return 
 		localExtra * _TailThick * (abs(dist)+1*_BaseSizeUpscale) / _ScreenParams.x * 100.0
 		+
-		distantExtra * abs(dist)  / _ScreenParams.x; // For distant objects, draw an extra pixel around them, so they don't flutter.
+		distantExtra * abs(dist)  / _ScreenParams.x * (1.0+_TailThickHullOffset); // For distant objects, draw an extra pixel around them, so they don't flutter.
 }
 
 float cross2d( float2 A, float2 B )

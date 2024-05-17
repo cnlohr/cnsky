@@ -13,6 +13,7 @@ Shader "SatelliteStuff/SatelliteDisplay"
 		_InverseScale("InverseScale", float) = 6000
 		_SatSize("Satellite Size", float)=0.01
 		_BaseSizeUpscale("Base Size Upscale", float)=1.0
+		_TailThickHullOffset("Tail Thickness Hull Offset", float)=0.3
 	}
 	SubShader
 	{
@@ -87,7 +88,7 @@ Shader "SatelliteStuff/SatelliteDisplay"
 			{
 				float fInvScale = 
 					_TailThick * (abs(dist) +.5*_BaseSizeUpscale) / _ScreenParams.x * 100.0
-					+ 0.8 * abs(dist)  / _ScreenParams.x; // Increase size of distant ones.
+					+ 1.4 * abs(dist)  / _ScreenParams.x; // Increase size of distant ones.
 				return 1./fInvScale;
 			}
 

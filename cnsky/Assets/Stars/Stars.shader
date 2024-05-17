@@ -5,8 +5,8 @@ Shader "Unlit/Stars"
 		_Hip2 ("HIPPARCOS Data", 2D) = "" {}
 		_ManagementTexture ("Management Texture", 2D) = "" {}
 		_InverseScale("InverseScale", float) = 6000
-		_StarSizeBase("Satellite Size Base", float)=0.025
-		_StarSizeRel("Satellite Size Rel", float)=0.025
+		_StarSizeBase("Star Size Base", float)=0.025
+		_StarSizeRel("Star Size Rel", float)=0.025
 		_BaseSizeUpscale("Base Size Upscale", float)=1.0
     }
     SubShader
@@ -94,6 +94,7 @@ Shader "Unlit/Stars"
 				uint2 thisStarImport = uint2( (thisstar % 256), (thisstar / 256) );
 				
 				float4 StarBlockA = _Hip2.Load( int3( thisStarImport.x*2+0, _Hip2_TexelSize.w - 1 - thisStarImport.y, 0 ) );
+				// block B is currently unused.
 				float4 StarBlockB = _Hip2.Load( int3( thisStarImport.x*2+1, _Hip2_TexelSize.w - 1 - thisStarImport.y, 0 ) );
 				float4 InfoBlock = _ManagementTexture.Load( int3( 0, _ManagementTexture_TexelSize.w - 1, 0 ) );
 				float4 ManagementBlock2 = _ManagementTexture.Load( int3( 0, _ManagementTexture_TexelSize.w - 2, 0 ) );
@@ -101,6 +102,7 @@ Shader "Unlit/Stars"
 				float jdFrac = InfoBlock.z;
 				
 				int4 StarBlockIntA = asuint( StarBlockA );
+				uint4 StarBlockUIntA = asuint( StarBlockA );
 				
 				float2 srascention, sdeclination;
 				sincos( ((uint(StarBlockIntA.r))/4294967296.0) * 6.2831852, srascention.x, srascention.y );
@@ -119,6 +121,13 @@ Shader "Unlit/Stars"
 				// MAG
 				// BV
 				// VI
+
+				StarBlockB = float4( 
+					StarBlockUIntA.b & 0xffff,
+					StarBlockUIntA.b >> 16,
+					StarBlockUIntA.a & 0xffff,
+					StarBlockUIntA.a >> 16 ) / float4( 100, 1000, 1000, 1000 );
+
 				float4 starinfo = po.starinfo = StarBlockB;
 				
 				float4 rsize = float4( _ScreenParams.y/_ScreenParams.x, 1, 0, 1. ) * _StarSizeRel + _StarSizeBase;

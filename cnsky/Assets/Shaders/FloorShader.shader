@@ -28,6 +28,8 @@ Shader "Custom/FloorShader"
 		_AxisDashScale ("Axis Dash Scale", Float) = 1.33
 		_CenterColor ("Axis Center Color", Color) = (1,1,1,1)
 		_Fade ("Fade", Float) = 0.0
+		
+		_TANoiseTex( "TANoise", 2D) = "" {}
 	}
 	SubShader
 	{
@@ -42,6 +44,7 @@ Shader "Custom/FloorShader"
 		// Use shader model 3.0 target, to get nicer looking lighting
 		#pragma target 3.0
 
+		#include "Assets/cnlohr/tanoise/tanoise.cginc"
 		#include "Assets/cnlohr/hashwithoutsine/hashwithoutsine.cginc"
 		
 		sampler2D _MainTex;
@@ -81,6 +84,7 @@ Shader "Custom/FloorShader"
 
 		void surf (Input IN, inout SurfaceOutputStandard o)
 		{
+			float calpha = 1.0;
 		#if defined(USING_STEREO_MATRICES)
 			float3 PlayerCenterCamera = ( unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1] ) / 2;
 		#else
@@ -89,9 +93,13 @@ Shader "Custom/FloorShader"
 			float4 col = 0.0;
 			
 			float bright = 1;
-			float cutoff = ( .1 + chash13( float3( IN.worldPos.xy * 40, _Time.x*10 ) ) )* ( (  length(IN.worldPos-PlayerCenterCamera) - _Fade)); 
+			//float cutoff = ( .1 + chash13( float3( IN.worldPos.xy * 40, _Time.x*10 ) ) )* ( (  length(IN.worldPos-PlayerCenterCamera) - _Fade)); 
+			
+			float cutoff = ( tanoise4_1d( float4( IN.worldPos.xyz*10.0, _Time.y ) )+.1 ) * ( (  length(IN.worldPos-PlayerCenterCamera) - _Fade));
 			if( _Fade > 0 ) 
-				clip(bright - cutoff);
+				clip(bright - cutoff-.2);
+			
+			
 			
 			float div = max(2.0, round(_MajorGridDiv));
 
@@ -205,13 +213,13 @@ Shader "Custom/FloorShader"
 			// Albedo comes from a texture tinted by color
 			//fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
 			
-			fixed4 c = col * _Color + _ColorFloor;
-			
+			fixed3 c = col * _Color + _ColorFloor;
+						
 			o.Albedo = c.rgb;
 			// Metallic and smoothness come from slider variables
 			o.Metallic = _Metallic;
 			o.Smoothness = _Glossiness;
-			o.Alpha = c.a;
+			o.Alpha = calpha;
 		}
 		ENDCG
 	}

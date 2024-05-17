@@ -14,6 +14,10 @@ For VCC (Creator Companion)
  * Fix earth
  * Back-port csgp4_simple.cginc
  * Remove unneeded parameters from csgp4_init.
+ 
+... later
+
+
  * Get rid of "optimization" flag on compute.
  * Fix hull of beziers.   DONE.
  * Try simplifying the bezier to cubic. DONE
@@ -25,6 +29,12 @@ For VCC (Creator Companion)
 				const uint totalsat = (511*85); // 85 satellites per line, 511 lines.
 				const uint thissatno = (thisop%totalsat); 
 ```
+ * Filtering + Color Coding (BEN)
+  * Highlight interesting satellites, i.e. Hubble, ISS, etc.
+ * Pick a satellite and show long-term orbit.
+ * Interaction System?
+
+
 
 ## Comments from first test.
  * Slider for adjusting tail length

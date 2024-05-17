@@ -99,10 +99,13 @@ Material:
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _SatSize: 0.54
+    - _SatelliteAlpha: 1
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
-    - _TailThick: 0.01
+    - _TailAlpha: 1
+    - _TailThick: 0.006
+    - _TailThickHullOffset: 0.3
     - _Thickness: 0.1
     - _ThicknessGeo: 0.27
     - _UVSec: 0
