@@ -35,6 +35,8 @@ For VCC (Creator Companion)
  * Interaction System?
 
 
+ * Handle satellites based on launch time/day.
+
 
 ## Comments from first test.
  * Slider for adjusting tail length

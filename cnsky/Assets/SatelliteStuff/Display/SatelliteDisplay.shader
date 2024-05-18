@@ -58,6 +58,7 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				float4 bez1 : BEZ1;
 				float4 bez2 : BEZ2;
 				float4 cppos : CPP;
+				float4 color : COLOR;
 				float3 reltime : RELTIME;
 				UNITY_FOG_COORDS(1)
 			};
@@ -110,7 +111,7 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				
 				// +1 in y term says to skip first row.
 				uint2 thissatImport = uint2( 6 * (thissatno % 85), ((thissatno / 85) % 511) + 1 );
-				uint2 thissatCompute = uint2( 6 * (thissatno % 85), (((thissatno / 85) % 511) + 1)*2 ); 
+				uint2 thissatCompute = uint2( 8 * (thissatno % 85), (((thissatno / 85) % 511) + 1)*2 ); 
 
 				float4 InfoBlock = _ManagementTexture.Load( int3( 0, _ManagementTexture_TexelSize.w - 1, 0 ) );
 				float4 ManagementBlock2 = _ManagementTexture.Load( int3( 0, _ManagementTexture_TexelSize.w - 2, 0 ) );
@@ -137,6 +138,8 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				g2f po;
 				UNITY_INITIALIZE_OUTPUT(g2f, po);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(po);
+
+				po.color = _ComputedTexture.Load( int3( thissatCompute.x + 6, _ComputedTexture_TexelSize.w - ( thissatCompute.y + 0 ) - 1 + 0, 0 ) );
 
 				for( seg = 0; seg < 5; seg++ )
 				{
@@ -243,12 +246,11 @@ Shader "SatelliteStuff/SatelliteDisplay"
 			
 			fixed4 frag (g2f i) : SV_Target
 			{
-				fixed4 col = float4( 1.0, 1.0, 1.0, 1.0 );
+				fixed4 col = float4( i.color.rgba );
 
 				if( length( i.reltime ) < 0.0001 )
 				{
 					float sedge = length(i.cppos.xy);
-					col = 1.0;
 					float2 uv = i.cppos+0.5;
 					
 					float distscale = .025 / length( fwidth( i.cppos.xy ) );
@@ -277,7 +279,7 @@ Shader "SatelliteStuff/SatelliteDisplay"
 						float4 grad = float4( ddx(uv), ddy(uv) );
 						float2 c = MSDFPrintChar( char, uv, grad );
 						c.x = 1.0 - c.x;
-						col.rgb = c.xxx;
+						col.rgb *= c.xxx;
 						//col.rgb = lerp( col.rgb, saturate( c.xxx ), saturate( distscale * 2.0 ) );
 					}					
 					
