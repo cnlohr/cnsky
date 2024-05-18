@@ -208,19 +208,23 @@ Shader "SatelliteStuff/RTComputeSatellites"
 					// STARLINK
 					if( CheckBlock.r == 0x52415453 && CheckBlock.g == 0x4b4e494c )
 						color = float4(0.78, 0.957, 0.392, 1.0);
+
 					if( CheckBlock.r == 0x42454420 ) // DEB
 						color = float4( 0.902, 0.267, 0.325, 1.0 ); //GREEN
 						//49 53 53 20
+
 					if( CheckBlock.r == 0x29535349 || CheckBlock.r == 0x20535349 || CheckBlock.r == 0x53534928 ) // ISS) ISS_ or (ISS
 						color = float4( 0.153, 0.404, 0.671, 1.0 ); // BLUE
 						
 					// Dragon
-					if( s == 0 && (  CheckBlock.r == 0x47415244 && ( CheckBlock.g & 0xffff ) == 0x4E4F ) ) // 44 52 41 47 4F 4E
+					if( s == 0 && 
+						( 
+						   (  CheckBlock.r == 0x47415244 && ( CheckBlock.g & 0xffff ) == 0x4E4F )  // 44 52 41 47 4F 4E "DRAGON"
+						|| ( CheckBlock.r == 0x474f5250 && CheckBlock.g  == 0x53534552  ) //50 52 4F 47 52 45 53 53 "PROGRESS"
+						) )
+					{
 						color = float4( 0.153, 0.404, 0.671, 1.0 ); // BLUE
-
-					// PROGRESS
-					if( s == 0 && ( CheckBlock.r == 0x474f5250 && CheckBlock.g  == 0x53534552  ) ) //50 52 4F 47 52 45 53 53
-						color = float4( 0.153, 0.404, 0.671, 1.0 ); // BLUE
+					}
 						
 					if( CheckBlock.r == 0x57454E4F && ( CheckBlock.g & 0xffff ) == 0x4245 ) // ONEWEB
 						color = float4( 0.306, 0.804, 0.769, 1.0 ); // CYAN
