@@ -95,7 +95,7 @@ Shader "Custom/FloorShader"
 			float bright = 1;
 			//float cutoff = ( .1 + chash13( float3( IN.worldPos.xy * 40, _Time.x*10 ) ) )* ( (  length(IN.worldPos-PlayerCenterCamera) - _Fade)); 
 			
-			float cutoff = ( tanoise4_1d( float4( IN.worldPos.xyz*10.0, _Time.y ) )+.1 ) * ( (  length(IN.worldPos-PlayerCenterCamera) - _Fade));
+			float cutoff = ( tanoise4_1d( float4( IN.worldPos.xyz*10.0, _Time.x ) )+.1 ) * ( (  length(IN.worldPos-PlayerCenterCamera) - _Fade));
 			if( _Fade > 0 ) 
 				clip(bright - cutoff-.2);
 			
