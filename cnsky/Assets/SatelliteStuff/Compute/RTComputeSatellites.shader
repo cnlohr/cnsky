@@ -196,6 +196,7 @@ Shader "SatelliteStuff/RTComputeSatellites"
 				uint4 InfoBlockStr  = asuint( _ImportTexture.Load( int3( thissatin.x + 4, _ImportTexture_TexelSize.w - thissatin.y - 1, 0 ) ) );
 				uint4 InfoBlockStr2 = asuint( _ImportTexture.Load( int3( thissatin.x + 5, _ImportTexture_TexelSize.w - thissatin.y - 1, 0 ) ) );
 				
+				// String search - shift through, ofsetting the string by 0 to 16 bytes, to string match to known color-coded satellites.
 				int s = 0;
 				for( s = 0; s < 16; s++ )
 				{
