@@ -17,6 +17,7 @@ For VCC (Creator Companion)
  
 ... later
 
+ * https://asteroid.lowell.edu/astorb/ << Asteroids!!
 
  * Get rid of "optimization" flag on compute.
  * Fix hull of beziers.   DONE.
