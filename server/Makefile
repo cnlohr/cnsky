@@ -10,6 +10,8 @@ download :
 update : tle2image
 	./tle2image active_satellites.tle /var/www/html/cnsky/lastsat.png
 	./tle2image full_catalog.tle /var/www/html/cnsky/fullcatalog.png
+	cp /var/www/html/cnsky/fullcatalog.png /var/www/html/cnsky/history/fullcatalog.`date +%Y%m%d-%H%M%S`.png
+
 
 validate : validate.c
 	gcc -o $@ $^ -O2 -lm -g -lz
