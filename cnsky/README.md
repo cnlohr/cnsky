@@ -17,7 +17,8 @@ For VCC (Creator Companion)
  
 ... later
 
-
+ * https://asteroid.lowell.edu/astorb/ << Asteroids!!
+ *  https://www.adsb.lol/docs/feeders-only/beast-mlat-out/ 
  * Get rid of "optimization" flag on compute.
  * Fix hull of beziers.   DONE.
  * Try simplifying the bezier to cubic. DONE

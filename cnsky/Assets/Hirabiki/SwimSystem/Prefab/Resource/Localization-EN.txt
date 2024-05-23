@@ -1,0 +1,23 @@
+SwimSets	Swimming settings
+SwimEnable	Enable swimming
+SwimMute	Mute swimming sounds
+SwimSpeed	Swim speed
+CreditsBtn	For world creators
+AdvSetsBtn	Advanced settings
+CreditsText	SwimSystem is created by Hirabiki\nGet yours for your world on BOOTH
+AdvSwimSets	Advanced swimming settings
+PhysSets	Physics settings
+StickMovSpd	Movement stick speed
+HandsSpeed	(VR) Hands speed
+LegsSpeed	(Full body) Legs speed
+SimpleCtrls	Simple swimming controls (can always hold trigger)
+UseHandsDir	Use hands for direction
+UseLegsSwim	Use legs for swimming (Full body only)
+RealLegsSwim	More accurate legs swimming movement
+WaterDrag	Water drag
+UWGravity	Underwater gravity
+SurfBouyancy	Buoyancy at surface
+UWRealSets	Underwater realism settings
+UWBreathEnable	Enable underwater breath mechanics
+BHTimeLimit	Breath hold limit (sec)
+BHRecovRate	Breath recovery rate

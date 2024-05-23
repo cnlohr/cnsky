@@ -1,0 +1,79 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
+  m_Name: UGUnparentOnStart
+  m_EditorClassIdentifier: 
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 0f2e86980507a524c9f4f21ace424a8a,
+    type: 2}
+  udonAssembly: ".data_start\r\n\r\n    \r\n    __instance_0: %UnityEngineTransform,
+    this\r\n    __value_0: %UnityEngineTransform, this\r\n    __instance_1: %UnityEngineTransform,
+    this\r\n    __var_0: %SystemObject, null\r\n\r\n.data_end\r\n\r\n.code_start\r\n\r\n   
+    .export _start\r\n    \r\n    _start:\r\n    \r\n        PUSH, __instance_1\r\n       
+    PUSH, __instance_0\r\n        EXTERN, \"UnityEngineTransform.__get_transform__UnityEngineTransform\"\r\n       
+    PUSH, __var_0\r\n        PUSH, __value_0\r\n        COPY\r\n        PUSH, __instance_0\r\n       
+    PUSH, __value_0\r\n        EXTERN, \"UnityEngineTransform.__set_parent__UnityEngineTransform__SystemVoid\"\r\n       
+    JUMP, 0xFFFFFFFC\r\n    \r\n\r\n.code_end\r\n"
+  assemblyError: 
+  graphData:
+    name: 
+    description: 
+    nodes:
+    - fullName: UnityEngineTransform.__get_transform__UnityEngineTransform
+      uid: a1ae2cac-563f-4921-bc87-f95c6faeaaf3
+      position: {x: -480, y: -312}
+      nodeUIDs:
+      - 
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+    - fullName: UnityEngineTransform.__set_parent__UnityEngineTransform__SystemVoid
+      uid: 8dfa3e07-c367-437b-9276-7d3ed1482f13
+      position: {x: -152, y: -337}
+      nodeUIDs:
+      - a1ae2cac-563f-4921-bc87-f95c6faeaaf3|0
+      - 4ca1d6dc-ddaa-4d28-bbe0-eed0e17f4bfa|0
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+    - fullName: Const_Null
+      uid: 4ca1d6dc-ddaa-4d28-bbe0-eed0e17f4bfa
+      position: {x: -314, y: -227}
+      nodeUIDs:
+      - 
+      flowUIDs: []
+      nodeValues:
+      - unityObjectValue: {fileID: 0}
+        stringValue: 
+    - fullName: Event_Start
+      uid: b4287b92-ed25-4ede-b3b8-260ee42f8855
+      position: {x: -340, y: -402}
+      nodeUIDs: []
+      flowUIDs:
+      - 8dfa3e07-c367-437b-9276-7d3ed1482f13
+      nodeValues: []
+    updateOrder: 0
+  graphElementData:
+  - type: 5
+    uid: 33afcb84-e86d-426f-b1f7-8d96bd4dcfd9
+    jsonData: '{"visible":true,"layout":{"serializedVersion":"2","x":10.0,"y":130.0,"width":200.0,"height":150.0}}'
+  - type: 4
+    uid: 5308c4f2-f1c4-4fe0-a53a-b0b09f88ac62
+    jsonData: '{"visible":true,"layout":{"serializedVersion":"2","x":10.0,"y":20.0,"width":0.0,"height":0.0}}'
+  viewTransform:
+    position: {x: 617, y: 645}
+    scale: 1
+  version: 1.0.0
+  showAssembly: 0
