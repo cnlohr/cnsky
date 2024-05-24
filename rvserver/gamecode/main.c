@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#include "vrc-rv32ima.h"
+
 // These are going to be bound to memory addresses in the linker script.
 extern volatile uint32_t VRCCON0;
 extern volatile uint32_t VRCCON1;
@@ -49,8 +51,14 @@ static void pprint( intptr_t ptr )
 	}
 }
 
-static void nprint( intptr_t ptr )
+static void nprint( int32_t ptrin )
 {
+	uint32_t ptr = ptrin;
+	if( ptrin < 0 )
+	{
+		ptr = -ptrin;
+		lprint( "-" );
+	}
 	int lg10;
 	int lg10c = 1;
 	for( lg10 = 0; lg10 < 10; lg10++ )
@@ -81,20 +89,35 @@ static inline uint32_t get_cyc_count() {
 	return ccount;
 }
 
+
+void Print3( const char * str, const volatile uint32_t * nums )
+{
+	lprint( str ); lprint( " " ); nprint( nums[0] ); lprint( " " ); nprint( nums[1] ); lprint( " " ); nprint( nums[2] ); lprint( "    \n" );
+}
+
 int main()
 {
 	lprint("\n");
 	lprint("Hello world from RV32 land.\n");
 	lprint("main is at: ");
 	pprint( (intptr_t)main );
-	lprint("\n");
+	lprint( "\nENVCTRL = " );
+	pprint( (intptr_t)&ENVCTRL->marker[0] );
+	lprint( "\nHOSTDAT = " );
+	pprint( (intptr_t)&HOSTDAT.GameFrameLow );
+	lprint( "\n" );
+
+	ENVCTRL->marker[0] = 0xffffffff;
+	ENVCTRL->marker[1] = 0xffffffff;
+	ENVCTRL->marker[2] = 0xffffffff;
+	ENVCTRL->marker[3] = 0xffffffff;
 
 	// Wait a while.
 	uint32_t cyclecount_initial = get_cyc_count();
 	uint32_t timer_initial = TIMERL;
 
 	int i;
-	for( i = 0; i < 10000; i++ )
+	for( i = 0; i < 30000; i++ )
 	{
 		asm volatile( "nop" );
 	}
@@ -116,10 +139,61 @@ int main()
 	// Idle
 	while(1)
 	{
-		int frame = VRCCON1;
-		lprint( "\x1b[10;1H" );
+		int frame = HOSTDAT.GameFrameLow;
+		lprint( "\x1b[9;1H" );
 		nprint( frame );
+		lprint( " " );
+		int np = HOSTDAT.NumPlayers;
+		nprint( np );
+		lprint( " " );
+		nprint( HOSTDAT.IdOfLocalPlayer );
+		lprint( "\n" );
+		lprint( "Clicks: " );
+		nprint( HOSTDAT.LeftClickness );
+		lprint( " " );
+		nprint( HOSTDAT.RightClickness );
+		lprint( "      \n" );
+
+		Print3( "IndexLD", HOSTDAT.IndexLeftDistal );
+		Print3( "IndexRD", HOSTDAT.IndexRightDistal );
+		Print3( "IndexLM", HOSTDAT.IndexLeftIntermediate );
+		Print3( "IndexRM", HOSTDAT.IndexRightIntermediate );
+		Print3( "PointLP", HOSTDAT.Pointer0Pos );
+		Print3( "PointRP", HOSTDAT.Pointer1Pos );
+		Print3( "PointLD", HOSTDAT.Pointer0Dir );
+		Print3( "PointRD", HOSTDAT.Pointer1Dir );
+
+		int n;
+		for( n = 0; n < np; n++ )
+		{
+			nprint( HOSTDAT.Players[n].Flag[0] );
+			lprint( " " );
+			nprint( HOSTDAT.Players[n].Pos[0] );
+			lprint( " " );
+			nprint( HOSTDAT.Players[n].Pos[1] );
+			lprint( " " );
+			nprint( HOSTDAT.Players[n].Pos[2] );
+			lprint( " " );
+			nprint( HOSTDAT.PlayerBones[n].LeftHand[0] );
+			lprint( " " );
+			nprint( HOSTDAT.PlayerBones[n].LeftHand[1] );
+			lprint( " " );
+			nprint( HOSTDAT.PlayerBones[n].LeftHand[2] );
+			lprint( " " );
+			nprint( HOSTDAT.Players[n].Name[0] );
+			lprint( " " );
+			nprint( HOSTDAT.Players[n].Name[1] );
+			lprint( " " );
+			nprint( HOSTDAT.Players[n].Name[2] );
+			lprint( " " );
+			nprint( HOSTDAT.Players[n].Name[3] );
+			lprint( " " );
+			nprint( HOSTDAT.Players[n].Name[4] );
+			lprint( "    \n");
+		}
+
 		VRCCON0 = 0x1;
 	}
 }
+
 

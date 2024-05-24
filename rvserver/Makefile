@@ -21,5 +21,8 @@ image.bin : image.elf
 deploy : image.bin imagegen
 	./imagegen 1024 $(OUTPNG) image.bin
 
+watch :
+	while true; do inotifywait -qr -e modify -e create -e delete -e move gamecode/*.c gamecode/*.S gamecode/*.h; make clean all; done
+
 clean :
 	rm -rf  *.o *~ image.bin imagegen image.lst image.elf # $(OUTPNG)
