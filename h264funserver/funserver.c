@@ -71,8 +71,8 @@ int RTSPControlCallback( struct RTSPConnection * conn, enum RTSPControlMessage e
 	case RTSP_PLAY:
 		if( demo ) demo->frameno = 0;
 		if( demo ) demo->playing = 1;
-		conn->rxtimedelay = 50000; // <50 Hz.
-		usleep(50000);
+		conn->rxtimedelay = 5000; // <50 Hz.
+		usleep(10000);
 		RTSPReconfigureDelay( conn );
 		printf( "PLAY on connection %d\n", conn->slotid );
 		return 0;
@@ -80,7 +80,7 @@ int RTSPControlCallback( struct RTSPConnection * conn, enum RTSPControlMessage e
 	{
 		if( !demo || demo->playing == 0 ) return 0;
 		double dNow = OGGetAbsoluteTime();
-		const int nr_to_send_per_frame = 2;
+		const int nr_to_send_per_frame = 1;
 
 		// emitting
 		for( bk = 0; bk < nr_to_send_per_frame; bk++ )
