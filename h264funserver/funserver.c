@@ -34,7 +34,7 @@ int CommonFunInit( H264Funzie * funzie, H264FunData datacb, void * opaque )
 	const H264ConfigParam params_normal[] = { { H2FUN_TIME_ENABLE, 0 }, { H2FUN_TERMINATOR, 0 } };
 	const H264ConfigParam params_spsonly[] = { { H2FUN_TIME_ENABLE, 0 }, { H2FUN_SPSPPSONLY, 0 }, { H2FUN_TERMINATOR, 0 } };
 	const H264ConfigParam * params = ( opaque == 0 ) ? params_spsonly : params_normal;
-	return H264FunInit( funzie, 512, 512, 1, datacb, opaque, params );
+	return H264FunInit( funzie, 128, 128, 1, datacb, opaque, params );
 }
 
 int RTSPControlCallback( struct RTSPConnection * conn, enum RTSPControlMessage event )
@@ -71,7 +71,7 @@ int RTSPControlCallback( struct RTSPConnection * conn, enum RTSPControlMessage e
 	case RTSP_PLAY:
 		if( demo ) demo->frameno = 0;
 		if( demo ) demo->playing = 1;
-		conn->rxtimedelay = 5000; // <50 Hz.
+		conn->rxtimedelay = 10000; // Will die if 5,000 or less
 		usleep(10000);
 		RTSPReconfigureDelay( conn );
 		printf( "PLAY on connection %d\n", conn->slotid );
@@ -80,7 +80,7 @@ int RTSPControlCallback( struct RTSPConnection * conn, enum RTSPControlMessage e
 	{
 		if( !demo || demo->playing == 0 ) return 0;
 		double dNow = OGGetAbsoluteTime();
-		const int nr_to_send_per_frame = 1;
+		const int nr_to_send_per_frame = 2;
 
 		// emitting
 		for( bk = 0; bk < nr_to_send_per_frame; bk++ )
@@ -90,13 +90,15 @@ int RTSPControlCallback( struct RTSPConnection * conn, enum RTSPControlMessage e
 			int basecolor = rand()%150 + 1;
 			uint8_t * buffer = malloc( 256 );
 
-			if( akey ) basecolor = 254;
-
 			if( bk == nr_to_send_per_frame-1 )
 			{
 				mbx = mby = 0;
-				basecolor = akey?1:254;
 			}
+
+//			if( akey ) basecolor = 254;
+			basecolor = akey?1:254;
+			mbx = bk % 8;
+			mby = bk / 8;
 
 			const uint16_t font[13] = //3 px wide, buffer to 4; 5 px high, buffer to 8.
 			{
@@ -178,6 +180,7 @@ void * InputThread( void * v )
 		int c = getchar();
 		if( c == 10 )
 			akey = !akey;
+		printf( "A KEY: %d", akey );
 	}
 }
 
