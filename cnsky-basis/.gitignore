@@ -96,3 +96,17 @@ crashlytics-build.properties
 bakery_times.log
 
 Packages\manifest.json
+
+# Jank XR stuff
+
+/Assets/XR*
+/Assets/Settings
+/Assets/Settings.meta
+/Assets/AddressableAssetsData
+/Assets/AddressableAssetsData.meta
+/Assets/Basis
+/Assets/Basis.meta
+/Assets/StreamingAssets
+/Assets/StreamingAssets.meta
+/ProjectSettings/*.meta
+
