@@ -10,7 +10,6 @@ Shader "SatelliteStuff/FloatImport"
 	SubShader
 	{
 		Tags { "RenderType"="Opaque" }
-		LOD 100
 
 		Cull Off
 		Lighting Off		
@@ -24,7 +23,7 @@ Shader "SatelliteStuff/FloatImport"
 			#include "UnityCustomRenderTexture.cginc"
 			#pragma vertex CustomRenderTextureVertexShader
 			#pragma fragment frag
-			#pragma target 4.0
+			#pragma target 5.0
 
 			#define glsl_mod(x,y) (((x)-(y)*floor((x)/(y))))
 			
@@ -56,26 +55,26 @@ Shader "SatelliteStuff/FloatImport"
 				return value;
 			}
 			
-			float4 frag (v2f_customrendertexture IN) : SV_Target
+			uint4 frag (v2f_customrendertexture IN) : SV_Target
 			{
 
 				//int2 Coord = float2(IN.localTexcoord.x,1.-IN.localTexcoord.y) * float2( _CustomRenderTextureWidth, _CustomRenderTextureHeight );
 				int2 Coord = IN.localTexcoord.xy * float2( _CustomRenderTextureWidth, _CustomRenderTextureHeight );
 
-				uint4 im0 = ColorCorrect4( _ImportTexture.Load( int3( Coord.x * 4 + 0, Coord.y, 0 ) ) ) * 255.55;
-				uint4 im1 = ColorCorrect4( _ImportTexture.Load( int3( Coord.x * 4 + 1, Coord.y, 0 ) ) ) * 255.55;
-				uint4 im2 = ColorCorrect4( _ImportTexture.Load( int3( Coord.x * 4 + 2, Coord.y, 0 ) ) ) * 255.55;
-				uint4 im3 = ColorCorrect4( _ImportTexture.Load( int3( Coord.x * 4 + 3, Coord.y, 0 ) ) ) * 255.55;
-								
+				uint4 im0 = ColorCorrect4( _ImportTexture[ int2( Coord.x * 4 + 0, Coord.y ) ] ) * 255.55;
+				uint4 im1 = ColorCorrect4( _ImportTexture[ int2( Coord.x * 4 + 1, Coord.y ) ] ) * 255.55;
+				uint4 im2 = ColorCorrect4( _ImportTexture[ int2( Coord.x * 4 + 2, Coord.y ) ] ) * 255.55;
+				uint4 im3 = ColorCorrect4( _ImportTexture[ int2( Coord.x * 4 + 3, Coord.y) ] ) * 255.55;
+
 				uint4 binrep = uint4(
-					(im0.a << 24) + (im0.b << 16) + (im0.g << 8) + (im0.r << 0),
-					(im1.a << 24) + (im1.b << 16) + (im1.g << 8) + (im1.r << 0),
-					(im2.a << 24) + (im2.b << 16) + (im2.g << 8) + (im2.r << 0),
-					(im3.a << 24) + (im3.b << 16) + (im3.g << 8) + (im3.r << 0)
+					(im0.a << (uint)24) + (im0.b << (uint)16) + (im0.g << (uint)8) + (im0.r << (uint)0),
+					(im1.a << (uint)24) + (im1.b << (uint)16) + (im1.g << (uint)8) + (im1.r << (uint)0),
+					(im2.a << (uint)24) + (im2.b << (uint)16) + (im2.g << (uint)8) + (im2.r << (uint)0),
+					(im3.a << (uint)24) + (im3.b << (uint)16) + (im3.g << (uint)8) + (im3.r << (uint)0)
 				);
-				float4 ret = asfloat( binrep );
-				//if( isnan( ret.g ) ) ret.g = 44;
-				return ret;
+				return binrep;
+				//loat4 ret = asfloat( binrep );
+				//return ret;
 			}
 
 			ENDCG

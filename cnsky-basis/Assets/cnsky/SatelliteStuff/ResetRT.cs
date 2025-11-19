@@ -1,18 +1,21 @@
-﻿
-using UdonSharp;
 using UnityEngine;
-using VRC.SDKBase;
-using VRC.Udon;
+using Basis;
 
-public class ResetRT : UdonSharpBehaviour
+[Cilboxable]
+public class ResetRT : BasisNetworkBehaviour
 {
+	public ExampleButtonInteractable btn;
 	public CustomRenderTexture rt;
-	public override void Interact()
+
+	public void ClickDelegate()
 	{
 		rt.Initialize();
 	}
-    void Start()
+
+    public override void Start()
     {
-        
+		base.Start();
+		btn.ButtonDown += ClickDelegate;
     }
 }
+

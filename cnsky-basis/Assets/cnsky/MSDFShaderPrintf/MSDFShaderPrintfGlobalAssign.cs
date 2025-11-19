@@ -1,20 +1,16 @@
 ﻿using UnityEngine;
-using UdonSharp;
-using VRC.SDKBase;
-using VRC.Udon.Common.Interfaces;
-using VRC.Udon;
-using static VRC.SDKBase.VRCShader;
+using Cilbox;
 
-[UdonBehaviourSyncMode(BehaviourSyncMode.Manual)]
-public class MSDFShaderPrintfGlobalAssign : UdonSharpBehaviour
+[Cilboxable]
+public class MSDFShaderPrintfGlobalAssign : MonoBehaviour
 {
-#if UDONSHARP
 	public Texture MSDFAssignTexture;
 
 	void Start()
 	{
-		int id = VRCShader.PropertyToID("_UdonMSDFPrintf"); 
-		VRCShader.SetGlobalTexture( id, MSDFAssignTexture );
+		int id = Shader.PropertyToID("_UdonMSDFPrintf"); 
+		Shader.SetGlobalTexture( id, MSDFAssignTexture );
 	}
-#endif
 }
+
+

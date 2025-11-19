@@ -5,7 +5,7 @@ Shader "cnlohr/Earth"
 	Properties
 	{
 		[Enum(Off, 0, Front, 1, Back, 2)] _Culling ("Culling Mode", Int) = 2
-		_Cutoff("Cutout", Range(0,1)) = .5
+		_RangeFalloff("Cutout", Range(0,1)) = .5
 		_MainTexDay("DayText", 2D) = "white" {}
 		_MainTexNight("NightTex", 2D) = "white" {}
 		[hdr] _Color("Albedo", Color) = (1,1,1,1)
@@ -19,17 +19,43 @@ Shader "cnlohr/Earth"
 	{
 		Tags
 		{
-			"RenderType"="Opaque"
-			"Queue"="Geometry"
+			"RenderType" = "Opaque"
+			"RenderPipeline" = "UniversalPipeline"
 		}
 
 		Cull [_Culling]
 
-		CGINCLUDE
-			#include "UnityCG.cginc"
-			#include "Lighting.cginc"
-			#include "AutoLight.cginc"
-			#include "UnityPBSLighting.cginc"
+		HLSLINCLUDE
+
+		#pragma target 5.0
+		#define UNITY_UNIFIED_SHADER_PRECISION_MODEL
+
+		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+
+#if defined(SHADER_API_MOBILE) // Android/iOS
+    #define R_ADDITIONAL_LIGHTS_FRAG    0
+    #define R_ADDITIONAL_LIGHTS_VTX     2 
+    #define R_FORWARD_PLUS              0
+    #define R_SCREEN_SPACE_GI           0
+#else // PC
+    #define R_ADDITIONAL_LIGHTS_FRAG    1
+    #define R_ADDITIONAL_LIGHTS_VTX     0
+    #define R_FORWARD_PLUS              1 // Was 2
+    #define R_SCREEN_SPACE_GI           0
+#endif
+
+#define R_ADAPTIVE_PROBE_VOLUMES    1   // 1 - multi-compile L1 and L2, 2 - L1 forced on, 3 - l1+l2 forced on
+#define R_LIGHTMAP_VARIANTS         1
+#define R_LIGHT_LAYERS              1
+#define R_USE_RENDERING_LAYERS      0
+#define R_DOTS_INSTANCING           0 
+#define R_DECAL_BUFFER              0
+
+#define _NORMALMAP 
+
+		#include_with_pragmas "/Assets/cnsky/URPDefaultLighting.hlsl"
+
 
 			uniform float4 _Color;
 			uniform float _Metallic;
@@ -38,33 +64,54 @@ Shader "cnlohr/Earth"
 			uniform sampler2D _MainTexDay, _MainTexNight;
 			//uniform sampler2D _MainTexDay, _MainTexNight;
 			uniform float4 _MainTexDay_ST;
-			uniform float _Cutoff, _EarthMidnightRotation;
+			uniform float _RangeFalloff, _EarthMidnightRotation;
 			float4 _ManagementTexture_TexelSize;
 			Texture2D< float4 > _ManagementTexture;
+
+
+			struct appdata
+			{
+				float4 vertex : POSITION;
+				float3 normal : NORMAL;
+				float4 tangent : TANGENT;
+				float2 uv : TEXCOORD0;
+#ifdef LIGHTMAP_ON
+				float2 lightmapUV : TEXCOORD1;
+#endif
+#ifdef DYNAMICLIGHTMAP_ON
+				float2 dynamicLightmapUV : TEXCOORD2;
+#endif
+			};
 
 			struct v2f
 			{
 				float3 objectOrigin : OBP;
 				float3 rayOrigin : RAYORIGIN;
 				float3 rayDir : RAYDIR;
-
-				#ifndef UNITY_PASS_SHADOWCASTER
-				float4 pos : SV_POSITION;
-				float3 normal : NORMAL;
-				float3 wPos : WPOSC;
-				float3 vPos : VPOSC;
-				
-				
-				SHADOW_COORDS(3)
-				#else
-				V2F_SHADOW_CASTER;
-				#endif
+				float vtxFogFactor : FOGFACTOR;
 				float2 uv : TEXCOORD1;
+
+#ifdef LIGHTMAP_ON
+				float2 lightmapUV : LIGHTMAPUV;
+#endif
+#ifdef DYNAMICLIGHTMAP_ON
+				float2 dynamicLightmapUV : DYNAMICLIGHTMAPUV;
+#endif
+#if R_ADDITIONAL_LIGHTS_VTX
+				float3 vtxLightContrib : VERTEXLIGHTCONTRIB;
+#endif
+
+				float4 pos : SV_POSITION;
+				float3 vtxNormalWS : NORMALWS;
+				float4 vtxTangentWS : TANGENT;
+				float3 positionWS : POSITIONWS;
+				float3 vPos : VPOSC;
 			};
 
-			v2f vert(appdata_base v)
+
+			v2f vert(appdata v)
 			{
-				v2f o;
+				v2f o = (v2f)0;
 				o.objectOrigin = mul(unity_ObjectToWorld, float4(0.0,0.0,0.0,1.0) );
 				// Thanks ben dot com.
 				// I saw these ortho shadow substitutions in a few places, but bgolus explains them
@@ -89,29 +136,58 @@ Shader "cnlohr/Earth"
 				o.rayOrigin = mul( float4( o.rayOrigin, 1.0 ), UNITY_MATRIX_IT_MV );
 				o.rayDir = mul( float4( o.rayDir, 0.0 ), UNITY_MATRIX_IT_MV ); //?!?!?! Why broke?
 				
-				
-				#ifdef UNITY_PASS_SHADOWCASTER
-				TRANSFER_SHADOW_CASTER_NOPOS(o, o.pos);
-				#else
-				o.wPos = mul(unity_ObjectToWorld, v.vertex);
+
+				o.positionWS = mul(unity_ObjectToWorld, v.vertex);
 				o.vPos = v.vertex;
-				o.pos = UnityWorldToClipPos(o.wPos);
-				o.normal = UnityObjectToWorldNormal(v.normal);
-				TRANSFER_SHADOW(o);
-				#endif
-				o.uv = TRANSFORM_TEX(v.texcoord.xy, _MainTexDay);
+				o.pos = TransformWorldToHClip(o.positionWS);
+				o.vtxNormalWS = TransformObjectToWorldNormal(v.normal);
+				o.vtxTangentWS = float4( TransformObjectToWorldNormal(v.tangent.xyz), v.tangent.w * GetOddNegativeScale() );
+				o.uv = TRANSFORM_TEX(v.uv, _MainTexDay);
+#ifdef LIGHTMAP_ON
+				OUTPUT_LIGHTMAP_UV( v.lightmapUV, unity_LightmapST, o.lightmapUV );
+#endif
+#ifdef DYNAMICLIGHTMAP_ON
+				o.dynamicLightmapUV = v.dynamicLightmapUV * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
+#endif
+				// Has to be here because we need the pre-clip value.
+				// TODO: Error says we can back out the divide-by-w in the fragment shader so
+				// we could skip an extra varying. (Raspi users will rejoice)
+				o.vtxFogFactor = ComputeFogFactor(o.pos.z);
+
+#if R_ADDITIONAL_LIGHTS_VTX
+				o.vtxLightContrib = VertexLighting( o.positionWS, o.vtxNormalWS );
+#endif
+
 				return o;
 			}
 
-			#ifndef UNITY_PASS_SHADOWCASTER
 			float4 frag(v2f i) : SV_TARGET
 			{
-				float3 normal = normalize(i.normal);
+				float4 positionCS = i.pos;
+				float3 vtxNormalWS = normalize(i.vtxNormalWS);
+				float4 vtxTangentWS = i.vtxTangentWS;
 				float2 uv = i.uv;
+#ifdef LIGHTMAP_ON
+				float2 lightmapUV = i.lightmapUV;
+#endif
+#ifdef DYNAMICLIGHTMAP_ON
+				float2 dynamicLightmapUV = i.dynamicLightmapUV;
+#endif
 				float2 uvbase = uv;
-				float3 wPos = i.wPos.xyz;
+				float3 positionWS = i.positionWS.xyz;
 				float3 vPos = i.vPos.xyz;
-				
+				float vtxFogFactor = i.vtxFogFactor;
+				float4 shadowCoord = TransformWorldToShadowCoord( positionWS );
+				float3 normalTS = float3( 0., 0., 1. );
+#if R_ADDITIONAL_LIGHTS_VTX
+				float3 vtxLightContrib = i.vtxLightContrib;
+#endif
+				float smoothness = _Smoothness;
+				float metallic = _Metallic;
+				float clearCoat = 0.;
+				float clearCoatSmoothness = 0.;
+
+
 				float4 InfoBlock0 = _ManagementTexture.Load( int3( 0, _ManagementTexture_TexelSize.w - 1, 0 ) );
 				float fFTime = InfoBlock0.z;
 				
@@ -150,8 +226,8 @@ Shader "cnlohr/Earth"
 					lambda = atan2( bestHitPosition.z, bestHitPosition.x );
 					phi = atan2( length(bestHitPosition.xz), bestHitPosition.y );
 					vPos = bestHitPosition;
-					wPos = mul( UNITY_MATRIX_M, float4( bestHitPosition, 1.0 ) );
-					normal = normalize( mul( UNITY_MATRIX_M, float4( bestHitNormal, 0.0 ) ) );
+					positionWS = mul( UNITY_MATRIX_M, float4( bestHitPosition, 1.0 ) );
+					vtxNormalWS = normalize( mul( UNITY_MATRIX_M, float4( bestHitNormal, 0.0 ) ) );
 				}
 				else
 				{
@@ -169,95 +245,157 @@ Shader "cnlohr/Earth"
 				//uv = clamp( uv, 0.0, .99 );
 				
 				
-				float dayness = saturate( dot( normal, normalize(_WorldSpaceLightPos0.xyz) )  * 6.0);
+				float dayness = saturate( dot( vtxNormalWS, normalize(_MainLightPosition.xyz) )  * 6.0);
 				float4 texCol = lerp( tex2Dgrad(_MainTexNight, uv, ddx(uvbase), ddy(uvbase) ), tex2Dgrad(_MainTexDay, uv, ddx(uvbase), ddy(uvbase)), dayness ) * _Color;
-				clip(texCol.a - _Cutoff);
-				
+				clip(texCol.a - _RangeFalloff);
 
-				UNITY_LIGHT_ATTENUATION(attenuation, i, wPos);
+				float4 albedo = texCol;
+				float4 emission = 0;
 
-				float3 specularTint;
-				float oneMinusReflectivity;
-				float smoothness = _Smoothness;
-				float3 albedo = DiffuseAndSpecularFromMetallic(
-					texCol, _Metallic, specularTint, oneMinusReflectivity
-				);
-				
-				float3 viewDir = normalize(_WorldSpaceCameraPos - wPos);
-				UnityLight light;
-				light.color = attenuation * _LightColor0.rgb;
-				light.dir = normalize(UnityWorldSpaceLightDir(i.wPos));
-				UnityIndirect indirectLight;
-				#ifdef UNITY_PASS_FORWARDADD
-				indirectLight.diffuse = indirectLight.specular = 0;
-				#else
-				indirectLight.diffuse = max(0, ShadeSH9(float4(normal, 1)));
-				float3 reflectionDir = reflect(-viewDir, normal);
-				Unity_GlossyEnvironmentData envData;
-				envData.roughness = 1 - smoothness;
-				envData.reflUVW = reflectionDir;
-				indirectLight.specular = Unity_GlossyEnvironment(
-					UNITY_PASS_TEXCUBE(unity_SpecCube0), unity_SpecCube0_HDR, envData
-				);
-				#endif
+				//////////////////////////////////////////////////////////////////////////////////
 
-				float3 col = UNITY_BRDF_PBS(
-					albedo, specularTint,
-					oneMinusReflectivity, smoothness,
-					normal, viewDir,
-					light, indirectLight
-				);
+				FragData fd;
+				fd.positionCS = positionCS;
+				fd.positionWS = positionWS;
+				fd.vtxNormalWS = vtxNormalWS;
+				fd.vtxTangentWS = vtxTangentWS;
+				fd.uv = uv;
+#ifdef LIGHTMAP_ON
+				fd.lightmapUV = lightmapUV;
+#endif
+#ifdef DYNAMICLIGHTMAP_ON
+				fd.dynamicLightmapUV = dynamicLightmapUV;
+#endif
+#if R_ADDITIONAL_LIGHTS_VTX
+			    fd.vertexLight = vtxLightContrib;
+#else
+				fd.vertexLight = 0;
+#endif
+				fd.fogFactor = vtxFogFactor;
+    			fd.shadowCoord = shadowCoord;
+				fd.vertexSH = 0; // Basis unsupported (Very slow)
+			    fd.probeOcclusion = 1;
 
-				#ifdef UNITY_PASS_FORWARDADD
-				return float4(col, 0);
-				#else
-				return float4(col, 1);
-				#endif
+
+				InputData id = (InputData)0;
+				InitializeInputData(fd, normalTS, id);
+				InitializeBakedGIData(fd, id);
+
+				SurfaceData sd = (SurfaceData)0;
+				sd.albedo = albedo;
+				sd.metallic = metallic;
+				sd.specular = 1.0;
+				sd.smoothness = smoothness;
+				sd.normalTS = normalTS;
+				sd.emission = emission;
+				sd.occlusion = 1.; // TODO: Do we have an occlusion texture.
+				sd.alpha = albedo.w;
+				sd.clearCoatMask = clearCoat;
+				sd.clearCoatSmoothness = clearCoatSmoothness;
+
+				float4 col = UniversalFragmentPBR( id, sd );
+
+				//col.xyz = vtxTangentWS;
+				return col;
 			}
-			#else
-			float4 frag(v2f i) : SV_Target
+
+			float4 fragDepth(v2f i) : SV_Target
 			{
 				float alpha = _Color.a;
-				if (_Cutoff > 0)
+				if (_RangeFalloff > 0)
 					alpha *= tex2D(_MainTexDay, i.uv).a;
-				clip(alpha - _Cutoff);
-				SHADOW_CASTER_FRAGMENT(i)
+				clip(alpha - _RangeFalloff);
+				//SHADOW_CASTER_FRAGMENT(i)
+				return 1.0;
 			}
-			#endif
-		ENDCG
+
+			float4 fragNormal(v2f i) : SV_Target
+			{
+				float alpha = _Color.a;
+				if (_RangeFalloff > 0)
+					alpha *= tex2D(_MainTexDay, i.uv).a;
+				clip(alpha - _RangeFalloff);
+
+
+				float3 vtxNormalWS = normalize(i.vtxNormalWS);
+				float2 uv = i.uv;
+				float2 uvbase = uv;
+				float3 positionWS = i.positionWS.xyz;
+				float3 vPos = i.vPos.xyz;
+				
+				float4 InfoBlock0 = _ManagementTexture.Load( int3( 0, _ManagementTexture_TexelSize.w - 1, 0 ) );
+				float fFTime = InfoBlock0.z;
+				
+				float lambda;
+				float phi;
+
+				if( _RayTrace )
+				{
+					float3 rayOrigin = i.rayOrigin;
+					float3 rayDir = normalize( vPos - rayOrigin );//(i.rayDir);
+
+					float4 sphere = float4( 0, 0, 0, 0.5 );
+					float bestHitDistance = 1e20;
+					float3 bestHitNormal = 0.0;
+					float3 bestHitPosition = 0.0;
+					// Calculate distance along the ray where the sphere is intersected
+					float3 d = rayOrigin - sphere.xyz;
+					float p1 = -dot(rayDir, d);
+					float p2sqr = p1 * p1 - dot(d, d) + sphere.w * sphere.w;
+					if (p2sqr < 0)
+						discard;
+					float p2 = sqrt(p2sqr);
+					float t = p1 - p2 > 0 ? p1 - p2 : p1 + p2;
+					if (t > 0 && t < bestHitDistance)
+					{
+						bestHitPosition = rayOrigin + t * rayDir;
+						bestHitNormal = normalize(bestHitPosition - sphere.xyz);
+						bestHitDistance = t;
+					}
+					else
+					{
+						discard;
+					}
+
+					lambda = atan2( bestHitPosition.z, bestHitPosition.x );
+					phi = atan2( length(bestHitPosition.xz), bestHitPosition.y );
+					vPos = bestHitPosition;
+					positionWS = mul( UNITY_MATRIX_M, float4( bestHitPosition, 1.0 ) );
+					vtxNormalWS = normalize( mul( UNITY_MATRIX_M, float4( bestHitNormal, 0.0 ) ) );
+				}
+				return float4( vtxNormalWS, 1.0 );
+			}
+
+
+		ENDHLSL
 
 		Pass
 		{
-			Tags { "LightMode" = "ForwardBase" }
-			CGPROGRAM
+			Tags { "LightMode" = "DepthOnly" }
+			HLSLPROGRAM
 			#pragma vertex vert
-			#pragma fragment frag
-			#pragma multi_compile_fwdbase_fullshadows
-			#pragma multi_compile UNITY_PASS_FORWARDBASE
-			ENDCG
+			#pragma fragment fragDepth
+			ENDHLSL
 		}
 
 		Pass
 		{
-			Tags { "LightMode" = "ForwardAdd" }
-			Blend One One
-			CGPROGRAM
+			Tags { "LightMode" = "DepthNormals" }
+			HLSLPROGRAM
 			#pragma vertex vert
-			#pragma fragment frag
-			#pragma multi_compile_fwdadd_fullshadows
-			#pragma multi_compile UNITY_PASS_FORWARDADD
-			ENDCG
+			#pragma fragment fragNormal
+			ENDHLSL
 		}
 
 		Pass
 		{
-			Tags { "LightMode" = "ShadowCaster" }
-			CGPROGRAM
+			Tags { "LightMode" = "UniversalForward" }
+			Blend One Zero
+			HLSLPROGRAM
 			#pragma vertex vert
 			#pragma fragment frag
-			#pragma multi_compile_shadowcaster
-			#pragma multi_compile UNITY_PASS_SHADOWCASTER
-			ENDCG
+			ENDHLSL
 		}
+
 	}
 }

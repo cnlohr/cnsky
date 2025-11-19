@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
-using UdonSharp;
-using VRC.SDKBase;
-using VRC.Udon;
+using Basis;
 
-public class MSDFShaderTextBox : UdonSharpBehaviour
+[Cilboxable]
+public class MSDFShaderTextBox : BasisNetworkBehaviour
 {
 	//public TextField textField;
 	private MaterialPropertyBlock block;
@@ -17,7 +16,7 @@ public class MSDFShaderTextBox : UdonSharpBehaviour
     public string textField;
 
 	// Start is called before the first frame update
-	void Start()
+	public override void Start()
 	{
 		OnValidate();
 	}

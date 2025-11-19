@@ -4,7 +4,7 @@ Shader "Unlit/Constellationship"
     {
 		_Hip2 ("HIPPARCOS Data", 2D) = "" {}
 		_ManagementTexture ("Management Texture", 2D) = "" {}
-		_ConstellationshipTexture ("Management Texture", 2D) = "" {}
+		_ConstellationshipTexture ("_ConstellationshipTexture Texture", 2D) = "" {}
 		
 		_InverseScale("InverseScale", float) = 6000
 		_BaseAlpha("Base Alpha", float ) = 0.1

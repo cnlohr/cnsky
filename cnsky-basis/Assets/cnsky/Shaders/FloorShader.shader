@@ -33,17 +33,23 @@ Shader "Custom/FloorShader"
 	}
 	SubShader
 	{
-		Tags { "RenderType"="Opaque" }
+		Tags { "RenderType" = "Opaque" "RenderPipeline" = "UniversalPipeline" }
 		LOD 200
 
-		CGPROGRAM
+		HLSLINCLUDE
 		// Physically based Standard lighting model, and enable shadows on all light types
-		#pragma shader_feature _ _AXIS_X _AXIS_Z // _AXIS_Y is default
-		#pragma surface surf Standard fullforwardshadows
+		//#pragma shader_feature _ _AXIS_X _AXIS_Z // _AXIS_Y is default
+		//#pragma surface surf Standard fullforwardshadows
 
 		// Use shader model 3.0 target, to get nicer looking lighting
-		#pragma target 3.0
+		//#pragma target 3.0
 
+		#define UNITY_UNIFIED_SHADER_PRECISION_MODEL
+		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+
+		#define fixed4 float4
+		#define fixed2 float2
 		#include "Assets/cnsky/cnlohr/tanoise/tanoise.cginc"
 		#include "Assets/cnsky/cnlohr/hashwithoutsine/hashwithoutsine.cginc"
 		
@@ -52,12 +58,12 @@ Shader "Custom/FloorShader"
 		struct Input
 		{
 			float2 uv_MainTex;
-			float3 worldPos;
+			float3 wPos;
 			float3 screenPos;
 		};
 
 		float _MajorLineWidth, _MinorLineWidth, _AxisLineWidth, _AxisDashScale;
-		half4 _MajorLineColor, _MinorLineColor, _BaseColor, _XAxisColor, _XAxisDashColor, _YAxisColor, _YAxisDashColor, _ZAxisColor, _ZAxisDashColor, _CenterColor;
+		half4 _MajorLineColor, _MinorLineColor, _XAxisColor, _XAxisDashColor, _YAxisColor, _YAxisDashColor, _ZAxisColor, _ZAxisDashColor, _CenterColor;
 
 		half _Glossiness;
 		half _Metallic;
@@ -82,8 +88,43 @@ Shader "Custom/FloorShader"
 			// put more per-instance properties here
 		UNITY_INSTANCING_BUFFER_END(Props)
 
-		void surf (Input IN, inout SurfaceOutputStandard o)
+		struct Attributes
 		{
+			float4 positionOS : POSITION;
+			float2 uv : TEXCOORD0;
+		};
+
+		struct Varyings
+		{
+			float4 positionHCS : SV_POSITION;
+			float2 uv : TEXCOORD0;
+			float3 wPos : WPOSC;
+		};
+
+		TEXTURE2D(_BaseMap);
+		SAMPLER(sampler_BaseMap);
+
+		CBUFFER_START(UnityPerMaterial)
+			half4 _BaseColor;
+			float4 _BaseMap_ST;
+		CBUFFER_END
+
+		Varyings vert(Attributes IN)
+		{
+			Varyings o;
+			o.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
+			o.uv = TRANSFORM_TEX(IN.uv, _BaseMap);
+			o.wPos = mul(unity_ObjectToWorld, IN.positionOS.xyzw);
+			return o;
+		}
+
+
+		half4 frag(Varyings IN) : SV_Target
+		{
+		//	half4 color = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv) * _BaseColor;
+		//	return color;
+		//void surf (Input IN, inout SurfaceOutputStandard o)
+
 			float calpha = 1.0;
 		#if defined(USING_STEREO_MATRICES)
 			float3 PlayerCenterCamera = ( unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1] ) / 2;
@@ -93,9 +134,9 @@ Shader "Custom/FloorShader"
 			float4 col = 0.0;
 			
 			float bright = 1;
-			//float cutoff = ( .1 + chash13( float3( IN.worldPos.xy * 40, _Time.x*10 ) ) )* ( (  length(IN.worldPos-PlayerCenterCamera) - _Fade)); 
+			//float cutoff = ( .1 + chash13( float3( IN.wPos.xy * 40, _Time.x*10 ) ) )* ( (  length(IN.wPos-PlayerCenterCamera) - _Fade)); 
 			
-			float cutoff = ( tanoise4_1d( float4( IN.worldPos.xyz*10.0, _Time.x ) )+.1 ) * ( (  length(IN.worldPos-PlayerCenterCamera) - _Fade));
+			float cutoff = ( tanoise4_1d( float4( IN.wPos.xyz*10.0, _Time.x ) )+.1 ) * ( (  length(IN.wPos-PlayerCenterCamera) - _Fade));
 			if( _Fade > 0 ) 
 				clip(bright - cutoff-.2);
 			
@@ -107,8 +148,8 @@ Shader "Custom/FloorShader"
 			
 			float3 cameraCenteringOffset = floor(_WorldSpaceCameraPos / div) * div;
 			float4 uv;
-			uv.yx = (IN.worldPos - cameraCenteringOffset).AXIS_COMPONENTS;
-			uv.wz = IN.worldPos.AXIS_COMPONENTS;
+			uv.yx = (IN.wPos - cameraCenteringOffset).AXIS_COMPONENTS;
+			uv.wz = IN.wPos.AXIS_COMPONENTS;
 			
 			float4 uvDDXY = float4(ddx(uv.xy), ddy(uv.xy));
 			float2 uvDeriv = float2(length(uvDDXY.xz), length(uvDDXY.yw));
@@ -213,15 +254,45 @@ Shader "Custom/FloorShader"
 			// Albedo comes from a texture tinted by color
 			//fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
 			
-			fixed3 c = col * _Color + _ColorFloor;
+			float3 c = col * _Color + _ColorFloor;
 						
-			o.Albedo = c.rgb;
+			float3 Albedo = c.rgb;
 			// Metallic and smoothness come from slider variables
-			o.Metallic = _Metallic;
-			o.Smoothness = _Glossiness;
-			o.Alpha = calpha;
+			float Metallic = _Metallic;
+			float Smoothness = _Glossiness;
+			float Alpha = calpha;
+			return float4( Albedo, 1.0 );
 		}
-		ENDCG
+		ENDHLSL
+
+
+		Pass
+		{
+			Tags { "LightMode" = "DepthOnly" }
+			HLSLPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			ENDHLSL
+		}
+
+		Pass
+		{
+			Tags { "LightMode" = "DepthNormals" }
+			HLSLPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			ENDHLSL
+		}
+
+		Pass
+		{
+			Tags { "LightMode" = "UniversalForward" }
+			Blend One Zero
+			HLSLPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			ENDHLSL
+		}
 	}
 	FallBack "Diffuse"
 }

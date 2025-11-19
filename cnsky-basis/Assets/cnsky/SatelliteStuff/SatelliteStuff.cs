@@ -1,32 +1,30 @@
-﻿﻿using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
+using Basis;
 
-public class SatelliteStuff : Behaviour
+[Cilboxable]
+public class SatelliteStuff : BasisNetworkBehaviour
 {
-	public VRCUrl stringUrl;	
-	private VRCImageDownloader _imageDownloader;
-	private IUdonEventReceiver _udonEventReceiver;
+	public BasisUrl stringUrl;	
+	private BasisImageDownloader _imageDownloader;
+
+	public ExampleButtonInteractable btn;
 
 	public Texture defaultTexture;
 	private new Renderer renderer;
 	public CustomRenderTexture crt;
 	
 	public bool doInitial;
-	
-	void Start()
+
+	public override void Start()
 	{
+		base.Start();
+
 		// It's important to store the VRCImageDownloader as a variable, to stop it from being garbage collected!
-		_imageDownloader = new VRCImageDownloader();
+		_imageDownloader = new BasisImageDownloader();
 
-		
-		
-		// To receive Image and String loading events, 'this' is casted to the type needed
-		_udonEventReceiver = (IUdonEventReceiver)this;
-		
-
-		var rgbInfo = new TextureInfo();
-		rgbInfo.GenerateMipMaps = false;
+		//var rgbInfo = new TextureInfo();
+		//rgbInfo.GenerateMipMaps = false;
 		
 		// Only one should be initial.
 		if( doInitial )
@@ -34,12 +32,12 @@ public class SatelliteStuff : Behaviour
 			Material m = crt.material;
 			m.SetTexture( "_ImportTexture", defaultTexture );
 			crt.Update();
-			_imageDownloader.DownloadImage( stringUrl, crt.material, _udonEventReceiver, rgbInfo);
+			_imageDownloader.DownloadImage( stringUrl, ImageLoadSuccessDelegate);
 			Debug.Log($"Trying download.");
 		}
 	}
 	
-	public override void OnImageLoadSuccess(IVRCImageDownload result)
+	public void ImageLoadSuccessDelegate(IBasisImageDownload result)
 	{
 		Debug.Log($"Image loaded: {result.SizeInMemoryBytes} bytes.");
 		//Renderer renderer = crt.GetComponent<Renderer>();
@@ -48,19 +46,18 @@ public class SatelliteStuff : Behaviour
 		crt.Update();
 	}
 	
-	public override void Interact()
+	public void ClickDelegate()
 	{
-		var rgbInfo = new TextureInfo();
-		rgbInfo.GenerateMipMaps = false;
-		_imageDownloader.DownloadImage( stringUrl, crt.material, _udonEventReceiver, rgbInfo);
+		_imageDownloader.DownloadImage( stringUrl, ImageLoadSuccessDelegate );
 		Debug.Log($"Trying download.");
 	}
 
-	private void OnDestroy()
+	public override void OnDestroy()
 	{
 		_imageDownloader.Dispose();
 		Material m = crt.material;
 		m.SetTexture( "_ImportTexture", defaultTexture );
+		base.OnDestroy();
 	 }
 	
 	
