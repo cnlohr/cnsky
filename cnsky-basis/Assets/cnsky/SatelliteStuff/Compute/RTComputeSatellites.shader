@@ -20,7 +20,7 @@ Shader "SatelliteStuff/RTComputeSatellites"
 		#pragma target 5.0
 
 		#define CRTTEXTURETYPE uint4
-		#include "/Assets/cnlohr/flexcrt/flexcrt.cginc"
+		#include "/Assets/cnsky/cnlohr/flexcrt/flexcrt.cginc"
 	ENDCG
 
 

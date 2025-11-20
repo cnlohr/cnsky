@@ -4,8 +4,8 @@ using UnityEngine;
 using UnityEngine.UIElements;
 using Basis;
 
-[Cilboxable]
-public class MSDFShaderTextBox : BasisNetworkBehaviour
+//[Cilboxable]
+public class MSDFShaderTextBox : MonoBehaviour
 {
 	//public TextField textField;
 	private MaterialPropertyBlock block;
@@ -16,7 +16,7 @@ public class MSDFShaderTextBox : BasisNetworkBehaviour
     public string textField;
 
 	// Start is called before the first frame update
-	public override void Start()
+	private void Start()
 	{
 		OnValidate();
 	}

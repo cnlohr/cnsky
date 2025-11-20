@@ -20,8 +20,8 @@ Shader "SatelliteStuff/RTComputeManagement"
 		#pragma target 5.0
 
 		#define CRTTEXTURETYPE float4
-		#include "/Assets/cnlohr/flexcrt/flexcrt.cginc"
-		#include "/Assets/SatelliteStuff/csgp4_aux.cginc"
+		#include "/Assets/cnsky/cnlohr/flexcrt/flexcrt.cginc"
+		#include "/Assets/cnsky/SatelliteStuff/csgp4_aux.cginc"
 		
 	ENDCG
 

@@ -1,9 +1,10 @@
 using UnityEngine;
 using UnityEngine.UI;
 using Basis;
+using System;
 
 [Cilboxable]
-public class SatelliteStuff : BasisNetworkBehaviour
+public class SatelliteStuff : MonoBehaviour
 {
 	public BasisUrl stringUrl;	
 	private BasisImageDownloader _imageDownloader;
@@ -16,9 +17,10 @@ public class SatelliteStuff : BasisNetworkBehaviour
 	
 	public bool doInitial;
 
-	public override void Start()
+	void Start()
 	{
-		base.Start();
+		//base.Start();
+		btn.ButtonDown = () => ClickDelegate();
 
 		// It's important to store the VRCImageDownloader as a variable, to stop it from being garbage collected!
 		_imageDownloader = new BasisImageDownloader();
@@ -52,12 +54,14 @@ public class SatelliteStuff : BasisNetworkBehaviour
 		Debug.Log($"Trying download.");
 	}
 
-	public override void OnDestroy()
+	void OnDestroy()
 	{
-		_imageDownloader.Dispose();
+		if( _imageDownloader != null )
+			_imageDownloader.Dispose();
+
 		Material m = crt.material;
 		m.SetTexture( "_ImportTexture", defaultTexture );
-		base.OnDestroy();
+		//base.OnDestroy();
 	 }
 	
 	

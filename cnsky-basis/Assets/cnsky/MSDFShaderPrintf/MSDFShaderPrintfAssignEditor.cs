@@ -5,12 +5,12 @@ using UnityEngine.SceneManagement;
 using Unity.Collections;
 using UnityEditor;
 
-#if  !UDONSHARP
+#if  UNITY_EDITOR
 [InitializeOnLoad]
 #endif
 public static class MSDFShaderPrintfAssignEditor
 {
-#if  !UDONSHARP
+#if  UNITY_EDITOR
 	static MSDFShaderPrintfAssignEditor()
 	{
 		string[] assets = AssetDatabase.FindAssets("msdfprintf"); 

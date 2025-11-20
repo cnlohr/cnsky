@@ -2,7 +2,7 @@ using UnityEngine;
 using Basis;
 
 [Cilboxable]
-public class ResetRT : BasisNetworkBehaviour
+public class ResetRT : MonoBehaviour
 {
 	public ExampleButtonInteractable btn;
 	public CustomRenderTexture rt;
@@ -12,10 +12,11 @@ public class ResetRT : BasisNetworkBehaviour
 		rt.Initialize();
 	}
 
-    public override void Start()
+    private void Start()
     {
-		base.Start();
-		btn.ButtonDown += ClickDelegate;
+		//base.Start();
+		//btn.ButtonDown += ClickDelegate;
+		btn.ButtonDown = () => ClickDelegate();
     }
 }
 
