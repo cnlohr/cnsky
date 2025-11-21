@@ -175,9 +175,9 @@ Shader "SatelliteStuff/SatelliteDisplay"
 					}
 
 					// TODO: Roll this into ResolveBezier
-					po.bez0 = ( mul( UNITY_MATRIX_MV, float4( bez[0], 1.0 ) ) );
-					po.bez1 = ( mul( UNITY_MATRIX_MV, float4( bez[1], 1.0 ) ) );
-					po.bez2 = ( mul( UNITY_MATRIX_MV, float4( bez[2], 1.0 ) ) );
+					po.bez0 = mul ( UNITY_MATRIX_V, ( mul( unity_ObjectToWorld, float4( bez[0], 1.0 ) ) ) );
+					po.bez1 = mul ( UNITY_MATRIX_V, ( mul( unity_ObjectToWorld, float4( bez[1], 1.0 ) ) ) );
+					po.bez2 = mul ( UNITY_MATRIX_V, ( mul( unity_ObjectToWorld, float4( bez[2], 1.0 ) ) ) );
 					
 					bez[0] = po.bez0;
 					bez[1] = po.bez1;
@@ -208,32 +208,32 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				}
 				
 				
-				// // Emit special block at end.
-				// //reltime
-				// float4 csCenter = UnityObjectToClipPos( objectCenter );
-				// float3 csWorldCenter = mul( UNITY_MATRIX_M, float4( objectCenter, 1.0 ) );
+				// Emit special block at end.
+				//reltime
+				float4 csCenter = UnityObjectToClipPos( objectCenter );
+				float3 csWorldCenter = mul( UNITY_MATRIX_M, float4( objectCenter, 1.0 ) );
 
 
-				// po.reltime = 0.0;
-				// po.bez0 = 0;
-				// po.bez1 = 0;
-				// po.bez2 = float4( thissatImport+0.5, 0.0, 0.0 );
-				// float4 rsize = float4( _ScreenParams.y/_ScreenParams.x, 1, 0, 1. ) * ComputeSatelliteSize( length( csWorldCenter - _WorldSpaceCameraPos ) );
-				// float4 vtx_ofs[4] = {
-				// 	{-1, -1, 0, 0},
-				// 	{ 1, -1, 0, 0},
-				// 	{-1,  1, 0, 0},
-				// 	{ 1,  1, 0, 0}
-				// 	};
-				// int i;
-				// for( i = 0; i < 4; i++ )
-				// {
-				// 	po.cppos = vtx_ofs[i];
-				// 	po.vertex = csCenter + vtx_ofs[i] * rsize;
+				po.reltime = 0.0;
+				po.bez0 = 0;
+				po.bez1 = 0;
+				po.bez2 = float4( thissatImport+0.5, 0.0, 0.0 );
+				float4 rsize = float4( _ScreenParams.y/_ScreenParams.x, 1, 0, 1. ) * ComputeSatelliteSize( length( csWorldCenter - _WorldSpaceCameraPos ) );
+				float4 vtx_ofs[4] = {
+					{-1, -1, 0, 0},
+					{ 1, -1, 0, 0},
+					{-1,  1, 0, 0},
+					{ 1,  1, 0, 0}
+					};
+				int i;
+				for( i = 0; i < 4; i++ )
+				{
+					po.cppos = vtx_ofs[i];
+					po.vertex = csCenter + vtx_ofs[i] * rsize;
 
-				// 	UNITY_TRANSFER_FOG(po,po.vertex);
-				// 	triStream.Append(po);
-				// }
+					UNITY_TRANSFER_FOG(po,po.vertex);
+					triStream.Append(po);
+				}
 			}
 			
 			float3 projectIntoPlane( float3 n,  float3 b )
@@ -246,7 +246,6 @@ Shader "SatelliteStuff/SatelliteDisplay"
 			{
 				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( i );
 				fixed4 col = float4( i.color.rgba );
-				return 1;
 				if( length( i.reltime ) < 0.0001 )
 				{
 					float sedge = length(i.cppos.xy);
