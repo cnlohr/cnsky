@@ -140,7 +140,8 @@ Shader "Unlit/Constellationship"
 		
 				g2f po;
 				UNITY_INITIALIZE_OUTPUT(g2f, po);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(po);
+				UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(p[0], po)
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po)
 				
 				// Emit special block at end.
 				float4 csCenter[4];
@@ -178,19 +179,23 @@ Shader "Unlit/Constellationship"
 					
 					po.cppos = float4( vtx_ofs[0].xy, genlen, scale );
 					po.vertex = csFrom + ( csOrtho - csExtend )* rsize * (_ProjectionParams.z*.997);
-					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); UNITY_TRANSFER_FOG(po,po.vertex); triStream.Append(po);
+					//UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po);
+					UNITY_TRANSFER_FOG(po,po.vertex); triStream.Append(po);
 
 					po.cppos = float4( vtx_ofs[1].xy, genlen, scale );
 					po.vertex = csFrom + ( -csOrtho - csExtend ) * rsize * (_ProjectionParams.z*.997);
-					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); UNITY_TRANSFER_FOG(po,po.vertex); triStream.Append(po);
+					//UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po);
+					UNITY_TRANSFER_FOG(po,po.vertex); triStream.Append(po);
 
 					po.cppos = float4( vtx_ofs[2].xy, genlen, scale );
 					po.vertex = csTo + ( csOrtho + csExtend ) * rsize * (_ProjectionParams.z*.997);
-					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); UNITY_TRANSFER_FOG(po,po.vertex); triStream.Append(po);
+					//UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po);
+					UNITY_TRANSFER_FOG(po,po.vertex); triStream.Append(po);
 
 					po.cppos = float4( vtx_ofs[3].xy, genlen, scale );
 					po.vertex = csTo + ( -csOrtho + csExtend ) * rsize * (_ProjectionParams.z*.997);
-					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); UNITY_TRANSFER_FOG(po,po.vertex); triStream.Append(po);
+					//UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po);
+					UNITY_TRANSFER_FOG(po,po.vertex); triStream.Append(po);
 					triStream.RestartStrip();
 
 				}
@@ -204,6 +209,7 @@ Shader "Unlit/Constellationship"
 			
 			fixed4 frag (g2f i) : SV_Target
 			{
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( i );
 				float4 col = 1.0;
 				float4 cppos = i.cppos;
 				float genlen = cppos.z;
