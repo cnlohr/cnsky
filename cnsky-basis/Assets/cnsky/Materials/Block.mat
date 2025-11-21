@@ -77,7 +77,7 @@ Material:
     - _DstBlend: 0
     - _Fade: 4.57
     - _GlossMapScale: 1
-    - _Glossiness: 0.5
+    - _Glossiness: 0.361
     - _GlossyReflections: 1
     - _GridScale: 1
     - _GridSpace: 0
@@ -86,12 +86,13 @@ Material:
     - _LineWidthZ: 0.01
     - _MajorGridDiv: 10
     - _MajorLineWidth: 0.02
-    - _Metallic: 0
+    - _Metallic: 0.438
     - _MinorLineWidth: 0.01
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _ShowOnlyTwo: 0
+    - _Smoothness: 0.709
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
@@ -115,3 +116,4 @@ Material:
     - _ZAxisColor: {r: 0, g: 0, b: 1, a: 1}
     - _ZAxisDashColor: {r: 0, g: 0, b: 0.5, a: 1}
   m_BuildTextureStacks: []
+  m_AllowLocking: 1

@@ -325,10 +325,211 @@ void InitializeBakedGIData(FragData input, inout InputData inputData)
         input.positionCS.xy,
         input.probeOcclusion,
         inputData.shadowMask);
-#else
+#elif defined(DEBUG_DISPLAY)
     inputData.bakedGI = SAMPLE_GI(input.staticLightmapUV, input.vertexSH, inputData.normalWS);
     inputData.shadowMask = SAMPLE_SHADOWMASK(input.staticLightmapUV);
 #endif
 }
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifdef LIGHTMAP_ON
+#define BASIS_APPDATA_LIGHTMAP float2 lightmapUV : TEXCOORD1;
+#else
+#define BASIS_APPDATA_LIGHTMAP
+#endif
+
+#ifdef DYNAMICLIGHTMAP_ON
+#define BASIS_APPDATA_DYNAMICLIGHTMAP float2 dynamicLightmapUV : TEXCOORD2;
+#else
+#define BASIS_APPDATA_DYNAMICLIGHTMAP 
+#endif
+
+#define BASIS_APPDATA_DEFAULT \
+	float4 vertex : POSITION; \
+	float3 normal : NORMAL; \
+	float4 tangent : TANGENT; \
+	float2 uv : TEXCOORD0; \
+	BASIS_APPDATA_DYNAMICLIGHTMAP \
+	BASIS_APPDATA_LIGHTMAP \
+	UNITY_VERTEX_INPUT_INSTANCE_ID
+
+
+
+#ifdef LIGHTMAP_ON
+#define V2F_BASIS_DEFAULT_LIGHTMAP float2 lightmapUV : LIGHTMAPUV;
+#else
+#define V2F_BASIS_DEFAULT_LIGHTMAP
+#endif
+
+#ifdef DYNAMICLIGHTMAP_ON
+#define V2F_BASIS_DEFAULT_DYNAMICLIGHTMAP float2 dynamicLightmapUV : DYNAMICLIGHTMAPUV;
+#else
+#define V2F_BASIS_DEFAULT_DYNAMICLIGHTMAP
+#endif
+
+#if R_ADDITIONAL_LIGHTS_VTX
+#define V2F_BASIS_DEFAULT_VTX_LIGHTS float3 vtxLightContrib : VERTEXLIGHTCONTRIB;
+#else
+#define V2F_BASIS_DEFAULT_VTX_LIGHTS
+#endif
+
+
+
+#define V2F_BASIS_DEFAULT \
+	float4 pos : SV_POSITION; \
+	float2 uv : TEXCOORD1; \
+	V2F_BASIS_DEFAULT_LIGHTMAP \
+	V2F_BASIS_DEFAULT_DYNAMICLIGHTMAP \
+	V2F_BASIS_DEFAULT_VTX_LIGHTS \
+	float3 vtxNormalWS : NORMALWS; \
+	float4 vtxTangentWS : TANGENT; \
+	float3 positionWS : POSITIONWS; \
+	float3 vPos : VPOSC; \
+	UNITY_VERTEX_INPUT_INSTANCE_ID \
+	UNITY_VERTEX_OUTPUT_STEREO \
+	float vtxFogFactor : FOG;
+
+
+#define BASIS_VERT_DEFAULT_SETUP( o, v ) \
+	UNITY_SETUP_INSTANCE_ID(v); \
+	UNITY_TRANSFER_INSTANCE_ID(v, o); \
+	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+
+#ifdef LIGHTMAP_ON
+#define BASIS_VERT_DEFAULT_LIGHTMAP				OUTPUT_LIGHTMAP_UV( v.lightmapUV, unity_LightmapST, o.lightmapUV );
+#else
+#define BASIS_VERT_DEFAULT_LIGHTMAP
+#endif
+
+#ifdef DYNAMICLIGHTMAP_ON
+#define BASIS_VERT_DEFAULT_DYNAMICLIGHTMAP		o.dynamicLightmapUV = v.dynamicLightmapUV * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
+#else
+#define BASIS_VERT_DEFAULT_DYNAMICLIGHTMAP
+#endif
+
+
+#if R_ADDITIONAL_LIGHTS_VTX
+#define BASIS_VERT_DEFAULT_VTX_LIGHTS o.vtxLightContrib = VertexLighting( o.positionWS, o.vtxNormalWS );
+#else
+#define BASIS_VERT_DEFAULT_VTX_LIGHTS
+#endif
+
+// Note: Fog Has to be here because we need the pre-clip value.
+// TODO: Error says we can back out the divide-by-w in the fragment shader so
+// we could skip an extra varying. (Raspi users will rejoice)
+
+#define BASIS_VERT_DEFAULT( o, v ) \
+	o.positionWS = mul(unity_ObjectToWorld, v.vertex); \
+	o.vPos = v.vertex; \
+	o.pos = TransformWorldToHClip(o.positionWS); \
+	o.vtxNormalWS = TransformObjectToWorldNormal(v.normal); \
+	o.vtxTangentWS = float4( TransformObjectToWorldNormal(v.tangent.xyz), v.tangent.w * GetOddNegativeScale() ); \
+	BASIS_VERT_DEFAULT_LIGHTMAP \
+	BASIS_VERT_DEFAULT_DYNAMICLIGHTMAP \
+	o.vtxFogFactor = ComputeFogFactor(o.pos.z); \
+	BASIS_VERT_DEFAULT_VTX_LIGHTS
+
+
+#ifdef LIGHTMAP_ON
+#define BASIS_FRAG_DEFAULT_SETUP_LIGHTMAP float2 lightmapUV = i.lightmapUV;
+#else
+#define BASIS_FRAG_DEFAULT_SETUP_LIGHTMAP
+#endif
+
+#ifdef DYNAMICLIGHTMAP_ON
+#define BASIS_FRAG_DEFAULT_SETUP_DYNAMICLIGHTMAP float2 dynamicLightmapUV = i.dynamicLightmapUV;
+#else
+#define BASIS_FRAG_DEFAULT_SETUP_DYNAMICLIGHTMAP
+#endif
+
+#if R_ADDITIONAL_LIGHTS_VTX
+#define BASIS_FRAG_DEFAULT_SETUP_ADDITIONAL_LIGHTS_VTX float3 vtxLightContrib = i.vtxLightContrib;
+#else
+#define BASIS_FRAG_DEFAULT_SETUP_ADDITIONAL_LIGHTS_VTX
+#endif
+
+#define BASIS_FRAG_DEFAULT_SETUP( i ) \
+	UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i); \
+	float4 positionCS = i.pos; \
+	float3 vtxNormalWS = normalize(i.vtxNormalWS); \
+	float4 vtxTangentWS = i.vtxTangentWS; \
+	float2 uv = i.uv; \
+	BASIS_FRAG_DEFAULT_SETUP_LIGHTMAP \
+	BASIS_FRAG_DEFAULT_SETUP_DYNAMICLIGHTMAP \
+	float2 uvbase = uv; \
+	float3 positionWS = i.positionWS.xyz; \
+	float3 vPos = i.vPos.xyz; \
+	float vtxFogFactor = i.vtxFogFactor; \
+	float4 shadowCoord = TransformWorldToShadowCoord( positionWS ); \
+	float3 normalTS = float3( 0., 0., 1. ); \
+	BASIS_FRAG_DEFAULT_SETUP_ADDITIONAL_LIGHTS_VTX \
+	float smoothness = _Smoothness; \
+	float metallic = _Metallic; \
+	float clearCoat = 0.; \
+	float clearCoatSmoothness = 0.; \
+	float4 albedo = 0.0; \
+	float4 emission = 0.0;
+
+
+
+#ifdef LIGHTMAP_ON
+#define BASIS_FRAG_DEFAULT_END_LIGHTMAP  fd.lightmapUV = lightmapUV;
+#else
+#define BASIS_FRAG_DEFAULT_END_LIGHTMAP
+#endif
+
+#ifdef DYNAMICLIGHTMAP_ON
+#define BASIS_FRAG_DEFAULT_END_DYNAMICLIGHTMAP fd.dynamicLightmapUV = dynamicLightmapUV;
+#else
+#define BASIS_FRAG_DEFAULT_END_DYNAMICLIGHTMAP
+#endif
+
+#if R_ADDITIONAL_LIGHTS_VTX
+#define BASIS_FRAG_DEFAULT_END_ADDITIONAL_LIGHTS  fd.vertexLight = vtxLightContrib;
+#else
+#define BASIS_FRAG_DEFAULT_END_ADDITIONAL_LIGHTS  fd.vertexLight = 0;
+#endif
+
+
+#define BASIS_FRAG_DEFAULT_END() \
+	FragData fd; \
+	fd.positionCS = positionCS; \
+	fd.positionWS = positionWS; \
+	fd.vtxNormalWS = vtxNormalWS; \
+	fd.vtxTangentWS = vtxTangentWS; \
+	fd.uv = uv; \
+	BASIS_FRAG_DEFAULT_END_LIGHTMAP \
+	BASIS_FRAG_DEFAULT_END_DYNAMICLIGHTMAP \
+	BASIS_FRAG_DEFAULT_END_ADDITIONAL_LIGHTS \
+	fd.fogFactor = vtxFogFactor; \
+	fd.shadowCoord = shadowCoord; \
+	fd.vertexSH = 0; /* Basis unsupported (Very slow) */ \
+    fd.probeOcclusion = 1; \
+	InputData id = (InputData)0; \
+	InitializeInputData(fd, normalTS, id); \
+	InitializeBakedGIData(fd, id); \
+	SurfaceData sd = (SurfaceData)0; \
+	sd.albedo = albedo; \
+	sd.metallic = metallic; \
+	sd.specular = 1.0; \
+	sd.smoothness = smoothness; \
+	sd.normalTS = normalTS; \
+	sd.emission = emission; \
+	sd.occlusion = 1.; /* TODO: Do we have an occlusion texture. */ \
+	sd.alpha = albedo.w; \
+	sd.clearCoatMask = clearCoat; \
+	sd.clearCoatSmoothness = clearCoatSmoothness; \
+	float4 colorShaded = UniversalFragmentPBR( id, sd ); \
+
+
+
+/** FYI For unlit shaders...
+  appdata contains 	UNITY_VERTEX_INPUT_INSTANCE_ID
+  v2f contains 	UNITY_VERTEX_OUTPUT_STEREO
+  UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o) in vertex shader
+  UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i) in fragment shader
+*/
 
 

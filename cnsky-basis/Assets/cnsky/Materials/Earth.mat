@@ -82,14 +82,14 @@ Material:
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
-    - _Metallic: 0.674
+    - _Metallic: 0
     - _Mode: 0
     - _NightMode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _RangeFalloff: 0.5
     - _RayTrace: 1
-    - _Smoothness: 0.286
+    - _Smoothness: 0.353
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1

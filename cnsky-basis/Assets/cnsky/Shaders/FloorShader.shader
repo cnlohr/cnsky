@@ -6,7 +6,6 @@ Shader "Custom/FloorShader"
 	{
 		_Color ("Color", Color) = (1,1,1,1)
 		_ColorFloor("Color Floor", Color) = (0,0,0,1)
-		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 		
 		[KeywordEnum(X, Y, Z)] _Axis ("Plane Axis", Float) = 1.0
@@ -28,7 +27,9 @@ Shader "Custom/FloorShader"
 		_AxisDashScale ("Axis Dash Scale", Float) = 1.33
 		_CenterColor ("Axis Center Color", Color) = (1,1,1,1)
 		_Fade ("Fade", Float) = 0.0
-		
+
+		_Smoothness("Smoothness", Range(0, 1)) = 0
+
 		_TANoiseTex( "TANoise", 2D) = "" {}
 	}
 	SubShader
@@ -37,16 +38,37 @@ Shader "Custom/FloorShader"
 		LOD 200
 
 		HLSLINCLUDE
-		// Physically based Standard lighting model, and enable shadows on all light types
-		//#pragma shader_feature _ _AXIS_X _AXIS_Z // _AXIS_Y is default
-		//#pragma surface surf Standard fullforwardshadows
 
-		// Use shader model 3.0 target, to get nicer looking lighting
-		//#pragma target 3.0
+		#pragma target 5.0
 
-		#define UNITY_UNIFIED_SHADER_PRECISION_MODEL
-		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
-		#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+#define UNITY_UNIFIED_SHADER_PRECISION_MODEL
+
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
+
+#if defined(SHADER_API_MOBILE) // Android/iOS
+    #define R_ADDITIONAL_LIGHTS_FRAG    0
+    #define R_ADDITIONAL_LIGHTS_VTX     2 
+    #define R_FORWARD_PLUS              0
+    #define R_SCREEN_SPACE_GI           0
+#else // PC
+    #define R_ADDITIONAL_LIGHTS_FRAG    1
+    #define R_ADDITIONAL_LIGHTS_VTX     0
+    #define R_FORWARD_PLUS              1 // Was 2
+    #define R_SCREEN_SPACE_GI           0
+#endif
+
+#define R_ADAPTIVE_PROBE_VOLUMES    1   // 1 - multi-compile L1 and L2, 2 - L1 forced on, 3 - l1+l2 forced on
+#define R_LIGHTMAP_VARIANTS         1
+#define R_LIGHT_LAYERS              1
+#define R_USE_RENDERING_LAYERS      0
+#define R_DOTS_INSTANCING           0 
+#define R_DECAL_BUFFER              0
+
+#define _NORMALMAP 
+
+#include_with_pragmas "/Assets/cnsky/URPDefaultLighting.hlsl"
+
 
 		#define fixed4 float4
 		#define fixed2 float2
@@ -55,18 +77,10 @@ Shader "Custom/FloorShader"
 		
 		sampler2D _MainTex;
 
-		struct Input
-		{
-			float2 uv_MainTex;
-			float3 wPos;
-			float3 screenPos;
-		};
-
 		float _MajorLineWidth, _MinorLineWidth, _AxisLineWidth, _AxisDashScale;
 		half4 _MajorLineColor, _MinorLineColor, _XAxisColor, _XAxisDashColor, _YAxisColor, _YAxisDashColor, _ZAxisColor, _ZAxisDashColor, _CenterColor;
 
-		half _Glossiness;
-		half _Metallic;
+		half _Metallic, _Smoothness;
 		fixed4 _Color, _ColorFloor;
 		float _Fade;
 
@@ -90,15 +104,13 @@ Shader "Custom/FloorShader"
 
 		struct Attributes
 		{
-			float4 positionOS : POSITION;
-			float2 uv : TEXCOORD0;
+			BASIS_APPDATA_DEFAULT
 		};
 
 		struct Varyings
 		{
 			float4 positionHCS : SV_POSITION;
-			float2 uv : TEXCOORD0;
-			float3 wPos : WPOSC;
+			V2F_BASIS_DEFAULT
 		};
 
 		TEXTURE2D(_BaseMap);
@@ -111,16 +123,21 @@ Shader "Custom/FloorShader"
 
 		Varyings vert(Attributes IN)
 		{
-			Varyings o;
-			o.positionHCS = TransformObjectToHClip(IN.positionOS.xyz);
+			Varyings o = (Varyings)0;
+			BASIS_VERT_DEFAULT_SETUP( o, v );
+
+			o.positionHCS = TransformObjectToHClip(IN.vertex.xyz);
 			o.uv = TRANSFORM_TEX(IN.uv, _BaseMap);
-			o.wPos = mul(unity_ObjectToWorld, IN.positionOS.xyzw);
+
+			BASIS_VERT_DEFAULT( o, IN )
 			return o;
 		}
 
 
 		half4 frag(Varyings IN) : SV_Target
 		{
+			BASIS_FRAG_DEFAULT_SETUP( IN )
+
 		//	half4 color = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, IN.uv) * _BaseColor;
 		//	return color;
 		//void surf (Input IN, inout SurfaceOutputStandard o)
@@ -136,7 +153,7 @@ Shader "Custom/FloorShader"
 			float bright = 1;
 			//float cutoff = ( .1 + chash13( float3( IN.wPos.xy * 40, _Time.x*10 ) ) )* ( (  length(IN.wPos-PlayerCenterCamera) - _Fade)); 
 			
-			float cutoff = ( tanoise4_1d( float4( IN.wPos.xyz*10.0, _Time.x ) )+.1 ) * ( (  length(IN.wPos-PlayerCenterCamera) - _Fade));
+			float cutoff = ( tanoise4_1d( float4( positionWS.xyz*10.0, _Time.x ) )+.1 ) * ( (  length(positionWS-PlayerCenterCamera) - _Fade));
 			if( _Fade > 0 ) 
 				clip(bright - cutoff-.2);
 			
@@ -147,25 +164,25 @@ Shader "Custom/FloorShader"
 			// trick to reduce visual artifacts when far from the world origin
 			
 			float3 cameraCenteringOffset = floor(_WorldSpaceCameraPos / div) * div;
-			float4 uv;
-			uv.yx = (IN.wPos - cameraCenteringOffset).AXIS_COMPONENTS;
-			uv.wz = IN.wPos.AXIS_COMPONENTS;
+			float4 uvuse;
+			uvuse.yx = (positionWS - cameraCenteringOffset).AXIS_COMPONENTS;
+			uvuse.wz = positionWS.AXIS_COMPONENTS;
 			
-			float4 uvDDXY = float4(ddx(uv.xy), ddy(uv.xy));
+			float4 uvDDXY = float4(ddx(uvuse.xy), ddy(uvuse.xy));
 			float2 uvDeriv = float2(length(uvDDXY.xz), length(uvDDXY.yw));
 
 			float axisLineWidth = max(_MajorLineWidth, _AxisLineWidth);
 			float2 axisDrawWidth = max(axisLineWidth, uvDeriv);
 			float2 axisLineAA = uvDeriv * 1.5;
-			float2 axisLines2 = smoothstep(axisDrawWidth + axisLineAA, axisDrawWidth - axisLineAA, abs(uv.zw * 2.0));
+			float2 axisLines2 = smoothstep(axisDrawWidth + axisLineAA, axisDrawWidth - axisLineAA, abs(uvuse.zw * 2.0));
 			axisLines2 *= saturate(axisLineWidth / axisDrawWidth);
 
 			float2 majorUVDeriv = uvDeriv / div;
 			float majorLineWidth = _MajorLineWidth / div;
 			float2 majorDrawWidth = clamp(majorLineWidth, majorUVDeriv, 0.5);
 			float2 majorLineAA = majorUVDeriv * 1.5;
-			float2 majorGridUV = 1.0 - abs(frac(uv.xy / div) * 2.0 - 1.0);
-			float2 majorAxisOffset = (1.0 - saturate(abs(uv.zw / div * 2.0))) * 2.0;
+			float2 majorGridUV = 1.0 - abs(frac(uvuse.xy / div) * 2.0 - 1.0);
+			float2 majorAxisOffset = (1.0 - saturate(abs(uvuse.zw / div * 2.0))) * 2.0;
 			majorGridUV += majorAxisOffset; // adjust UVs so center axis line is skipped
 			float2 majorGrid2 = smoothstep(majorDrawWidth + majorLineAA, majorDrawWidth - majorLineAA, majorGridUV);
 			majorGrid2 *= saturate(majorLineWidth / majorDrawWidth);
@@ -177,24 +194,24 @@ Shader "Custom/FloorShader"
 			float minorTargetWidth = minorInvertLine ? 1.0 - minorLineWidth : minorLineWidth;
 			float2 minorDrawWidth = clamp(minorTargetWidth, uvDeriv, 0.5);
 			float2 minorLineAA = uvDeriv * 1.5;
-			float2 minorGridUV = abs(frac(uv.xy) * 2.0 - 1.0);
+			float2 minorGridUV = abs(frac(uvuse.xy) * 2.0 - 1.0);
 			minorGridUV = minorInvertLine ? minorGridUV : 1.0 - minorGridUV;
-			float2 minorMajorOffset = (1.0 - saturate((1.0 - abs(frac(uv.zw / div) * 2.0 - 1.0)) * div)) * 2.0;
+			float2 minorMajorOffset = (1.0 - saturate((1.0 - abs(frac(uvuse.zw / div) * 2.0 - 1.0)) * div)) * 2.0;
 			minorGridUV += minorMajorOffset; // adjust UVs so major division lines are skipped
 			float2 minorGrid2 = smoothstep(minorDrawWidth + minorLineAA, minorDrawWidth - minorLineAA, minorGridUV);
 			minorGrid2 *= saturate(minorTargetWidth / minorDrawWidth);
 			minorGrid2 = saturate(minorGrid2 - axisLines2); // hack
 			minorGrid2 = lerp(minorGrid2, minorTargetWidth, saturate(uvDeriv * 2.0 - 1.0));
 			minorGrid2 = minorInvertLine ? 1.0 - minorGrid2 : minorGrid2;
-			minorGrid2 = abs(uv.zw) > 0.5 ? minorGrid2 : 0.0;
+			minorGrid2 = abs(uvuse.zw) > 0.5 ? minorGrid2 : 0.0;
 
 			half minorGrid = lerp(minorGrid2.x, 1.0, minorGrid2.y);
 			half majorGrid = lerp(majorGrid2.x, 1.0, majorGrid2.y);
 
-			float2 axisDashUV = abs(frac((uv.zw + axisLineWidth * 0.5) * _AxisDashScale) * 2.0 - 1.0) - 0.5;
+			float2 axisDashUV = abs(frac((uvuse.zw + axisLineWidth * 0.5) * _AxisDashScale) * 2.0 - 1.0) - 0.5;
 			float2 axisDashDeriv = uvDeriv * _AxisDashScale * 1.5;
 			float2 axisDash = smoothstep(-axisDashDeriv, axisDashDeriv, axisDashUV);
-			axisDash = uv.zw < 0.0 ? axisDash : 1.0;
+			axisDash = uvuse.zw < 0.0 ? axisDash : 1.0;
 
 		#if defined(UNITY_COLORSPACE_GAMMA)
 			half4 xAxisColor = half4(GammaToLinearSpace(_XAxisColor.rgb), _XAxisColor.a);
@@ -255,13 +272,14 @@ Shader "Custom/FloorShader"
 			//fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
 			
 			float3 c = col * _Color + _ColorFloor;
-						
-			float3 Albedo = c.rgb;
-			// Metallic and smoothness come from slider variables
-			float Metallic = _Metallic;
-			float Smoothness = _Glossiness;
-			float Alpha = calpha;
-			return float4( Albedo, 1.0 );
+	
+			albedo = float4( c.rgb, 1.0);
+			emission = 0.;
+			//float4 albedo = texCol;
+
+			BASIS_FRAG_DEFAULT_END()
+
+			return colorShaded;
 		}
 		ENDHLSL
 
