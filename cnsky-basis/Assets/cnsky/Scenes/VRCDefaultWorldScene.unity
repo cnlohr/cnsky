@@ -6978,7 +6978,7 @@ MonoBehaviour:
   AutoHold: 1
   InputKey: 0
   InteractRange: 1
-  isEnabled: 0
+  isEnabled: 1
   PropertyName: _Color
   Color: {r: 1, g: 1, b: 1, a: 1}
   HoverColor: {r: 1, g: 1, b: 1, a: 1}
