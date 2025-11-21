@@ -137,7 +137,8 @@ Shader "SatelliteStuff/SatelliteDisplay"
 //						( mul( UNITY_MATRIX_MV, float4( poscenterish.xyz, 1.0 ) ) ).xyz ) );
 				g2f po;
 				UNITY_INITIALIZE_OUTPUT(g2f, po);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(po);
+				UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(p[0], po)
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po)
 
 				po.color = _ComputedTexture.Load( int3( thissatCompute.x + 6, _ComputedTexture_TexelSize.w - ( thissatCompute.y + 0 ) - 1 + 0, 0 ) );
 
@@ -198,8 +199,6 @@ Shader "SatelliteStuff/SatelliteDisplay"
 						po.vertex = cp;
 						po.cppos = ( float4( viewpos[vtx], 1.0  ));
 
-						UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po);
-
 						UNITY_TRANSFER_FOG(po,po.vertex);
 
 						triStream.Append(po);
@@ -209,33 +208,32 @@ Shader "SatelliteStuff/SatelliteDisplay"
 				}
 				
 				
-				// Emit special block at end.
-				//reltime
-				float4 csCenter = UnityObjectToClipPos( objectCenter );
-				float3 csWorldCenter = mul( UNITY_MATRIX_M, float4( objectCenter, 1.0 ) );
+				// // Emit special block at end.
+				// //reltime
+				// float4 csCenter = UnityObjectToClipPos( objectCenter );
+				// float3 csWorldCenter = mul( UNITY_MATRIX_M, float4( objectCenter, 1.0 ) );
 
 
-				po.reltime = 0.0;
-				po.bez0 = 0;
-				po.bez1 = 0;
-				po.bez2 = float4( thissatImport+0.5, 0.0, 0.0 );
-				float4 rsize = float4( _ScreenParams.y/_ScreenParams.x, 1, 0, 1. ) * ComputeSatelliteSize( length( csWorldCenter - _WorldSpaceCameraPos ) );
-				float4 vtx_ofs[4] = {
-					{-1, -1, 0, 0},
-					{ 1, -1, 0, 0},
-					{-1,  1, 0, 0},
-					{ 1,  1, 0, 0}
-					};
-				int i;
-				for( i = 0; i < 4; i++ )
-				{
-					po.cppos = vtx_ofs[i];
-					po.vertex = csCenter + vtx_ofs[i] * rsize;
+				// po.reltime = 0.0;
+				// po.bez0 = 0;
+				// po.bez1 = 0;
+				// po.bez2 = float4( thissatImport+0.5, 0.0, 0.0 );
+				// float4 rsize = float4( _ScreenParams.y/_ScreenParams.x, 1, 0, 1. ) * ComputeSatelliteSize( length( csWorldCenter - _WorldSpaceCameraPos ) );
+				// float4 vtx_ofs[4] = {
+				// 	{-1, -1, 0, 0},
+				// 	{ 1, -1, 0, 0},
+				// 	{-1,  1, 0, 0},
+				// 	{ 1,  1, 0, 0}
+				// 	};
+				// int i;
+				// for( i = 0; i < 4; i++ )
+				// {
+				// 	po.cppos = vtx_ofs[i];
+				// 	po.vertex = csCenter + vtx_ofs[i] * rsize;
 
-					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po);
-					UNITY_TRANSFER_FOG(po,po.vertex);
-					triStream.Append(po);
-				}
+				// 	UNITY_TRANSFER_FOG(po,po.vertex);
+				// 	triStream.Append(po);
+				// }
 			}
 			
 			float3 projectIntoPlane( float3 n,  float3 b )
@@ -246,8 +244,9 @@ Shader "SatelliteStuff/SatelliteDisplay"
 			
 			fixed4 frag (g2f i) : SV_Target
 			{
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( i );
 				fixed4 col = float4( i.color.rgba );
-
+				return 1;
 				if( length( i.reltime ) < 0.0001 )
 				{
 					float sedge = length(i.cppos.xy);

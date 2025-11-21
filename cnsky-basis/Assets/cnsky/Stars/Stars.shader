@@ -111,7 +111,8 @@ Shader "Unlit/Stars"
 		
 				g2f po;
 				UNITY_INITIALIZE_OUTPUT(g2f, po);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(po);
+				UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(p[0], po)
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po)
 				
 				// Emit special block at end.
 				float4 csCenter = mul( UNITY_MATRIX_VP, float4( objectCenter.xyz, 1.0 ) );
@@ -176,7 +177,7 @@ Shader "Unlit/Stars"
 					po.cppos = vtx_ofs[i];
 					po.vertex = csCenter + vtx_ofs[i] * rsize * (_ProjectionParams.z*.998);
 
-					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po);
+					//UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po);
 					UNITY_TRANSFER_FOG(po,po.vertex);
 					triStream.Append(po);
 				}
@@ -190,6 +191,7 @@ Shader "Unlit/Stars"
 			
 			fixed4 frag (g2f i) : SV_Target
 			{
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( i );
 				float initialmag = (15.-i.starinfo.y)/16;
 				float mag = exp(-i.starinfo.y);
 				float bright = mag*200.+.15;
