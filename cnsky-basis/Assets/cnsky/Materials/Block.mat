@@ -86,13 +86,13 @@ Material:
     - _LineWidthZ: 0.01
     - _MajorGridDiv: 10
     - _MajorLineWidth: 0.02
-    - _Metallic: 0.438
+    - _Metallic: 0.154
     - _MinorLineWidth: 0.01
     - _Mode: 0
     - _OcclusionStrength: 1
     - _Parallax: 0.02
     - _ShowOnlyTwo: 0
-    - _Smoothness: 0.709
+    - _Smoothness: 0.334
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1

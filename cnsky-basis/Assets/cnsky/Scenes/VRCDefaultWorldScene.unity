@@ -547,6 +547,7 @@ MonoBehaviour:
     extras: []
   interactableEnabled: 1
   AutoHold: 1
+  InputKey: 0
   InteractRange: 1
   isEnabled: 1
   PropertyName: _Color
@@ -1905,6 +1906,7 @@ MonoBehaviour:
     extras: []
   interactableEnabled: 1
   AutoHold: 1
+  InputKey: 0
   InteractRange: 1
   isEnabled: 1
   PropertyName: _Color
@@ -3435,7 +3437,7 @@ Transform:
   m_GameObject: {fileID: 909410980}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.541, z: 0}
+  m_LocalPosition: {x: -1.745, y: 1.541, z: 0.516}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3896,7 +3898,7 @@ Transform:
   m_GameObject: {fileID: 989218179}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.801, z: 0}
+  m_LocalPosition: {x: -1.92, y: 1.57, z: -6.38}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -4906,6 +4908,7 @@ MonoBehaviour:
     extras: []
   interactableEnabled: 1
   AutoHold: 1
+  InputKey: 0
   InteractRange: 1
   isEnabled: 1
   PropertyName: _Color
@@ -6117,6 +6120,7 @@ MonoBehaviour:
     extras: []
   interactableEnabled: 1
   AutoHold: 1
+  InputKey: 0
   InteractRange: 1
   isEnabled: 1
   PropertyName: _Color
@@ -6678,6 +6682,7 @@ MonoBehaviour:
     extras: []
   interactableEnabled: 1
   AutoHold: 1
+  InputKey: 0
   InteractRange: 1
   isEnabled: 1
   PropertyName: _Color
@@ -6971,6 +6976,7 @@ MonoBehaviour:
     extras: []
   interactableEnabled: 1
   AutoHold: 1
+  InputKey: 0
   InteractRange: 1
   isEnabled: 0
   PropertyName: _Color
@@ -7222,6 +7228,7 @@ MonoBehaviour:
     extras: []
   interactableEnabled: 1
   AutoHold: 1
+  InputKey: 0
   InteractRange: 1
   isEnabled: 1
   PropertyName: _Color

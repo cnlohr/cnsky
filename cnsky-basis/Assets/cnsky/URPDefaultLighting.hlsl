@@ -398,22 +398,22 @@ void InitializeBakedGIData(FragData input, inout InputData inputData)
 	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
 #ifdef LIGHTMAP_ON
-#define BASIS_VERT_DEFAULT_LIGHTMAP				OUTPUT_LIGHTMAP_UV( v.lightmapUV, unity_LightmapST, o.lightmapUV );
+#define BASIS_VERT_DEFAULT_LIGHTMAP( o, v )				OUTPUT_LIGHTMAP_UV( v.lightmapUV, unity_LightmapST, o.lightmapUV );
 #else
-#define BASIS_VERT_DEFAULT_LIGHTMAP
+#define BASIS_VERT_DEFAULT_LIGHTMAP( o, v )
 #endif
 
 #ifdef DYNAMICLIGHTMAP_ON
-#define BASIS_VERT_DEFAULT_DYNAMICLIGHTMAP		o.dynamicLightmapUV = v.dynamicLightmapUV * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
+#define BASIS_VERT_DEFAULT_DYNAMICLIGHTMAP( o, v )		o.dynamicLightmapUV = v.dynamicLightmapUV * unity_DynamicLightmapST.xy + unity_DynamicLightmapST.zw;
 #else
-#define BASIS_VERT_DEFAULT_DYNAMICLIGHTMAP
+#define BASIS_VERT_DEFAULT_DYNAMICLIGHTMAP( o, v )
 #endif
 
 
 #if R_ADDITIONAL_LIGHTS_VTX
-#define BASIS_VERT_DEFAULT_VTX_LIGHTS o.vtxLightContrib = VertexLighting( o.positionWS, o.vtxNormalWS );
+#define BASIS_VERT_DEFAULT_VTX_LIGHTS( o, v ) o.vtxLightContrib = VertexLighting( o.positionWS, o.vtxNormalWS );
 #else
-#define BASIS_VERT_DEFAULT_VTX_LIGHTS
+#define BASIS_VERT_DEFAULT_VTX_LIGHTS( o, v )
 #endif
 
 // Note: Fog Has to be here because we need the pre-clip value.
@@ -426,28 +426,28 @@ void InitializeBakedGIData(FragData input, inout InputData inputData)
 	o.pos = TransformWorldToHClip(o.positionWS); \
 	o.vtxNormalWS = TransformObjectToWorldNormal(v.normal); \
 	o.vtxTangentWS = float4( TransformObjectToWorldNormal(v.tangent.xyz), v.tangent.w * GetOddNegativeScale() ); \
-	BASIS_VERT_DEFAULT_LIGHTMAP \
-	BASIS_VERT_DEFAULT_DYNAMICLIGHTMAP \
+	BASIS_VERT_DEFAULT_LIGHTMAP( o, v ) \
+	BASIS_VERT_DEFAULT_DYNAMICLIGHTMAP( o, v ) \
 	o.vtxFogFactor = ComputeFogFactor(o.pos.z); \
-	BASIS_VERT_DEFAULT_VTX_LIGHTS
+	BASIS_VERT_DEFAULT_VTX_LIGHTS( o, v )
 
 
 #ifdef LIGHTMAP_ON
-#define BASIS_FRAG_DEFAULT_SETUP_LIGHTMAP float2 lightmapUV = i.lightmapUV;
+#define BASIS_FRAG_DEFAULT_SETUP_LIGHTMAP( i ) float2 lightmapUV = i.lightmapUV;
 #else
-#define BASIS_FRAG_DEFAULT_SETUP_LIGHTMAP
+#define BASIS_FRAG_DEFAULT_SETUP_LIGHTMAP( i )
 #endif
 
 #ifdef DYNAMICLIGHTMAP_ON
-#define BASIS_FRAG_DEFAULT_SETUP_DYNAMICLIGHTMAP float2 dynamicLightmapUV = i.dynamicLightmapUV;
+#define BASIS_FRAG_DEFAULT_SETUP_DYNAMICLIGHTMAP( i ) float2 dynamicLightmapUV = i.dynamicLightmapUV;
 #else
-#define BASIS_FRAG_DEFAULT_SETUP_DYNAMICLIGHTMAP
+#define BASIS_FRAG_DEFAULT_SETUP_DYNAMICLIGHTMAP( i )
 #endif
 
 #if R_ADDITIONAL_LIGHTS_VTX
-#define BASIS_FRAG_DEFAULT_SETUP_ADDITIONAL_LIGHTS_VTX float3 vtxLightContrib = i.vtxLightContrib;
+#define BASIS_FRAG_DEFAULT_SETUP_ADDITIONAL_LIGHTS_VTX( i ) float3 vtxLightContrib = i.vtxLightContrib;
 #else
-#define BASIS_FRAG_DEFAULT_SETUP_ADDITIONAL_LIGHTS_VTX
+#define BASIS_FRAG_DEFAULT_SETUP_ADDITIONAL_LIGHTS_VTX( i )
 #endif
 
 #define BASIS_FRAG_DEFAULT_SETUP( i ) \
@@ -456,15 +456,15 @@ void InitializeBakedGIData(FragData input, inout InputData inputData)
 	float3 vtxNormalWS = normalize(i.vtxNormalWS); \
 	float4 vtxTangentWS = i.vtxTangentWS; \
 	float2 uv = i.uv; \
-	BASIS_FRAG_DEFAULT_SETUP_LIGHTMAP \
-	BASIS_FRAG_DEFAULT_SETUP_DYNAMICLIGHTMAP \
+	BASIS_FRAG_DEFAULT_SETUP_LIGHTMAP( i ) \
+	BASIS_FRAG_DEFAULT_SETUP_DYNAMICLIGHTMAP( i ) \
 	float2 uvbase = uv; \
 	float3 positionWS = i.positionWS.xyz; \
 	float3 vPos = i.vPos.xyz; \
 	float vtxFogFactor = i.vtxFogFactor; \
 	float4 shadowCoord = TransformWorldToShadowCoord( positionWS ); \
 	float3 normalTS = float3( 0., 0., 1. ); \
-	BASIS_FRAG_DEFAULT_SETUP_ADDITIONAL_LIGHTS_VTX \
+	BASIS_FRAG_DEFAULT_SETUP_ADDITIONAL_LIGHTS_VTX( i ) \
 	float smoothness = _Smoothness; \
 	float metallic = _Metallic; \
 	float clearCoat = 0.; \

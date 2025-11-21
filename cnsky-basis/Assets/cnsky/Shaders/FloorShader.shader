@@ -109,7 +109,6 @@ Shader "Custom/FloorShader"
 
 		struct Varyings
 		{
-			float4 positionHCS : SV_POSITION;
 			V2F_BASIS_DEFAULT
 		};
 
@@ -126,7 +125,6 @@ Shader "Custom/FloorShader"
 			Varyings o = (Varyings)0;
 			BASIS_VERT_DEFAULT_SETUP( o, v );
 
-			o.positionHCS = TransformObjectToHClip(IN.vertex.xyz);
 			o.uv = TRANSFORM_TEX(IN.uv, _BaseMap);
 
 			BASIS_VERT_DEFAULT( o, IN )
