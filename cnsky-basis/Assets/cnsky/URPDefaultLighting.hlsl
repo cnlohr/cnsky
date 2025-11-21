@@ -527,6 +527,8 @@ void InitializeBakedGIData(FragData input, inout InputData inputData)
 
 /** FYI For unlit shaders...
   appdata contains 	UNITY_VERTEX_INPUT_INSTANCE_ID
+  UNITY_SETUP_INSTANCE_ID(v) in the vertex shader
+  UNITY_INITIALIZE_OUTPUT(v2f, o) in vertex shader
   v2f contains 	UNITY_VERTEX_OUTPUT_STEREO
   UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o) in vertex shader
   UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i) in fragment shader

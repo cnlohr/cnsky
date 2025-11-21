@@ -137,7 +137,8 @@ Shader "SatelliteStuff/SatelliteDisplay"
 //						( mul( UNITY_MATRIX_MV, float4( poscenterish.xyz, 1.0 ) ) ).xyz ) );
 				g2f po;
 				UNITY_INITIALIZE_OUTPUT(g2f, po);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(po);
+				UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(p[0], po)
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po)
 
 				po.color = _ComputedTexture.Load( int3( thissatCompute.x + 6, _ComputedTexture_TexelSize.w - ( thissatCompute.y + 0 ) - 1 + 0, 0 ) );
 
@@ -174,9 +175,9 @@ Shader "SatelliteStuff/SatelliteDisplay"
 					}
 
 					// TODO: Roll this into ResolveBezier
-					po.bez0 = ( mul( UNITY_MATRIX_MV, float4( bez[0], 1.0 ) ) );
-					po.bez1 = ( mul( UNITY_MATRIX_MV, float4( bez[1], 1.0 ) ) );
-					po.bez2 = ( mul( UNITY_MATRIX_MV, float4( bez[2], 1.0 ) ) );
+					po.bez0 = mul ( UNITY_MATRIX_V, ( mul( unity_ObjectToWorld, float4( bez[0], 1.0 ) ) ) );
+					po.bez1 = mul ( UNITY_MATRIX_V, ( mul( unity_ObjectToWorld, float4( bez[1], 1.0 ) ) ) );
+					po.bez2 = mul ( UNITY_MATRIX_V, ( mul( unity_ObjectToWorld, float4( bez[2], 1.0 ) ) ) );
 					
 					bez[0] = po.bez0;
 					bez[1] = po.bez1;
@@ -197,8 +198,6 @@ Shader "SatelliteStuff/SatelliteDisplay"
 						float4 cp = mul( UNITY_MATRIX_P, float4( viewpos[vtx], 1.0 ) );
 						po.vertex = cp;
 						po.cppos = ( float4( viewpos[vtx], 1.0  ));
-
-						UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po);
 
 						UNITY_TRANSFER_FOG(po,po.vertex);
 
@@ -232,7 +231,6 @@ Shader "SatelliteStuff/SatelliteDisplay"
 					po.cppos = vtx_ofs[i];
 					po.vertex = csCenter + vtx_ofs[i] * rsize;
 
-					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po);
 					UNITY_TRANSFER_FOG(po,po.vertex);
 					triStream.Append(po);
 				}
@@ -246,8 +244,8 @@ Shader "SatelliteStuff/SatelliteDisplay"
 			
 			fixed4 frag (g2f i) : SV_Target
 			{
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( i );
 				fixed4 col = float4( i.color.rgba );
-
 				if( length( i.reltime ) < 0.0001 )
 				{
 					float sedge = length(i.cppos.xy);

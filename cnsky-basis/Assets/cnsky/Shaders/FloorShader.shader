@@ -123,7 +123,7 @@ Shader "Custom/FloorShader"
 		Varyings vert(Attributes IN)
 		{
 			Varyings o = (Varyings)0;
-			BASIS_VERT_DEFAULT_SETUP( o, v );
+			BASIS_VERT_DEFAULT_SETUP( o, IN );
 
 			o.uv = TRANSFORM_TEX(IN.uv, _BaseMap);
 
