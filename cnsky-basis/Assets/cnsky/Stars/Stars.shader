@@ -103,7 +103,7 @@ Shader "Unlit/Stars"
 				
 				int4 StarBlockIntA = asuint( StarBlockA );
 				uint4 StarBlockUIntA = asuint( StarBlockA );
-				
+				if( length( StarBlockIntA.rg ) == 0 ) return;
 				float2 srascention, sdeclination;
 				sincos( ((uint(StarBlockIntA.r))/4294967296.0) * 6.2831852, srascention.x, srascention.y );
 				sincos( StarBlockIntA.g/2147483647.0 * 3.14159, sdeclination.x, sdeclination.y );
