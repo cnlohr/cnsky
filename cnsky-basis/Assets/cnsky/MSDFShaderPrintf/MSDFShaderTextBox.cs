@@ -53,7 +53,6 @@ public class MSDFShaderTextBox : MonoBehaviour
 		float [] fa = new float[1024];
 		x = 0;
 		y = 0;
-		int i;
 		for( chaid = 0; chaid < fieldText.Length; chaid++ )
 		{
 			int c = System.Convert.ToInt32( fieldText[chaid] );
