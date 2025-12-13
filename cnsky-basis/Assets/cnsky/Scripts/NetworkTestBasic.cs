@@ -1,9 +1,8 @@
 using UnityEngine;
 using Basis;
 using Cilbox;
-using Basis.Scripts.BasisSdk.Players;
 using Basis.Scripts.Networking.NetworkedAvatar;
-using LiteNetLib;
+using Basis.Network.Core;
 
 [Cilboxable]
 public class NetworkTestBasic : MonoBehaviour
@@ -86,9 +85,7 @@ public class NetworkTestBasic : MonoBehaviour
 
     void Update()
     {
-       status.text = 
-		CilboxPublicUtils.GetProxyBuildTimeGuid( this ) + "\n" +
-		CilboxPublicUtils.GetProxyInitialPath( this ) + " " + ticker;
+       status.text = $"{CilboxPublicUtils.GetProxyBuildTimeGuid( this ).ToString()}\n{CilboxPublicUtils.GetProxyInitialPath( this ).ToString()}\n{ticker.ToString()}";
     }
 }
 

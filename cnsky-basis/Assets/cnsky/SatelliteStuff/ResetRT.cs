@@ -4,7 +4,7 @@ using Basis;
 [Cilboxable]
 public class ResetRT : MonoBehaviour
 {
-	public ExampleButtonInteractable btn;
+	public BasisInteractableShim btn;
 	public CustomRenderTexture rt;
 
 	public void ClickDelegate()
@@ -14,8 +14,7 @@ public class ResetRT : MonoBehaviour
 
     private void Start()
     {
-		//base.Start();
-		//btn.ButtonDown += ClickDelegate;
+		btn = Basis.SafeUtil.MakeInteractable(this);
 		btn.ButtonDown = () => ClickDelegate();
     }
 }

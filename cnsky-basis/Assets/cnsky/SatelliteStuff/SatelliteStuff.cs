@@ -9,7 +9,7 @@ public class SatelliteStuff : MonoBehaviour
 	public BasisUrl stringUrl;	
 	private BasisImageDownloader _imageDownloader;
 
-	public ExampleButtonInteractable btn;
+	public BasisInteractableShim btn;
 
 	public Texture defaultTexture;
 	private new Renderer renderer;
@@ -19,6 +19,8 @@ public class SatelliteStuff : MonoBehaviour
 
 	void Start()
 	{
+		btn = Basis.SafeUtil.MakeInteractable(this);
+
 		//base.Start();
 		btn.ButtonDown = () => ClickDelegate();
 
