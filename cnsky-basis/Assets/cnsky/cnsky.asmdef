@@ -1,0 +1,22 @@
+{
+    "name": "cnsky",
+    "rootNamespace": "",
+    "references": [
+        "Cilbox",
+        "BasisSDK",
+        "BasisExamples",
+        "BasisShims",
+        "LiteNetLib",
+        "Basis Framework",
+        "BasisNetworkCore"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
