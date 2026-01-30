@@ -3,7 +3,6 @@ Shader "Unlit/Stars"
     Properties
     {
 		_Hip2 ("HIPPARCOS Data", 2D) = "" {}
-		_ManagementTexture ("Management Texture", 2D) = "" {}
 		_InverseScale("InverseScale", float) = 6000
 		_StarSizeBase("Star Size Base", float)=0.025
 		_StarSizeRel("Star Size Rel", float)=0.025
@@ -96,10 +95,6 @@ Shader "Unlit/Stars"
 				float4 StarBlockA = _Hip2.Load( int3( thisStarImport.x*2+0, _Hip2_TexelSize.w - 1 - thisStarImport.y, 0 ) );
 				// block B is currently unused.
 				float4 StarBlockB = _Hip2.Load( int3( thisStarImport.x*2+1, _Hip2_TexelSize.w - 1 - thisStarImport.y, 0 ) );
-				float4 InfoBlock = _ManagementTexture.Load( int3( 0, _ManagementTexture_TexelSize.w - 1, 0 ) );
-				float4 ManagementBlock2 = _ManagementTexture.Load( int3( 0, _ManagementTexture_TexelSize.w - 2, 0 ) );
-				float jdDay = InfoBlock.y;
-				float jdFrac = InfoBlock.z;
 				
 				int4 StarBlockIntA = asuint( StarBlockA );
 				uint4 StarBlockUIntA = asuint( StarBlockA );

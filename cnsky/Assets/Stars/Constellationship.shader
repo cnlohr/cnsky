@@ -3,8 +3,7 @@ Shader "Unlit/Constellationship"
     Properties
     {
 		_Hip2 ("HIPPARCOS Data", 2D) = "" {}
-		_ManagementTexture ("Management Texture", 2D) = "" {}
-		_ConstellationshipTexture ("Management Texture", 2D) = "" {}
+		_ConstellationshipTexture ("Constellationship Texture", 2D) = "" {}
 		
 		_InverseScale("InverseScale", float) = 6000
 		_BaseAlpha("Base Alpha", float ) = 0.1
@@ -65,8 +64,7 @@ Shader "Unlit/Constellationship"
 			float _StarSizeBase;
 			Texture2D< float4 > _ConstellationshipTexture;
 			float4 _ConstellationshipTexture_TexelSize;
-			Texture2D< float4 > _ManagementTexture;
-			float4 _ManagementTexture_TexelSize;
+
 			Texture2D< float4 > _Hip2;
 			float4 _Hip2_TexelSize;
 
@@ -98,11 +96,6 @@ Shader "Unlit/Constellationship"
 				uint2 thisConstImport = uint2( (thisconst % 1024), 1 );
 				float4 ConstSel = _ConstellationshipTexture.Load( int3( thisConstImport.x, _ConstellationshipTexture_TexelSize.w - 1 - thisConstImport.y, 0 ) );
 				uint4 StarCodes = asuint( ConstSel );
-
-				float4 InfoBlock = _ManagementTexture.Load( int3( 0, _ManagementTexture_TexelSize.w - 1, 0 ) );
-				float4 ManagementBlock2 = _ManagementTexture.Load( int3( 0, _ManagementTexture_TexelSize.w - 2, 0 ) );
-				float jdDay = InfoBlock.y;
-				float jdFrac = InfoBlock.z;
 
 				float4 rsize = float4( _ScreenParams.y/_ScreenParams.x, 1, 0, 1. ) * _StarSizeRel + _StarSizeBase;
 
