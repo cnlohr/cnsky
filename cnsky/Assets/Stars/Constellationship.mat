@@ -73,7 +73,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BaseAlpha: 0.008
+    - _BaseAlpha: 0.00165
     - _BaseSizeUpscale: 1
     - _BumpScale: 1
     - _Cutoff: 0.5
@@ -91,7 +91,7 @@ Material:
     - _SpecularHighlights: 1
     - _SrcBlend: 1
     - _StarSize: 0.51
-    - _StarSizeBase: 0.0009
+    - _StarSizeBase: 0.0003
     - _StarSizeRel: 0.0005
     - _UVSec: 0
     - _ZWrite: 1

@@ -7,6 +7,7 @@ Shader "Unlit/Stars"
 		_StarSizeBase("Star Size Base", float)=0.025
 		_StarSizeRel("Star Size Rel", float)=0.025
 		_BaseSizeUpscale("Base Size Upscale", float)=1.0
+		_AlphaMultiply("AlphaMultiply", float)=1.0
     }
     SubShader
 	{
@@ -28,8 +29,6 @@ Shader "Unlit/Stars"
 			#pragma fragment frag
 			#pragma target 5.0
 			#pragma multi_compile_fog
-			
-			#include "Assets/MSDFShaderPrintf/MSDFShaderPrintf.cginc"
 			
 			struct appdata
 			{
@@ -57,6 +56,7 @@ Shader "Unlit/Stars"
 			float _TailAlpha;
 			float _SatelliteAlpha;
 			float _BaseSizeUpscale;
+			float _AlphaMultiply;
 			float _StarSizeRel;
 			float _StarSizeBase;
 			Texture2D< float4 > _ManagementTexture;
@@ -102,15 +102,16 @@ Shader "Unlit/Stars"
 				float2 srascention, sdeclination;
 				sincos( ((uint(StarBlockIntA.r))/4294967296.0) * 6.2831852, srascention.x, srascention.y );
 				sincos( StarBlockIntA.g/2147483647.0 * 3.14159, sdeclination.x, sdeclination.y );
-				float3 objectCenter = normalize ( float3( -srascention.x * sdeclination.y, srascention.y * sdeclination.y, sdeclination.x )  ).xzy  * (_ProjectionParams.z*.998) + PlayerCenterCamera;
+				float3 objectCenter = normalize ( float3( -srascention.x * sdeclination.y, srascention.y * sdeclination.y, sdeclination.x )  ).xzy  ;
 		
 				g2f po;
 				UNITY_INITIALIZE_OUTPUT(g2f, po);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(po);
 				
+				float3 newCenter = mul ( UNITY_MATRIX_M, float4(objectCenter.xyz, 0.0 ) )* (_ProjectionParams.z*.98) + PlayerCenterCamera;
+
 				// Emit special block at end.
-				float4 csCenter = mul( UNITY_MATRIX_VP, float4( objectCenter.xyz, 1.0 ) );
-				float3 csWorldCenter = mul( UNITY_MATRIX_M, float4( objectCenter, 1.0 ) );
+				float4 csCenter = mul( UNITY_MATRIX_VP, float4( newCenter, 1.0 ) );
 				
 				// Parallax
 				// MAG
@@ -169,7 +170,7 @@ Shader "Unlit/Stars"
 				for( i = 0; i < 4; i++ )
 				{
 					po.cppos = vtx_ofs[i];
-					po.vertex = csCenter + vtx_ofs[i] * rsize * (_ProjectionParams.z*.998);
+					po.vertex = csCenter + vtx_ofs[i] * rsize * (_ProjectionParams.z*.52);
 
 					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po);
 					UNITY_TRANSFER_FOG(po,po.vertex);
@@ -220,7 +221,7 @@ Shader "Unlit/Stars"
 				
 				col.a *= saturate(2.0-sedge*2.0) * _SatelliteAlpha;
 				#endif
-				//col.a += 0.05;
+				col.a *= _AlphaMultiply;
 				return col;
 			}
 			ENDCG

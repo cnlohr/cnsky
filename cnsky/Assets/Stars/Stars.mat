@@ -69,6 +69,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AlphaMultiplier: 1
+    - _AlphaMultiply: 1
     - _BaseSizeUpscale: 1
     - _BumpScale: 1
     - _Cutoff: 0.5
@@ -87,7 +89,7 @@ Material:
     - _SrcBlend: 1
     - _StarSize: 0.51
     - _StarSizeBase: 0.001
-    - _StarSizeRel: 0.001
+    - _StarSizeRel: 0.0015
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:

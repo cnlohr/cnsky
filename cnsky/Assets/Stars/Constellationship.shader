@@ -32,7 +32,7 @@ Shader "Unlit/Constellationship"
 			#pragma target 5.0
 			#pragma multi_compile_fog
 			
-			#include "Assets/MSDFShaderPrintf/MSDFShaderPrintf.cginc"
+			//#include "Assets/MSDFShaderPrintf/MSDFShaderPrintf.cginc"
 			
 			struct appdata
 			{
@@ -114,22 +114,22 @@ Shader "Unlit/Constellationship"
 				float2 srascention, sdeclination;
 				sincos( ((uint(StarBlockIntA.r))/4294967296.0) * 6.2831852, srascention.x, srascention.y );
 				sincos( StarBlockIntA.g/2147483647.0 * 3.14159, sdeclination.x, sdeclination.y );
-				float3 objectCenter0 = normalize ( float3( -srascention.x * sdeclination.y, srascention.y * sdeclination.y, sdeclination.x )  ).xzy  * (_ProjectionParams.z*.99) + PlayerCenterCamera;
+				float3 objectCenter0 = normalize ( float3( -srascention.x * sdeclination.y, srascention.y * sdeclination.y, sdeclination.x )  ).xzy;
 
 				StarBlockIntA = Star2;
 				sincos( ((uint(StarBlockIntA.r))/4294967296.0) * 6.2831852, srascention.x, srascention.y );
 				sincos( StarBlockIntA.g/2147483647.0 * 3.14159, sdeclination.x, sdeclination.y );
-				float3 objectCenter1 = normalize ( float3( -srascention.x * sdeclination.y, srascention.y * sdeclination.y, sdeclination.x )  ).xzy  * (_ProjectionParams.z*.99) + PlayerCenterCamera;
+				float3 objectCenter1 = normalize ( float3( -srascention.x * sdeclination.y, srascention.y * sdeclination.y, sdeclination.x )  ).xzy;
 
 				StarBlockIntA = Star3;
 				sincos( ((uint(StarBlockIntA.r))/4294967296.0) * 6.2831852, srascention.x, srascention.y );
 				sincos( StarBlockIntA.g/2147483647.0 * 3.14159, sdeclination.x, sdeclination.y );
-				float3 objectCenter2 = normalize ( float3( -srascention.x * sdeclination.y, srascention.y * sdeclination.y, sdeclination.x )  ).xzy  * (_ProjectionParams.z*.99) + PlayerCenterCamera;
+				float3 objectCenter2 = normalize ( float3( -srascention.x * sdeclination.y, srascention.y * sdeclination.y, sdeclination.x )  ).xzy;
 
 				StarBlockIntA = Star4;
 				sincos( ((uint(StarBlockIntA.r))/4294967296.0) * 6.2831852, srascention.x, srascention.y );
 				sincos( StarBlockIntA.g/2147483647.0 * 3.14159, sdeclination.x, sdeclination.y );
-				float3 objectCenter3 = normalize ( float3( -srascention.x * sdeclination.y, srascention.y * sdeclination.y, sdeclination.x )  ).xzy  * (_ProjectionParams.z*.99) + PlayerCenterCamera;
+				float3 objectCenter3 = normalize ( float3( -srascention.x * sdeclination.y, srascention.y * sdeclination.y, sdeclination.x )  ).xzy;
 		
 				g2f po;
 				UNITY_INITIALIZE_OUTPUT(g2f, po);
@@ -138,14 +138,20 @@ Shader "Unlit/Constellationship"
 				// Emit special block at end.
 				float4 csCenter[4];
 				float3 csWorldCenter[4];
-				csCenter[0] = mul( UNITY_MATRIX_VP, float4( objectCenter0.xyz, 1.0 ) );
-				csWorldCenter[0] = mul( UNITY_MATRIX_M, float4( objectCenter0, 1.0 ) );
-				csCenter[1] = mul( UNITY_MATRIX_VP, float4( objectCenter1.xyz, 1.0 ) );
-				csWorldCenter[1] = mul( UNITY_MATRIX_M, float4( objectCenter1, 1.0 ) );
-				csCenter[2] = mul( UNITY_MATRIX_VP, float4( objectCenter2.xyz, 1.0 ) );
-				csWorldCenter[2] = mul( UNITY_MATRIX_M, float4( objectCenter2, 1.0 ) );
-				csCenter[3] = mul( UNITY_MATRIX_VP, float4( objectCenter3.xyz, 1.0 ) );
-				csWorldCenter[3] = mul( UNITY_MATRIX_M, float4( objectCenter3, 1.0 ) );
+				float3 newCenter0 = mul ( UNITY_MATRIX_M, float4(objectCenter0.xyz, 0.0 ) )* (_ProjectionParams.z*.98) + PlayerCenterCamera;
+				float3 newCenter1 = mul ( UNITY_MATRIX_M, float4(objectCenter1.xyz, 0.0 ) )* (_ProjectionParams.z*.98) + PlayerCenterCamera;
+				float3 newCenter2 = mul ( UNITY_MATRIX_M, float4(objectCenter2.xyz, 0.0 ) )* (_ProjectionParams.z*.98) + PlayerCenterCamera;
+				float3 newCenter3 = mul ( UNITY_MATRIX_M, float4(objectCenter3.xyz, 0.0 ) )* (_ProjectionParams.z*.98) + PlayerCenterCamera;
+
+				// Emit special block at end.
+				csCenter[0] = mul( UNITY_MATRIX_VP, float4( newCenter0, 1.0 ) );
+				csWorldCenter[0] = float4( newCenter0, 1.0 );
+				csCenter[1] = mul( UNITY_MATRIX_VP, float4( newCenter1, 1.0 ) );
+				csWorldCenter[1] = float4( newCenter1, 1.0 );
+				csCenter[2] = mul( UNITY_MATRIX_VP, float4( newCenter2, 1.0 ) );
+				csWorldCenter[2] = float4( newCenter2, 1.0 );
+				csCenter[3] = mul( UNITY_MATRIX_VP, float4( newCenter3, 1.0 ) );
+				csWorldCenter[3] = float4( newCenter3, 1.0 );
 
 				float4 vtx_ofs[4] = {
 					{-1, 0, 0, 0 },
@@ -165,24 +171,24 @@ Shader "Unlit/Constellationship"
 					float4 csOrtho = float4( normalize(csTo.xy - csFrom.xy).yx * float2( -1, 1 ), 0, 0 );
 					float4 csExtend = float4( normalize(csTo.xy - csFrom.xy).xy * float2( 1, 1 ), 0, 0 );
 					
-					float scale = ( rsize * (_ProjectionParams.z*.997));
+					float scale = ( rsize * (_ProjectionParams.z*.98));
 					float genlen = length( csTo.xy - csFrom.xy );
 					float3 csOrthoWorld = normalize(csWorldTo.xyz - csWorldFrom.xyz);
 					
 					po.cppos = float4( vtx_ofs[0].xy, genlen, scale );
-					po.vertex = csFrom + ( csOrtho - csExtend )* rsize * (_ProjectionParams.z*.997);
+					po.vertex = csFrom + ( csOrtho - csExtend )* rsize * (_ProjectionParams.z*.98);
 					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); UNITY_TRANSFER_FOG(po,po.vertex); triStream.Append(po);
 
 					po.cppos = float4( vtx_ofs[1].xy, genlen, scale );
-					po.vertex = csFrom + ( -csOrtho - csExtend ) * rsize * (_ProjectionParams.z*.997);
+					po.vertex = csFrom + ( -csOrtho - csExtend ) * rsize * (_ProjectionParams.z*.98);
 					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); UNITY_TRANSFER_FOG(po,po.vertex); triStream.Append(po);
 
 					po.cppos = float4( vtx_ofs[2].xy, genlen, scale );
-					po.vertex = csTo + ( csOrtho + csExtend ) * rsize * (_ProjectionParams.z*.997);
+					po.vertex = csTo + ( csOrtho + csExtend ) * rsize * (_ProjectionParams.z*.98);
 					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); UNITY_TRANSFER_FOG(po,po.vertex); triStream.Append(po);
 
 					po.cppos = float4( vtx_ofs[3].xy, genlen, scale );
-					po.vertex = csTo + ( -csOrtho + csExtend ) * rsize * (_ProjectionParams.z*.997);
+					po.vertex = csTo + ( -csOrtho + csExtend ) * rsize * (_ProjectionParams.z*.98);
 					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); UNITY_TRANSFER_FOG(po,po.vertex); triStream.Append(po);
 					triStream.RestartStrip();
 
