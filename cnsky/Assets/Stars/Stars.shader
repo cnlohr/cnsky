@@ -18,14 +18,13 @@ Shader "Unlit/Stars"
 		Cull Off
 		ZWrite Off
 		ZTest On
-		
+
 		Pass
 		{
 			CGPROGRAM
 			#include "UnityCG.cginc"
 
 			#pragma vertex vert
-			#pragma geometry geo
 			#pragma fragment frag
 			#pragma target 5.0
 			#pragma multi_compile_fog
@@ -34,18 +33,17 @@ Shader "Unlit/Stars"
 			
 			struct appdata
 			{
-				UNITY_VERTEX_INPUT_INSTANCE_ID
+#if defined(UNITY_INSTANCING_ENABLED) || defined(UNITY_PROCEDURAL_INSTANCING_ENABLED) || defined(UNITY_STEREO_INSTANCING_ENABLED)
+				uint instanceID : SV_InstanceID;
+#endif
 			};
 
-			struct v2g
+			struct v2f
 			{
-				uint id : ID;
-				UNITY_VERTEX_INPUT_INSTANCE_ID
-			};
-
-			struct g2f
-			{
-				UNITY_VERTEX_OUTPUT_STEREO
+#if defined(UNITY_INSTANCING_ENABLED) || defined(UNITY_PROCEDURAL_INSTANCING_ENABLED) || defined(UNITY_STEREO_INSTANCING_ENABLED)
+				uint stereoTargetEyeIndexSV : SV_RenderTargetArrayIndex;
+				uint stereoTargetEyeIndex : BLENDINDICES0;
+#endif
 				float4 vertex : SV_POSITION;
 				float4 cppos : CPP;
 				nointerpolation float4 starinfo : STARINFO;
@@ -64,31 +62,28 @@ Shader "Unlit/Stars"
 			Texture2D< float4 > _Hip2;
 			float4 _Hip2_TexelSize;
 
-			v2g vert (appdata v, uint id : SV_VertexID, uint iid : SV_InstanceID  )
+			v2f vert (appdata v, uint id : SV_VertexID, uint iid : SV_InstanceID  )
 			{
-				v2g t;
+				v2f t;
 				UNITY_SETUP_INSTANCE_ID(v);
-				UNITY_TRANSFER_INSTANCE_ID(v, t);
-
-				t.id = id;
-				return t;
-			}
-
-		
-			[maxvertexcount(36)]
-			void geo(point v2g p[1], inout TriangleStream<g2f> triStream, uint pid : SV_PrimitiveID )
-			{
-				UNITY_SETUP_INSTANCE_ID(p[0]);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(t);
+#if 0
+#if defined(UNITY_INSTANCING_ENABLED) || defined(UNITY_PROCEDURAL_INSTANCING_ENABLED) || defined(UNITY_STEREO_INSTANCING_ENABLED)
+				unity_StereoEyeIndex = v.instanceID & 0x01;
+                unity_InstanceID = unity_BaseInstanceID + (v.instanceID >> 1);
+				//t.instanceID = v.instanceID;
+				t.stereoTargetEyeIndex = unity_StereoEyeIndex;
+				t.stereoTargetEyeIndexSV = unity_StereoEyeIndex;
+				//t.viewID = unity_StereoEyeIndex;
+#endif
+#endif				
 				#if defined(USING_STEREO_MATRICES)
 					float3 PlayerCenterCamera = ( unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1] ) / 2;
 				#else
 					float3 PlayerCenterCamera = _WorldSpaceCameraPos.xyz;
 				#endif
 
-				uint operationID = pid;
-				uint thisop = operationID;
-				const uint totalsat = (512*461);
-				const uint thisstar = thisop;
+				const uint thisstar = id/4;
 
 				// +1 in y term says to skip first row.
 				uint2 thisStarImport = uint2( (thisstar % 256), (thisstar / 256) );
@@ -103,21 +98,17 @@ Shader "Unlit/Stars"
 				
 				int4 StarBlockIntA = asuint( StarBlockA );
 				uint4 StarBlockUIntA = asuint( StarBlockA );
-				if( length( StarBlockIntA.rg ) == 0 ) return;
+				if( length( StarBlockIntA.rg ) == 0 ) return (v2f)0;
 				float2 srascention, sdeclination;
 				sincos( ((uint(StarBlockIntA.r))/4294967296.0) * 6.2831852, srascention.x, srascention.y );
 				sincos( StarBlockIntA.g/2147483647.0 * 3.14159, sdeclination.x, sdeclination.y );
 				float3 objectCenter = normalize ( float3( -srascention.x * sdeclination.y, srascention.y * sdeclination.y, sdeclination.x )  ).xzy  ;
-		
-				g2f po = (g2f)0;
-                UNITY_INITIALIZE_OUTPUT(g2f, po);
-                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(po);
-  
-				
-				float3 newCenter = mul ( UNITY_MATRIX_M, float4(objectCenter.xyz, 0.0 ) )* (_ProjectionParams.z*.98) + PlayerCenterCamera;
+
+				float farPlane = _ProjectionParams.z * .97;
+				float3 newCenter = mul( UNITY_MATRIX_MV, float4(objectCenter.xyz, 0.0 ) ) * (farPlane);
 
 				// Emit special block at end.
-				float4 csCenter = mul( UNITY_MATRIX_VP, float4( newCenter, 1.0 ) );
+				float4 csCenter = mul( UNITY_MATRIX_P, float4( newCenter, 1.0 ) );
 				
 				// Parallax
 				// MAG
@@ -130,7 +121,7 @@ Shader "Unlit/Stars"
 					StarBlockUIntA.a & 0xffff,
 					StarBlockUIntA.a >> 16 ) / float4( 100, 1000, 1000, 1000 );
 
-				float4 starinfo = po.starinfo = StarBlockB;
+				float4 starinfo = t.starinfo = StarBlockB;
 				
 				float4 rsize = float4( _ScreenParams.y/_ScreenParams.x, 1, 0, 1. ) * _StarSizeRel + _StarSizeBase;
 				
@@ -140,26 +131,26 @@ Shader "Unlit/Stars"
 				float vi = StarBlockB.a;
 
 				//Color temperature in kelvin
-				float t = 4600 * ((1 / ((0.92 * bv) + 1.7)) +(1 / ((0.92 * bv) + 0.62)) );
-				// t to xyY
+				float tS = 4600 * ((1 / ((0.92 * bv) + 1.7)) +(1 / ((0.92 * bv) + 0.62)) );
+				// tS to xyY
 				float x = 0, y = 0;
-				if (t>=1667 && t<=4000) {
-				  x = ((-0.2661239 * pow(10,9)) / pow(t,3)) + ((-0.2343580 * pow(10,6)) / pow(t,2)) + ((0.8776956 * pow(10,3)) / t) + 0.179910;
-				} else if (t > 4000 && t <= 25000) {
-				  x = ((-3.0258469 * pow(10,9)) / pow(t,3)) + ((2.1070379 * pow(10,6)) / pow(t,2)) + ((0.2226347 * pow(10,3)) / t) + 0.240390;
+				if (tS>=1667 && tS<=4000) {
+				  x = ((-0.2661239 * pow(10,9)) / pow(tS,3)) + ((-0.2343580 * pow(10,6)) / pow(tS,2)) + ((0.8776956 * pow(10,3)) / tS) + 0.179910;
+				} else if (tS > 4000 && tS <= 25000) {
+				  x = ((-3.0258469 * pow(10,9)) / pow(tS,3)) + ((2.1070379 * pow(10,6)) / pow(tS,2)) + ((0.2226347 * pow(10,3)) / tS) + 0.240390;
 				}
 
-				if (t >= 1667 && t <= 2222) {
+				if (tS >= 1667 && tS <= 2222) {
 				  y = -1.1063814 * pow(x,3) - 1.34811020 * pow(x,2) + 2.18555832 * x - 0.20219683;
-				} else if (t > 2222 && t <= 4000) {
+				} else if (tS > 2222 && tS <= 4000) {
 				  y = -0.9549476 * pow(x,3) - 1.37418593 * pow(x,2) + 2.09137015 * x - 0.16748867;
-				} else if (t > 4000 && t <= 25000) {
+				} else if (tS > 4000 && tS <= 25000) {
 				  y = 3.0817580 * pow(x,3) - 5.87338670 * pow(x,2) + 3.75112997 * x - 0.37001483;
 				}
 				float Y = (y == 0)? 0 : 1;
 				float X = (y == 0)? 0 : (x * Y) / y;
 				float Z = (y == 0)? 0 : ((1 - x - y) * Y) / y;
-				po.starcolor =  float3(
+				t.starcolor =  float3(
 					 0.41847 * X - 0.15866 * Y - 0.082835 * Z,
 					 -0.091169 * X + 0.25243 * Y + 0.015708 * Z,
 					0.00092090 * X - 0.0025498 * Y + 0.17860 * Z );
@@ -169,36 +160,36 @@ Shader "Unlit/Stars"
 				float4 vtx_ofs[4] = {
 					{-1, -1, 0, 0},
 					{ 1, -1, 0, 0},
-					{-1,  1, 0, 0},
-					{ 1,  1, 0, 0}
+					{ 1,  1, 0, 0},
+					{-1,  1, 0, 0}
 					};
-				int i;
-				for( i = 0; i < 4; i++ )
+				uint io = id % 4;
 				{
-					po.cppos = vtx_ofs[i];
-					po.vertex = csCenter + vtx_ofs[i] * rsize * (_ProjectionParams.z*.98);
-
-					UNITY_TRANSFER_FOG(po,po.vertex);
-					triStream.Append(po);
+					t.cppos = vtx_ofs[io];
+					t.vertex = csCenter + vtx_ofs[io] * rsize * (farPlane*.98);
+					UNITY_TRANSFER_FOG(t,t.vertex);
 				}
+
+				return t;
 			}
-			
+
 			float3 projectIntoPlane( float3 n,  float3 b )
 			{
 				n = normalize( n );
 				return cross( n, cross( b, n ) ) + n * dot( n, b );
 			}
 			
-			fixed4 frag (g2f i) : SV_Target
+			fixed4 frag (v2f i) : SV_Target
 			{
 				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( i );
+
 				float initialmag = (15.-i.starinfo.y)/16;
 				float mag = exp(-i.starinfo.y);
 				float bright = mag*200.+.15;
 				
 				fixed4 col = float4( i.starcolor, 1.0 );
 				
-				float sedge = length(i.cppos.xy);
+				float sedge = length(i.cppos.xy)*.9; // better fill
 				
 				
 				float disa = initialmag - sedge;

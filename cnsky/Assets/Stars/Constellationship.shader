@@ -77,7 +77,7 @@ Shader "Unlit/Constellationship"
 			}
 
 		
-			[maxvertexcount(36)]
+			[maxvertexcount(8)]
 			void geo(point v2g p[1], inout TriangleStream<g2f> triStream, uint pid : SV_PrimitiveID )
 			{
 				UNITY_SETUP_INSTANCE_ID(p[0]);
@@ -138,10 +138,10 @@ Shader "Unlit/Constellationship"
 				// Emit special block at end.
 				float4 csCenter[4];
 				float3 csWorldCenter[4];
-				float3 newCenter0 = mul ( UNITY_MATRIX_M, float4(objectCenter0.xyz, 0.0 ) )* (_ProjectionParams.z*.98) + PlayerCenterCamera;
-				float3 newCenter1 = mul ( UNITY_MATRIX_M, float4(objectCenter1.xyz, 0.0 ) )* (_ProjectionParams.z*.98) + PlayerCenterCamera;
-				float3 newCenter2 = mul ( UNITY_MATRIX_M, float4(objectCenter2.xyz, 0.0 ) )* (_ProjectionParams.z*.98) + PlayerCenterCamera;
-				float3 newCenter3 = mul ( UNITY_MATRIX_M, float4(objectCenter3.xyz, 0.0 ) )* (_ProjectionParams.z*.98) + PlayerCenterCamera;
+				float3 newCenter0 = mul ( UNITY_MATRIX_M, float4(objectCenter0.xyz, 0.0 ) )* (_ProjectionParams.z*.498) + PlayerCenterCamera;
+				float3 newCenter1 = mul ( UNITY_MATRIX_M, float4(objectCenter1.xyz, 0.0 ) )* (_ProjectionParams.z*.498) + PlayerCenterCamera;
+				float3 newCenter2 = mul ( UNITY_MATRIX_M, float4(objectCenter2.xyz, 0.0 ) )* (_ProjectionParams.z*.498) + PlayerCenterCamera;
+				float3 newCenter3 = mul ( UNITY_MATRIX_M, float4(objectCenter3.xyz, 0.0 ) )* (_ProjectionParams.z*.498) + PlayerCenterCamera;
 
 				// Emit special block at end.
 				csCenter[0] = mul( UNITY_MATRIX_VP, float4( newCenter0, 1.0 ) );
