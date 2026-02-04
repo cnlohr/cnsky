@@ -3,11 +3,11 @@ Shader "Unlit/Stars"
     Properties
     {
 		_Hip2 ("HIPPARCOS Data", 2D) = "" {}
+		_ManagementTexture ("Management Texture", 2D) = "" {}
 		_InverseScale("InverseScale", float) = 6000
 		_StarSizeBase("Star Size Base", float)=0.025
 		_StarSizeRel("Star Size Rel", float)=0.025
 		_BaseSizeUpscale("Base Size Upscale", float)=1.0
-		_AlphaMultiply("AlphaMultiply", float)=1.0
     }
     SubShader
 	{
@@ -30,6 +30,8 @@ Shader "Unlit/Stars"
 			#pragma target 5.0
 			#pragma multi_compile_fog
 			
+			//#include "Assets/cnsky/MSDFShaderPrintf/MSDFShaderPrintf.cginc"
+			
 			struct appdata
 			{
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -39,7 +41,6 @@ Shader "Unlit/Stars"
 			{
 				uint id : ID;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
-				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
 			struct g2f
@@ -56,7 +57,6 @@ Shader "Unlit/Stars"
 			float _TailAlpha;
 			float _SatelliteAlpha;
 			float _BaseSizeUpscale;
-			float _AlphaMultiply;
 			float _StarSizeRel;
 			float _StarSizeBase;
 			Texture2D< float4 > _ManagementTexture;
@@ -68,8 +68,8 @@ Shader "Unlit/Stars"
 			{
 				v2g t;
 				UNITY_SETUP_INSTANCE_ID(v);
-				UNITY_INITIALIZE_OUTPUT(v2g, t);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(t);
+				UNITY_TRANSFER_INSTANCE_ID(v, t);
+
 				t.id = id;
 				return t;
 			}
@@ -78,6 +78,7 @@ Shader "Unlit/Stars"
 			[maxvertexcount(36)]
 			void geo(point v2g p[1], inout TriangleStream<g2f> triStream, uint pid : SV_PrimitiveID )
 			{
+				UNITY_SETUP_INSTANCE_ID(p[0]);
 				#if defined(USING_STEREO_MATRICES)
 					float3 PlayerCenterCamera = ( unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1] ) / 2;
 				#else
@@ -95,18 +96,23 @@ Shader "Unlit/Stars"
 				float4 StarBlockA = _Hip2.Load( int3( thisStarImport.x*2+0, _Hip2_TexelSize.w - 1 - thisStarImport.y, 0 ) );
 				// block B is currently unused.
 				float4 StarBlockB = _Hip2.Load( int3( thisStarImport.x*2+1, _Hip2_TexelSize.w - 1 - thisStarImport.y, 0 ) );
+				float4 InfoBlock = _ManagementTexture.Load( int3( 0, _ManagementTexture_TexelSize.w - 1, 0 ) );
+				float4 ManagementBlock2 = _ManagementTexture.Load( int3( 0, _ManagementTexture_TexelSize.w - 2, 0 ) );
+				float jdDay = InfoBlock.y;
+				float jdFrac = InfoBlock.z;
 				
 				int4 StarBlockIntA = asuint( StarBlockA );
 				uint4 StarBlockUIntA = asuint( StarBlockA );
-				
+				if( length( StarBlockIntA.rg ) == 0 ) return;
 				float2 srascention, sdeclination;
 				sincos( ((uint(StarBlockIntA.r))/4294967296.0) * 6.2831852, srascention.x, srascention.y );
 				sincos( StarBlockIntA.g/2147483647.0 * 3.14159, sdeclination.x, sdeclination.y );
 				float3 objectCenter = normalize ( float3( -srascention.x * sdeclination.y, srascention.y * sdeclination.y, sdeclination.x )  ).xzy  ;
 		
-				g2f po;
-				UNITY_INITIALIZE_OUTPUT(g2f, po);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(po);
+				g2f po = (g2f)0;
+                UNITY_INITIALIZE_OUTPUT(g2f, po);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(po);
+  
 				
 				float3 newCenter = mul ( UNITY_MATRIX_M, float4(objectCenter.xyz, 0.0 ) )* (_ProjectionParams.z*.98) + PlayerCenterCamera;
 
@@ -170,9 +176,8 @@ Shader "Unlit/Stars"
 				for( i = 0; i < 4; i++ )
 				{
 					po.cppos = vtx_ofs[i];
-					po.vertex = csCenter + vtx_ofs[i] * rsize * (_ProjectionParams.z*.52);
+					po.vertex = csCenter + vtx_ofs[i] * rsize * (_ProjectionParams.z*.98);
 
-					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po);
 					UNITY_TRANSFER_FOG(po,po.vertex);
 					triStream.Append(po);
 				}
@@ -186,6 +191,7 @@ Shader "Unlit/Stars"
 			
 			fixed4 frag (g2f i) : SV_Target
 			{
+				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX( i );
 				float initialmag = (15.-i.starinfo.y)/16;
 				float mag = exp(-i.starinfo.y);
 				float bright = mag*200.+.15;
@@ -221,7 +227,7 @@ Shader "Unlit/Stars"
 				
 				col.a *= saturate(2.0-sedge*2.0) * _SatelliteAlpha;
 				#endif
-				col.a *= _AlphaMultiply;
+				//col.a += 0.05;
 				return col;
 			}
 			ENDCG

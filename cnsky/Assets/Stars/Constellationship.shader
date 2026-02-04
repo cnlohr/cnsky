@@ -43,7 +43,6 @@ Shader "Unlit/Constellationship"
 			{
 				uint id : ID;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
-				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
 			struct g2f
@@ -72,8 +71,7 @@ Shader "Unlit/Constellationship"
 			{
 				v2g t;
 				UNITY_SETUP_INSTANCE_ID(v);
-				UNITY_INITIALIZE_OUTPUT(v2g, t);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(t);
+				UNITY_TRANSFER_INSTANCE_ID(v, t);
 				t.id = id;
 				return t;
 			}
@@ -82,6 +80,7 @@ Shader "Unlit/Constellationship"
 			[maxvertexcount(36)]
 			void geo(point v2g p[1], inout TriangleStream<g2f> triStream, uint pid : SV_PrimitiveID )
 			{
+				UNITY_SETUP_INSTANCE_ID(p[0]);
 				#if defined(USING_STEREO_MATRICES)
 					float3 PlayerCenterCamera = ( unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1] ) / 2;
 				#else
@@ -132,9 +131,10 @@ Shader "Unlit/Constellationship"
 				float3 objectCenter3 = normalize ( float3( -srascention.x * sdeclination.y, srascention.y * sdeclination.y, sdeclination.x )  ).xzy;
 		
 				g2f po;
-				UNITY_INITIALIZE_OUTPUT(g2f, po);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(po);
-				
+
+                UNITY_INITIALIZE_OUTPUT(g2f, po);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(po);
+  				
 				// Emit special block at end.
 				float4 csCenter[4];
 				float3 csWorldCenter[4];
