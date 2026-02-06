@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Stars
-  m_Shader: {fileID: 4800000, guid: 63a4be97cad265d4ba4b5dba02569452, type: 3}
+  m_Shader: {fileID: 4800000, guid: 1987e97b33c44ac4a9f9b059443f38b6, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -16,7 +16,7 @@ Material:
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 3000
+  m_CustomRenderQueue: -1
   stringTagMap: {}
   disabledShaderPasses: []
   m_LockedProperties: 
@@ -89,7 +89,7 @@ Material:
     - _SrcBlend: 1
     - _StarSize: 0.51
     - _StarSizeBase: 0.001
-    - _StarSizeRel: 0.0015
+    - _StarSizeRel: 0.0005
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:

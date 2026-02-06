@@ -31,9 +31,8 @@ Shader "Unlit/Constellationship"
 			#pragma fragment frag
 			#pragma target 5.0
 			#pragma multi_compile_fog
-			
-			//#include "Assets/MSDFShaderPrintf/MSDFShaderPrintf.cginc"
-			
+			//#pragma multi_compile_instancing
+
 			struct appdata
 			{
 				UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -43,12 +42,17 @@ Shader "Unlit/Constellationship"
 			{
 				uint id : ID;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
+				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
 			struct g2f
 			{
+				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 				float4 vertex : SV_POSITION;
+#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
+				uint gl_Layer : SV_RenderTargetArrayIndex;
+#endif
 				float4 cppos : CPP;
 				nointerpolation float3 starcolor : STARCOLOR;
 				UNITY_FOG_COORDS(1)
@@ -71,15 +75,23 @@ Shader "Unlit/Constellationship"
 			{
 				v2g t;
 				UNITY_SETUP_INSTANCE_ID(v);
-				UNITY_TRANSFER_INSTANCE_ID(v, t);
+				UNITY_INITIALIZE_OUTPUT(v2g, t);
+				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(t);
 				t.id = id;
 				return t;
 			}
 
-		
-			[maxvertexcount(8)]
+			[maxvertexcount(16)] // 16 for Quest, 8 for desktop.
 			void geo(point v2g p[1], inout TriangleStream<g2f> triStream, uint pid : SV_PrimitiveID )
-			{
+			{			
+			
+#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
+				int eye;
+				for( eye = 0; eye < 2; eye ++ )
+				{
+					unity_StereoEyeIndex = p[0].stereoTargetEyeIndex = eye;
+#endif				
+
 				UNITY_SETUP_INSTANCE_ID(p[0]);
 				#if defined(USING_STEREO_MATRICES)
 					float3 PlayerCenterCamera = ( unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1] ) / 2;
@@ -134,7 +146,11 @@ Shader "Unlit/Constellationship"
 
                 UNITY_INITIALIZE_OUTPUT(g2f, po);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(po);
-  				
+  				UNITY_TRANSFER_VERTEX_OUTPUT_STEREO( po, p[0] );
+
+#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
+				po.gl_Layer = eye;
+#endif
 				// Emit special block at end.
 				float4 csCenter[4];
 				float3 csWorldCenter[4];
@@ -193,6 +209,9 @@ Shader "Unlit/Constellationship"
 					triStream.RestartStrip();
 
 				}
+#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
+				}
+#endif
 			}
 			
 			float3 projectIntoPlane( float3 n,  float3 b )

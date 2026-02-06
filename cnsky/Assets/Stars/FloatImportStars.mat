@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: FloatImportStars
-  m_Shader: {fileID: 4800000, guid: 408e65a4bd09dfe49aca8183b63d1e69, type: 3}
+  m_Shader: {fileID: 4800000, guid: 671c0eb24fb9ebc478e1990d2ec814e6, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -44,7 +44,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _ImportTexture:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: d83f79ae9194aad448b394215cb9865e, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:

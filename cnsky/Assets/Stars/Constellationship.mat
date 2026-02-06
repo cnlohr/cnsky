@@ -73,7 +73,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _BaseAlpha: 0.00165
+    - _BaseAlpha: 0.15
     - _BaseSizeUpscale: 1
     - _BumpScale: 1
     - _Cutoff: 0.5
