@@ -25,11 +25,11 @@ Shader "Unlit/TextureMSDFPrint"
 			#pragma fragment frag
 			// make fog work
 			#pragma multi_compile_fog
+			#pragma target 5.0
 
 			#include "UnityCG.cginc"
 			#include "../MSDFShaderPrintf.cginc"
-			#include "Packages/com.llealloo.audiolink/Runtime/Shaders/AudioLink.cginc"
-		
+
 			struct appdata
 			{
 				float4 vertex : POSITION;
@@ -59,6 +59,7 @@ Shader "Unlit/TextureMSDFPrint"
 				return o;
 			}
 
+
 			fixed4 frag (v2f i) : SV_Target
 			{
 				float4 col = 0.0;
@@ -72,7 +73,6 @@ Shader "Unlit/TextureMSDFPrint"
 				int2 dig = floor( uv );
 
 				col.a += 0.2;
-
 				
 				float2 fielduv = inuv;
 				fielduv *= float2( supercolumns, lines );

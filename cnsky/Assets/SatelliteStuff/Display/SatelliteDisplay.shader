@@ -4,6 +4,7 @@ Shader "SatelliteStuff/SatelliteDisplay"
 {
 	Properties
 	{
+		_MSDFTex ("MSDF Texture", 2DArray) = "white" {}
 		_TailThick ("Tail Thickness", float) = 0.01
 		_TailAlpha("Tail Alpha", float)=1.0
 		_SatelliteAlpha("Satellite Alpha", float)=1.0
@@ -52,6 +53,7 @@ Shader "SatelliteStuff/SatelliteDisplay"
 
 			struct g2f
 			{
+				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 				float4 vertex : SV_POSITION;
 				float4 bez0 : BEZ0;
@@ -100,10 +102,25 @@ Shader "SatelliteStuff/SatelliteDisplay"
 					+ 2.0 * abs(dist)  / _ScreenParams.x; // Increase size of distant ones.
 			}
 
-			
-			[maxvertexcount(36)]
+
+#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
+			[maxvertexcount(64)]
+#else
+			[maxvertexcount(32)]
+#endif
+
 			void geo(point v2g p[1], inout TriangleStream<g2f> triStream, uint pid : SV_PrimitiveID )
 			{
+			
+#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
+				int eye;
+				for( eye = 0; eye < 2; eye ++ )
+				{
+					unity_StereoEyeIndex = p[0].stereoTargetEyeIndex = eye;
+#endif				
+
+				UNITY_SETUP_INSTANCE_ID(p[0]);
+				
 				uint operationID = pid;
 				uint thisop = operationID;
 				const uint totalsat = (511*85); // 85 satellites per line, 511 lines.
@@ -136,9 +153,13 @@ Shader "SatelliteStuff/SatelliteDisplay"
 //						( mul( UNITY_MATRIX_MV, float4( posfront.xyz, 1.0 ) ) -  mul( UNITY_MATRIX_MV, float4( poslast.xyz, 1.0 ) ) ).xyz, 
 //						( mul( UNITY_MATRIX_MV, float4( poscenterish.xyz, 1.0 ) ) ).xyz ) );
 				g2f po;
+
 				UNITY_INITIALIZE_OUTPUT(g2f, po);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(po);
-
+				UNITY_TRANSFER_VERTEX_OUTPUT_STEREO( po, p[0] );
+#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
+				po.gl_Layer = eye;
+#endif
 				po.color = _ComputedTexture.Load( int3( thissatCompute.x + 6, _ComputedTexture_TexelSize.w - ( thissatCompute.y + 0 ) - 1 + 0, 0 ) );
 
 				for( seg = 0; seg < 5; seg++ )
@@ -198,8 +219,6 @@ Shader "SatelliteStuff/SatelliteDisplay"
 						po.vertex = cp;
 						po.cppos = ( float4( viewpos[vtx], 1.0  ));
 
-						UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po);
-
 						UNITY_TRANSFER_FOG(po,po.vertex);
 
 						triStream.Append(po);
@@ -233,9 +252,15 @@ Shader "SatelliteStuff/SatelliteDisplay"
 					po.vertex = csCenter + vtx_ofs[i] * rsize;
 
 					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po);
+
 					UNITY_TRANSFER_FOG(po,po.vertex);
 					triStream.Append(po);
 				}
+				
+				
+#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
+				}
+#endif
 			}
 			
 			float3 projectIntoPlane( float3 n,  float3 b )

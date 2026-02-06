@@ -81,10 +81,13 @@ Shader "Unlit/Constellationship"
 				return t;
 			}
 
+#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
 			[maxvertexcount(16)] // 16 for Quest, 8 for desktop.
+#else
+			[maxvertexcount(8)] // 16 for Quest, 8 for desktop.
+#endif
 			void geo(point v2g p[1], inout TriangleStream<g2f> triStream, uint pid : SV_PrimitiveID )
-			{			
-			
+			{
 #if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
 				int eye;
 				for( eye = 0; eye < 2; eye ++ )

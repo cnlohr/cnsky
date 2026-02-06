@@ -2,7 +2,7 @@ Shader "Unlit/MSDFTextBox"
 {
 	Properties
 	{
-		
+		_MSDFTex ("MSDF Texture", 2DArray) = "white" {}
 	}
 	SubShader
 	{
@@ -21,7 +21,7 @@ Shader "Unlit/MSDFTextBox"
 
 			#include "UnityCG.cginc"
 			#include "../MSDFShaderPrintf.cginc"
-			#include "Packages/com.llealloo.audiolink/Runtime/Shaders/AudioLink.cginc"
+			//#include "Packages/com.llealloo.audiolink/Runtime/Shaders/AudioLink.cginc"
 		
 			struct appdata
 			{
@@ -37,7 +37,7 @@ Shader "Unlit/MSDFTextBox"
 			};
 
 			float _TextW, _TextH;
-			float _Text[1023];
+			float _Text[500];
 			float4 _FGColor;
 	
 			v2f vert (appdata v)
