@@ -31,7 +31,6 @@ Shader "Unlit/Constellationship"
 			#pragma fragment frag
 			#pragma target 5.0
 			#pragma multi_compile_fog
-			//#pragma multi_compile_instancing
 
 			struct appdata
 			{

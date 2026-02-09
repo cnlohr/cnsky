@@ -6,11 +6,9 @@ Shader "SatelliteStuff/RTComputeManagement"
     }
     SubShader
     {
-
 		Tags { }
 		ZTest always
 		ZWrite Off
-
 
 	CGINCLUDE
 		#pragma vertex vert
@@ -32,8 +30,6 @@ Shader "SatelliteStuff/RTComputeManagement"
 			
 			CGPROGRAM
 			
-			#include "/Assets/cnlohr/hashwithoutsine/hashwithoutsine.cginc"
-
 			#include "Packages/com.llealloo.audiolink/Runtime/Shaders/AudioLink.cginc"
 		
 			Texture2D<float4> _FloatImport;
