@@ -14,8 +14,8 @@
 #error Error: Cannot include both the unity custom render texture system and FLEXCRT.
 #endif
 
-#include "UnityCG.cginc"
-#include "UnityStandardConfig.cginc"
+//#include "UnityCG.cginc"
+//#include "UnityStandardConfig.cginc"
 
 // Keep in sync with CustomRenderTexture.h
 #define kCustomTextureBatchSize 16

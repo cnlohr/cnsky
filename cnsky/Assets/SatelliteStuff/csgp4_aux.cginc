@@ -11,7 +11,7 @@
 
 void days2mdhms
 	(
-	int year, float days, float dayfrac,
+	uint year, float days, float dayfrac,
 	out int mon, out int day, out int hr, out int minute, out float  second
 	)
 {

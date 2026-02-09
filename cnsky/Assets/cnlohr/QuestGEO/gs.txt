@@ -1,0 +1,67 @@
+
+
+#if 0
+#ifdef GEOMETRY
+
+
+layout(triangles) in;
+layout(triangle_strip, max_vertices=150) out;
+
+/*
+    out gl_PerVertex {
+        vec4 gl_Position;
+        float gl_PointSize;
+        float gl_ClipDistance[];
+    };
+*/
+
+
+in VS_OUT {
+    vec2 ouv;
+	float eye;
+} gs_in[];  
+
+out vec2 ouvf;
+out float eyeo;
+
+layout(num_views = 2) in;
+
+// For now, each invocation outputs a triangle to each eye.
+
+	void main()
+	{
+		int eyeid = 0;
+		int x, y;
+		for( x = 0; x < 5; x ++ )
+		for( y = 0; y < 5; y++ )
+		{
+#if defined(STEREO_MULTIVIEW_ON) || defined(STEREO_INSTANCING_ON)
+		for( eyeid = 0; eyeid < 2; eyeid++ )
+		//eyeid = int(gs_in[0].eye+0.5);  // If testing the input instance ID code, uncomment this, and comment out the above line.
+		//eyeid = gl_ViewID_OVR;
+#endif
+		{
+			#if defined(STEREO_MULTIVIEW_ON) || defined(STEREO_INSTANCING_ON)
+				mat4 stereoVP = unity_StereoMatrixVP[eyeid];
+			#else
+				mat4 stereoVP = unity_MatrixVP;
+			#endif
+			for(int i=0; i<3; i++)
+			{
+				gl_Position = stereoVP * unity_ObjectToWorld * ( gl_in[i].gl_Position + vec4( x*2, y*2, 0, 0 ) );
+				vec2 o = vec2( gs_in[i].ouv );
+
+				
+				gl_Layer = eyeid;
+				eyeo = float(gs_in[0].eye);
+				
+				ouvf = o;
+				EmitVertex();
+			}
+			EndPrimitive();
+		}
+		}
+	}
+
+#endif
+#endif

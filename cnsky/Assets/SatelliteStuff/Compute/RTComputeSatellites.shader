@@ -45,6 +45,8 @@ Shader "SatelliteStuff/RTComputeSatellites"
 			{
 				float4 vertex		   : SV_POSITION;
 				float4 color			: TEXCOORD0;
+				float ps : PSIZE;
+				uint gl_Layer : SV_RenderTargetArrayIndex;
 			};
 
 			Texture2D< float4 > _ImportTexture;
@@ -101,6 +103,9 @@ Shader "SatelliteStuff/RTComputeSatellites"
 				uint instanceID : SV_GSInstanceID, uint geoPrimID : SV_PrimitiveID )
 			{
 				g2f o;
+				o.ps = 1;
+				o.gl_Layer = 0;
+
 				int operationID = geoPrimID * INSTANCE_CT + instanceID;
 				// operationID = 0..63
 				

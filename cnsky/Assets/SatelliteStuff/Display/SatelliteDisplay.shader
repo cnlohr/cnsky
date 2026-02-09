@@ -53,6 +53,11 @@ Shader "SatelliteStuff/SatelliteDisplay"
 
 			struct g2f
 			{
+			
+#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
+// Force cause an issue so it doesn't run slowww
+				uint gl_Layer : SV_RenderTargetArrayIndex;
+#endif
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 				float4 vertex : SV_POSITION;
@@ -103,12 +108,7 @@ Shader "SatelliteStuff/SatelliteDisplay"
 			}
 
 
-#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
-			[maxvertexcount(64)]
-#else
 			[maxvertexcount(32)]
-#endif
-
 			void geo(point v2g p[1], inout TriangleStream<g2f> triStream, uint pid : SV_PrimitiveID )
 			{
 			

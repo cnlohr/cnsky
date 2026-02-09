@@ -16,13 +16,13 @@ Shader "SatelliteStuff/RTComputeManagement"
 		#pragma vertex vert
 		#pragma fragment frag
 		#pragma geometry geo
-		#pragma multi_compile_fog
+
 		#pragma target 5.0
 
 		#define CRTTEXTURETYPE float4
 		#include "/Assets/cnlohr/flexcrt/flexcrt.cginc"
 		#include "/Assets/SatelliteStuff/csgp4_aux.cginc"
-		
+
 	ENDCG
 
 
@@ -42,13 +42,15 @@ Shader "SatelliteStuff/RTComputeManagement"
 			struct v2g
 			{
 				float4 vertex : SV_POSITION;
-				uint2 batchID : TEXCOORD0;
+				uint batchID : TEXCOORD0;
 			};
 
 			struct g2f
 			{
 				float4 vertex		   : SV_POSITION;
-				uint4 color			: TEXCOORD0;
+				uint4  color		   : TEXCOORD0;
+				uint gl_Layer : SV_RenderTargetArrayIndex;
+				float ps : PSIZE;
 			};
 
 			v2g vert( appdata_customrendertexture IN )
@@ -57,7 +59,7 @@ Shader "SatelliteStuff/RTComputeManagement"
 				o.batchID = IN.vertexID / 6;
 
 				// This is unused, but must be initialized otherwise things get janky.
-				o.vertex = 0.;
+				o.vertex = float4( 0.0, 0.0, 0.5, 0.5 );
 				return o;
 			}
 
@@ -73,6 +75,9 @@ Shader "SatelliteStuff/RTComputeManagement"
 				int operationID = geoPrimID * 2 + ( instanceID - batchID );
 				g2f o;
 
+				o.ps = 1;
+				o.gl_Layer = 0;
+				
 				float4 infoblock0 = _FloatImport.Load( uint3( 0, _FloatImport_TexelSize.w - 1, 0 ) );
 				float4 infoblock1 = _FloatImport.Load( uint3( 1, _FloatImport_TexelSize.w - 1, 0 ) );
 

@@ -40,14 +40,12 @@ Shader "Unlit/Constellationship"
 
 			struct v2g
 			{
-				uint id : ID;
+				int id : ID;
 				UNITY_VERTEX_INPUT_INSTANCE_ID
-				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
 			struct g2f
 			{
-				UNITY_VERTEX_INPUT_INSTANCE_ID
 				UNITY_VERTEX_OUTPUT_STEREO
 				float4 vertex : SV_POSITION;
 #if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
@@ -73,26 +71,39 @@ Shader "Unlit/Constellationship"
 
 			v2g vert (appdata v, uint id : SV_VertexID, uint iid : SV_InstanceID  )
 			{
-				v2g t;
 				UNITY_SETUP_INSTANCE_ID(v);
-				UNITY_INITIALIZE_OUTPUT(v2g, t);
-				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(t);
+
+				v2g t = (v2g)0;
+				UNITY_TRANSFER_INSTANCE_ID(v,t);
+
+#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
+				// Probably not needed.  But, just in case...
+				if( unity_StereoEyeIndex > 0 )
+				{
+					id = -1;
+				}
+#endif
 				t.id = id;
 				return t;
 			}
 
-#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
-			[maxvertexcount(16)] // 16 for Quest, 8 for desktop.
-#else
-			[maxvertexcount(8)] // 16 for Quest, 8 for desktop.
-#endif
-			void geo(point v2g p[1], inout TriangleStream<g2f> triStream, uint pid : SV_PrimitiveID )
+			[maxvertexcount(8)]
+			[instance(2)]
+			void geo(point v2g p[1], inout TriangleStream<g2f> triStream,
+				//uint InstanceID : SV_GSInstanceID,
+				uint pid : SV_PrimitiveID
+				)
 			{
 #if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
-				int eye;
-				for( eye = 0; eye < 2; eye ++ )
+				if( p[0].id < 0 ) return;
+				int eye = 0;
+				for( eye = 0; eye < 2; eye++ )
 				{
-					unity_StereoEyeIndex = p[0].stereoTargetEyeIndex = eye;
+				unity_StereoEyeIndex = 
+#if defined(UNITY_INSTANCING_ENABLED) || defined(UNITY_PROCEDURAL_INSTANCING_ENABLED) || defined(UNITY_STEREO_INSTANCING_ENABLED)
+					p[0].instanceID =
+#endif
+					eye;
 #endif				
 
 				UNITY_SETUP_INSTANCE_ID(p[0]);
@@ -149,7 +160,6 @@ Shader "Unlit/Constellationship"
 
                 UNITY_INITIALIZE_OUTPUT(g2f, po);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(po);
-  				UNITY_TRANSFER_VERTEX_OUTPUT_STEREO( po, p[0] );
 
 #if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
 				po.gl_Layer = eye;
@@ -212,6 +222,7 @@ Shader "Unlit/Constellationship"
 					triStream.RestartStrip();
 
 				}
+				
 #if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
 				}
 #endif
