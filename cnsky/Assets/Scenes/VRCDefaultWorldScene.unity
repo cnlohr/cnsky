@@ -4176,12 +4176,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 307664950}
   m_CullTransparentMesh: 0
---- !u!1 &315372691 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 6255735715744633057, guid: 8585eff579082994293b561b83ac5854,
-    type: 3}
-  m_PrefabInstance: {fileID: 5878687202313280784}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &337630436
 GameObject:
   m_ObjectHideFlags: 0
@@ -21772,28 +21766,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1884300441}
   m_CullTransparentMesh: 0
---- !u!1 &1887028876 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2888767415393174875, guid: 8585eff579082994293b561b83ac5854,
-    type: 3}
-  m_PrefabInstance: {fileID: 5878687202313280784}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1887028878
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1887028876}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff1a9227f251c9f48991feb1ee8810c0, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  stars: {fileID: 315372691}
-  constellations: {fileID: 5878687202313280785}
-  starMaterialQuest: {fileID: 2100000, guid: f5a4c1809b41ffd41a974909cf123a53, type: 2}
-  starMaterialPC: {fileID: 2100000, guid: 3cf8441a03688904db8ce60ff214a7da, type: 2}
 --- !u!1 &1894710426
 GameObject:
   m_ObjectHideFlags: 0
@@ -24872,51 +24844,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 168197600854927821, guid: 8585eff579082994293b561b83ac5854,
-        type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 4300000, guid: ffa8dc9c8dfa46446b718cde41e73c5b, type: 2}
-    - target: {fileID: 1281329245102985512, guid: 8585eff579082994293b561b83ac5854,
-        type: 3}
-      propertyPath: m_Mesh
-      value: 
-      objectReference: {fileID: 4300000, guid: 16f041123283dc04ba4c826cf8b02f8f, type: 2}
-    - target: {fileID: 1504359846200073416, guid: 8585eff579082994293b561b83ac5854,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1504359846200073416, guid: 8585eff579082994293b561b83ac5854,
-        type: 3}
-      propertyPath: m_StaticEditorFlags
-      value: 126
-      objectReference: {fileID: 0}
-    - target: {fileID: 1916967145995062260, guid: 8585eff579082994293b561b83ac5854,
-        type: 3}
-      propertyPath: m_CastShadows
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1916967145995062260, guid: 8585eff579082994293b561b83ac5854,
-        type: 3}
-      propertyPath: m_ReceiveShadows
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1916967145995062260, guid: 8585eff579082994293b561b83ac5854,
-        type: 3}
-      propertyPath: m_DynamicOccludee
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1916967145995062260, guid: 8585eff579082994293b561b83ac5854,
-        type: 3}
-      propertyPath: m_LightProbeUsage
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1916967145995062260, guid: 8585eff579082994293b561b83ac5854,
-        type: 3}
-      propertyPath: m_ReflectionProbeUsage
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 2888767415393174875, guid: 8585eff579082994293b561b83ac5854,
         type: 3}
       propertyPath: m_Name
@@ -24972,56 +24899,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 6255735715744633057, guid: 8585eff579082994293b561b83ac5854,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6255735715744633057, guid: 8585eff579082994293b561b83ac5854,
-        type: 3}
-      propertyPath: m_StaticEditorFlags
-      value: 126
-      objectReference: {fileID: 0}
-    - target: {fileID: 7462136406204600180, guid: 8585eff579082994293b561b83ac5854,
-        type: 3}
-      propertyPath: m_CastShadows
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7462136406204600180, guid: 8585eff579082994293b561b83ac5854,
-        type: 3}
-      propertyPath: m_ReceiveShadows
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7462136406204600180, guid: 8585eff579082994293b561b83ac5854,
-        type: 3}
-      propertyPath: m_LightProbeUsage
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7462136406204600180, guid: 8585eff579082994293b561b83ac5854,
-        type: 3}
-      propertyPath: m_ReflectionProbeUsage
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 7462136406204600180, guid: 8585eff579082994293b561b83ac5854,
-        type: 3}
-      propertyPath: m_Materials.Array.data[0]
-      value: 
-      objectReference: {fileID: 2100000, guid: 3cf8441a03688904db8ce60ff214a7da, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2888767415393174875, guid: 8585eff579082994293b561b83ac5854,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1887028878}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8585eff579082994293b561b83ac5854, type: 3}
---- !u!1 &5878687202313280785 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1504359846200073416, guid: 8585eff579082994293b561b83ac5854,
-    type: 3}
-  m_PrefabInstance: {fileID: 5878687202313280784}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &7111575897785925491
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25066,7 +24948,7 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 0f125b2e74625fe4a846a24c4181b8c8, type: 2}
   - {fileID: 2100000, guid: 5c715e9c7c1c4e0448f7ecf0f478a217, type: 2}
   - {fileID: 2100000, guid: d95fc552403df0e418cef3aa0a311fd0, type: 2}
-  - {fileID: 2100000, guid: 3cf8441a03688904db8ce60ff214a7da, type: 2}
+  - {fileID: 2100000, guid: f5a4c1809b41ffd41a974909cf123a53, type: 2}
   - {fileID: 2100000, guid: 7495a1846e6934f4badf7c4f514e378c, type: 2}
   - {fileID: 2100000, guid: 9afc4b106e391b84e881d5363ac12413, type: 2}
   - {fileID: 2100000, guid: 32e8ab006d01bd548adecd20efa8619d, type: 2}

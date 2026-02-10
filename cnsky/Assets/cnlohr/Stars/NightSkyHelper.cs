@@ -85,6 +85,7 @@ public class StarMeshScript : MonoBehaviour
 				mesh = constellationMesh.mesh = new Mesh();
 			}
 
+/*
 			int vertices = 676; // Generate line points (Will be triangles)
 			mesh.vertices = new Vector3[vertices];
 			int [] inds = new int[vertices];
@@ -96,6 +97,23 @@ public class StarMeshScript : MonoBehaviour
 
 			mesh.bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(1000000, 1000000, 1000000));
 			mesh.SetIndices(inds, MeshTopology.Points, 0, false, 0);
+			AssetDatabase.CreateAsset(mesh, constellationAssetName );
+			*/
+			int csegs = 676; // Generate line points (Will be triangles)
+			mesh.vertices = new Vector3[csegs*6];
+			int [] inds = new int[csegs*6];
+			int i;
+			for( i = 0; i < csegs; i++ )
+			{
+				inds[i*6+0] = i*6+0;
+				inds[i*6+1] = i*6+1;
+				inds[i*6+2] = i*6+2;
+				inds[i*6+3] = i*6+3;
+				inds[i*6+4] = i*6+4;
+				inds[i*6+5] = i*6+5;
+			}
+			mesh.bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(1000000, 1000000, 1000000));
+			mesh.SetIndices(inds, MeshTopology.Triangles, 0, false, 0);
 			AssetDatabase.CreateAsset(mesh, constellationAssetName );
 		}
 

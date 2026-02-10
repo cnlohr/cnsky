@@ -8,6 +8,8 @@ Shader "Unlit/Stars-GLPOINT"
 		//_StarSizeBase("Star Size Base", float)=0.025
 		_StarSizeRel("Star Size Rel", float)=0.025
 		_BaseSizeUpscale("Base Size Upscale", float)=1.0
+		_EnableHorizonness( "EnableHorizonness", float ) = 0.0
+		_HorizonnessShift( "Horizonness Shift", float ) = 0.0
     }
     SubShader
 	{
@@ -52,6 +54,8 @@ Shader "Unlit/Stars-GLPOINT"
 			float _SatelliteAlpha;
 			float _BaseSizeUpscale;
 			float _StarSizeRel;
+			float _EnableHorizonness;
+			float _HorizonnessShift;
 			//float _StarSizeBase;
 			Texture2D< float4 > _ManagementTexture;
 			float4 _ManagementTexture_TexelSize;
@@ -99,7 +103,15 @@ Shader "Unlit/Stars-GLPOINT"
 					StarBlockUIntA.b >> 16,
 					StarBlockUIntA.a & 0xffff,
 					StarBlockUIntA.a >> 16 ) / float4( 1000, 1000, 1000, 1000 );
-				t.starcolor = StarBlockB.rgba;
+					
+					
+				float3 newCenterForNorm = mul ( UNITY_MATRIX_M, float4(objectCenter.xyz, 0.0 ) );
+				float3 ncnorm = normalize(newCenterForNorm);
+				float yness = ncnorm.y;
+				float calcHorizonness = 1.0 - yness * 10.0;
+				float ohness = saturate( 1.0 - (calcHorizonness * _EnableHorizonness + _HorizonnessShift) );
+
+				t.starcolor = StarBlockB.rgba * ohness;
 				float initmag = StarBlockB.a;
 				
 				float relsize = _StarSizeRel * initmag * 0.5 +.00015;
@@ -111,7 +123,7 @@ Shader "Unlit/Stars-GLPOINT"
 							( csCenter.xy/csCenter.w * 0.5 + 0.5 ) * _ScreenParams.xy,
 							length(relsize*_ScreenParams.xy).xx+1.0 );//vtx_ofs[io];
 					//t.cppos.y = _ScreenParams.y - t.cppos.y;
-					t.vertex = csCenter;// + vtx_ofs[io] * rsize * (farPlane*.98);
+					t.vertex = csCenter;// + vtx_ofs[io] * rsize * (farPlane*.97);
 					UNITY_TRANSFER_FOG(t,t.vertex);
 				}
 				t.ps = length(2.0*relsize*_ScreenParams.xy)+.9;

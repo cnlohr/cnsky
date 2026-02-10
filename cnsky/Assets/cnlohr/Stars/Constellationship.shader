@@ -1,4 +1,4 @@
-Shader "Unlit/Constellationship"
+Shader "Unlit/Constellationship-VERT"
 {
     Properties
     {
@@ -10,6 +10,9 @@ Shader "Unlit/Constellationship"
 		_StarSizeBase("Line Size Base", float)=0.025
 		_StarSizeRel("Line Size Rel", float)=0.025
 		_BaseSizeUpscale("Base Size Upscale", float)=1.0
+		
+		_EnableHorizonness( "Enable Horizonness", float ) = 0.0
+		_HorizonnessShift( "Horizonness Shift", float ) = 0.0
     }
     SubShader
 	{
@@ -27,7 +30,6 @@ Shader "Unlit/Constellationship"
 			#include "UnityCG.cginc"
 
 			#pragma vertex vert
-			#pragma geometry geo
 			#pragma fragment frag
 			#pragma target 5.0
 
@@ -36,21 +38,12 @@ Shader "Unlit/Constellationship"
 				UNITY_VERTEX_INPUT_INSTANCE_ID
 			};
 
-			struct v2g
-			{
-				int id : ID;
-				UNITY_VERTEX_INPUT_INSTANCE_ID
-			};
-
-			struct g2f
+			struct v2f
 			{
 				UNITY_VERTEX_OUTPUT_STEREO
 				float4 vertex : SV_POSITION;
-#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
-				uint gl_Layer : SV_RenderTargetArrayIndex;
-#endif
 				float4 cppos : CPP;
-				nointerpolation float3 starcolor : STARCOLOR;
+				float horizonness : HORIZONNESS;
 			};
 
 			float _BaseAlpha;
@@ -60,81 +53,49 @@ Shader "Unlit/Constellationship"
 			float _BaseSizeUpscale;
 			float _StarSizeRel;
 			float _StarSizeBase;
+			float _EnableHorizonness;
+			float _HorizonnessShift;
 			Texture2D< float4 > _ConstellationshipTexture;
 			float4 _ConstellationshipTexture_TexelSize;
 
 			Texture2D< float4 > _Hip2;
 			float4 _Hip2_TexelSize;
 
-			v2g vert (appdata v, uint id : SV_VertexID, uint iid : SV_InstanceID  )
+			v2f vert (appdata v, uint id : SV_VertexID  )
 			{
 				UNITY_SETUP_INSTANCE_ID(v);
 
-				v2g t = (v2g)0;
-				UNITY_TRANSFER_INSTANCE_ID(v,t);
+				v2f po = (v2f)0;
+                UNITY_INITIALIZE_OUTPUT(v2f, po);
+                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(po);
 
-#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
-				// Probably not needed.  But, just in case...
-				if( unity_StereoEyeIndex > 0 )
-				{
-					id = -1;
-				}
-#endif
-				t.id = id;
-				return t;
-			}
+				int segid = id % 6;
+				if( segid >= 3 ) segid -= 2;
+				// segid = 0..3 for the point on the square.
+				int quadno = id / 6;
 
-
-#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
-			[maxvertexcount(16)]
-#else
-			[maxvertexcount(8)]
-			[instance(2)]
-#endif
-			void geo(point v2g p[1], inout TriangleStream<g2f> triStream,
-				//uint InstanceID : SV_GSInstanceID,
-				uint pid : SV_PrimitiveID
-				)
-			{
-#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
-				if( p[0].id < 0 ) return;
-				int eye = 0;
-				for( eye = 0; eye < 2; eye++ )
-				{
-				unity_StereoEyeIndex = 
-#if defined(UNITY_INSTANCING_ENABLED) || defined(UNITY_PROCEDURAL_INSTANCING_ENABLED) || defined(UNITY_STEREO_INSTANCING_ENABLED)
-					p[0].instanceID =
-#endif
-					eye;
-#endif				
-
-				UNITY_SETUP_INSTANCE_ID(p[0]);
 				#if defined(USING_STEREO_MATRICES)
 					float3 PlayerCenterCamera = ( unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1] ) / 2;
 				#else
 					float3 PlayerCenterCamera = _WorldSpaceCameraPos.xyz;
 				#endif
 
-				uint operationID = pid;
-				uint thisop = operationID;
-				const uint thisconst = thisop;
+				uint thisconst = quadno / 2;
 
 				// +1 in y term says to skip first row.
 				uint2 thisConstImport = uint2( (thisconst % 1024), 1 );
 				float4 ConstSel = _ConstellationshipTexture.Load( int3( thisConstImport.x, _ConstellationshipTexture_TexelSize.w - 1 - thisConstImport.y, 0 ) );
 				uint4 StarCodes = asuint( ConstSel );
+				
+				uint2 StarCodesPair = ( quadno % 2 ) ? StarCodes.xy : StarCodes.zw;
 
 				float4 rsize = float4( _ScreenParams.y/_ScreenParams.x, 1, 0, 1. ) * _StarSizeRel + _StarSizeBase;
 
 				uint2 thisStarImport;
-				thisStarImport = uint2( (StarCodes.x % 256), (StarCodes.x / 256) );
+				thisStarImport = uint2( (StarCodesPair.x % 256), (StarCodesPair.x / 256) );
 				int4 Star1 = asuint( _Hip2.Load( int3( thisStarImport.x*2+0, _Hip2_TexelSize.w - 1 - thisStarImport.y, 0 ) ) );
-				thisStarImport = uint2( (StarCodes.y % 256), (StarCodes.y / 256) );
+				thisStarImport = uint2( (StarCodesPair.y % 256), (StarCodesPair.y / 256) );
 				int4 Star2 = asuint( _Hip2.Load( int3( thisStarImport.x*2+0, _Hip2_TexelSize.w - 1 - thisStarImport.y, 0 ) ) );
-				thisStarImport = uint2( (StarCodes.z % 256), (StarCodes.z / 256) );
-				int4 Star3 = asuint( _Hip2.Load( int3( thisStarImport.x*2+0, _Hip2_TexelSize.w - 1 - thisStarImport.y, 0 ) ) );
-				thisStarImport = uint2( (StarCodes.w % 256), (StarCodes.w / 256) );
-				int4 Star4 = asuint( _Hip2.Load( int3( thisStarImport.x*2+0, _Hip2_TexelSize.w - 1 - thisStarImport.y, 0 ) ) );
 				
 				int4 StarBlockIntA = Star1;
 				
@@ -148,41 +109,17 @@ Shader "Unlit/Constellationship"
 				sincos( StarBlockIntA.g/2147483647.0 * 3.14159, sdeclination.x, sdeclination.y );
 				float3 objectCenter1 = normalize ( float3( -srascention.x * sdeclination.y, srascention.y * sdeclination.y, sdeclination.x )  ).xzy;
 
-				StarBlockIntA = Star3;
-				sincos( ((uint(StarBlockIntA.r))/4294967296.0) * 6.2831852, srascention.x, srascention.y );
-				sincos( StarBlockIntA.g/2147483647.0 * 3.14159, sdeclination.x, sdeclination.y );
-				float3 objectCenter2 = normalize ( float3( -srascention.x * sdeclination.y, srascention.y * sdeclination.y, sdeclination.x )  ).xzy;
-
-				StarBlockIntA = Star4;
-				sincos( ((uint(StarBlockIntA.r))/4294967296.0) * 6.2831852, srascention.x, srascention.y );
-				sincos( StarBlockIntA.g/2147483647.0 * 3.14159, sdeclination.x, sdeclination.y );
-				float3 objectCenter3 = normalize ( float3( -srascention.x * sdeclination.y, srascention.y * sdeclination.y, sdeclination.x )  ).xzy;
-		
-				g2f po;
-
-                UNITY_INITIALIZE_OUTPUT(g2f, po);
-                UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(po);
-
-#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
-				po.gl_Layer = eye;
-#endif
 				// Emit special block at end.
-				float4 csCenter[4];
-				float3 csWorldCenter[4];
-				float3 newCenter0 = mul ( UNITY_MATRIX_M, float4(objectCenter0.xyz, 0.0 ) )* (_ProjectionParams.z*.498) + PlayerCenterCamera;
-				float3 newCenter1 = mul ( UNITY_MATRIX_M, float4(objectCenter1.xyz, 0.0 ) )* (_ProjectionParams.z*.498) + PlayerCenterCamera;
-				float3 newCenter2 = mul ( UNITY_MATRIX_M, float4(objectCenter2.xyz, 0.0 ) )* (_ProjectionParams.z*.498) + PlayerCenterCamera;
-				float3 newCenter3 = mul ( UNITY_MATRIX_M, float4(objectCenter3.xyz, 0.0 ) )* (_ProjectionParams.z*.498) + PlayerCenterCamera;
+				float4 csCenter[2];
+				float3 csWorldCenter[2];
+				float3 newCenter0 = mul ( UNITY_MATRIX_M, float4(objectCenter0.xyz, 0.0 ) )* (_ProjectionParams.z*.97) + PlayerCenterCamera;
+				float3 newCenter1 = mul ( UNITY_MATRIX_M, float4(objectCenter1.xyz, 0.0 ) )* (_ProjectionParams.z*.97) + PlayerCenterCamera;
 
 				// Emit special block at end.
 				csCenter[0] = mul( UNITY_MATRIX_VP, float4( newCenter0, 1.0 ) );
 				csWorldCenter[0] = float4( newCenter0, 1.0 );
 				csCenter[1] = mul( UNITY_MATRIX_VP, float4( newCenter1, 1.0 ) );
 				csWorldCenter[1] = float4( newCenter1, 1.0 );
-				csCenter[2] = mul( UNITY_MATRIX_VP, float4( newCenter2, 1.0 ) );
-				csWorldCenter[2] = float4( newCenter2, 1.0 );
-				csCenter[3] = mul( UNITY_MATRIX_VP, float4( newCenter3, 1.0 ) );
-				csWorldCenter[3] = float4( newCenter3, 1.0 );
 
 				float4 vtx_ofs[4] = {
 					{-1, 0, 0, 0 },
@@ -190,44 +127,30 @@ Shader "Unlit/Constellationship"
 					{-1,  1, 0, 0 },
 					{ 1,  1, 0, 0 } };
 
-				int i;
-				int seg;
-				for( seg = 0; seg < 2; seg++ )
-				{
-					float4 csFrom = csCenter[seg*2+0];
-					float3 csWorldFrom = csWorldCenter[seg*2+0];
-					float4 csTo = csCenter[seg*2+1];
-					float3 csWorldTo = csWorldCenter[seg*2+1];
-					
-					float4 csOrtho = float4( normalize(csTo.xy - csFrom.xy).yx * float2( -1, 1 ), 0, 0 );
-					float4 csExtend = float4( normalize(csTo.xy - csFrom.xy).xy * float2( 1, 1 ), 0, 0 );
-					
-					float scale = ( rsize * (_ProjectionParams.z*.98));
-					float genlen = length( csTo.xy - csFrom.xy );
-					float3 csOrthoWorld = normalize(csWorldTo.xyz - csWorldFrom.xyz);
-					
-					po.cppos = float4( vtx_ofs[0].xy, genlen, scale );
-					po.vertex = csFrom + ( csOrtho - csExtend )* rsize * (_ProjectionParams.z*.98);
-					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); triStream.Append(po);
 
-					po.cppos = float4( vtx_ofs[1].xy, genlen, scale );
-					po.vertex = csFrom + ( -csOrtho - csExtend ) * rsize * (_ProjectionParams.z*.98);
-					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); triStream.Append(po);
-
-					po.cppos = float4( vtx_ofs[2].xy, genlen, scale );
-					po.vertex = csTo + ( csOrtho + csExtend ) * rsize * (_ProjectionParams.z*.98);
-					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); triStream.Append(po);
-
-					po.cppos = float4( vtx_ofs[3].xy, genlen, scale );
-					po.vertex = csTo + ( -csOrtho + csExtend ) * rsize * (_ProjectionParams.z*.98);
-					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); triStream.Append(po);
-					triStream.RestartStrip();
-
-				}
+				float4 csFrom = csCenter[0];
+				float3 csWorldFrom = csWorldCenter[0];
+				float4 csTo = csCenter[1];
+				float3 csWorldTo = csWorldCenter[1];
 				
-#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
-				}
-#endif
+				float4 csOrtho = float4( normalize(csTo.xy - csFrom.xy).yx * float2( -1, 1 ), 0, 0 );
+				float4 csExtend = float4( normalize(csTo.xy - csFrom.xy).xy * float2( 1, 1 ), 0, 0 );
+				
+				float scale = ( rsize * (_ProjectionParams.z*.98));
+				float genlen = length( csTo.xy - csFrom.xy );
+				float3 csOrthoWorld = normalize(csWorldTo.xyz - csWorldFrom.xyz);
+				
+				float2 rsc = vtx_ofs[segid].xy;
+				
+				po.cppos = float4( vtx_ofs[segid].xy, genlen, scale );
+				//po.vertex = csFrom + ( csOrtho * rsc.x + csExtend * rsc.y* genlen ) * rsize * (_ProjectionParams.z*.98);
+				po.vertex = ((segid<2)?csFrom:csTo) + ( csOrtho * rsc.x ) * rsize * (_ProjectionParams.z*.97);
+
+				float3 ncnorm = normalize(((segid<2)?newCenter0:newCenter1) - PlayerCenterCamera );
+				float yness = ncnorm.y;
+				float calcHorizonness = 1.0 - yness * 10.0;
+				po.horizonness = saturate( 1.0 - (calcHorizonness * _EnableHorizonness + _HorizonnessShift) );
+				return po;
 			}
 			
 			float3 projectIntoPlane( float3 n,  float3 b )
@@ -236,7 +159,7 @@ Shader "Unlit/Constellationship"
 				return cross( n, cross( b, n ) ) + n * dot( n, b );
 			}
 			
-			fixed4 frag (g2f i) : SV_Target
+			fixed4 frag (v2f i) : SV_Target
 			{
 				float4 col = 1.0;
 				float4 cppos = i.cppos;
@@ -258,6 +181,9 @@ Shader "Unlit/Constellationship"
 					dist = dist3;
 
 				col.a = 1.0 - dist;
+				
+				col.a *= i.horizonness;
+				
 				col.a *= _BaseAlpha;
 				return saturate( col );
 			}

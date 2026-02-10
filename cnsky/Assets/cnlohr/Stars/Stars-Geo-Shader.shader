@@ -8,6 +8,8 @@ Shader "Unlit/Stars-Geo-Shader"
 		_StarSizeBase("Star Size Base", float)=0.025
 		_StarSizeRel("Star Size Rel", float)=0.025
 		_BaseSizeUpscale("Base Size Upscale", float)=1.0
+		_EnableHorizonness( "EnableHorizonness", float ) = 0.0
+		_HorizonnessShift( "Horizonness Shift", float ) = 0.0
     }
     SubShader
 	{
@@ -69,6 +71,8 @@ Shader "Unlit/Stars-Geo-Shader"
 			float4 _ManagementTexture_TexelSize;
 			Texture2D< float4 > _Hip2;
 			float4 _Hip2_TexelSize;
+			float _EnableHorizonness;
+			float _HorizonnessShift;
 
 			v2g vert (appdata v, uint id : SV_VertexID, uint iid : SV_InstanceID  )
 			{
@@ -153,7 +157,7 @@ Shader "Unlit/Stars-Geo-Shader"
 				sincos( StarBlockIntA.g/2147483647.0 * 3.14159, sdeclination.x, sdeclination.y );
 				float3 objectCenter = normalize ( float3( -srascention.x * sdeclination.y, srascention.y * sdeclination.y, sdeclination.x )  ).xzy  ;
 
-				float3 newCenter = mul ( UNITY_MATRIX_M, float4(objectCenter.xyz, 0.0 ) )* (_ProjectionParams.z*.98) + PlayerCenterCamera;
+				float3 newCenter = mul ( UNITY_MATRIX_M, float4(objectCenter.xyz, 0.0 ) )* (_ProjectionParams.z*.97) + PlayerCenterCamera;
 
 				// Emit special block at end.
 				float4 csCenter = mul( UNITY_MATRIX_VP, float4( newCenter, 1.0 ) );
@@ -163,7 +167,15 @@ Shader "Unlit/Stars-Geo-Shader"
 					StarBlockUIntA.b >> 16,
 					StarBlockUIntA.a & 0xffff,
 					StarBlockUIntA.a >> 16 ) / float4( 1000, 1000, 1000, 1000 );
-				po.starcolor = StarBlockB.rgba;
+
+
+				float3 ncnorm = normalize(newCenter - PlayerCenterCamera );
+				float yness = ncnorm.y;
+				float calcHorizonness = 1.0 - yness * 10.0;
+				float ohness = saturate( 1.0 - (calcHorizonness * _EnableHorizonness + _HorizonnessShift) );
+				
+
+				po.starcolor = StarBlockB.rgba * ohness;
 				float initmag = StarBlockB.a;
 
 				
@@ -181,8 +193,9 @@ Shader "Unlit/Stars-Geo-Shader"
 				for( i = 0; i < 4; i++ )
 				{
 					po.cppos = vtx_ofs[i];
-					po.vertex = csCenter + vtx_ofs[i] * rsize * (_ProjectionParams.z*.98);
+					po.vertex = csCenter + vtx_ofs[i] * rsize * (_ProjectionParams.z*.97);
 
+				
 					UNITY_TRANSFER_FOG(po,po.vertex);
 					triStream.Append(po);
 				}
