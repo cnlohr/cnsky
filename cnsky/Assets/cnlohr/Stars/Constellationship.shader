@@ -30,7 +30,6 @@ Shader "Unlit/Constellationship"
 			#pragma geometry geo
 			#pragma fragment frag
 			#pragma target 5.0
-			#pragma multi_compile_fog
 
 			struct appdata
 			{
@@ -52,7 +51,6 @@ Shader "Unlit/Constellationship"
 #endif
 				float4 cppos : CPP;
 				nointerpolation float3 starcolor : STARCOLOR;
-				UNITY_FOG_COORDS(1)
 			};
 
 			float _BaseAlpha;
@@ -205,19 +203,19 @@ Shader "Unlit/Constellationship"
 					
 					po.cppos = float4( vtx_ofs[0].xy, genlen, scale );
 					po.vertex = csFrom + ( csOrtho - csExtend )* rsize * (_ProjectionParams.z*.98);
-					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); UNITY_TRANSFER_FOG(po,po.vertex); triStream.Append(po);
+					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); triStream.Append(po);
 
 					po.cppos = float4( vtx_ofs[1].xy, genlen, scale );
 					po.vertex = csFrom + ( -csOrtho - csExtend ) * rsize * (_ProjectionParams.z*.98);
-					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); UNITY_TRANSFER_FOG(po,po.vertex); triStream.Append(po);
+					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); triStream.Append(po);
 
 					po.cppos = float4( vtx_ofs[2].xy, genlen, scale );
 					po.vertex = csTo + ( csOrtho + csExtend ) * rsize * (_ProjectionParams.z*.98);
-					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); UNITY_TRANSFER_FOG(po,po.vertex); triStream.Append(po);
+					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); triStream.Append(po);
 
 					po.cppos = float4( vtx_ofs[3].xy, genlen, scale );
 					po.vertex = csTo + ( -csOrtho + csExtend ) * rsize * (_ProjectionParams.z*.98);
-					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); UNITY_TRANSFER_FOG(po,po.vertex); triStream.Append(po);
+					UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(po); triStream.Append(po);
 					triStream.RestartStrip();
 
 				}

@@ -23,7 +23,6 @@ Shader "SatelliteStuff/RTComputeManagement"
 
 	ENDCG
 
-
 		Pass
 		{
 			Name "Satellite Management CRT"
@@ -61,7 +60,7 @@ Shader "SatelliteStuff/RTComputeManagement"
 
 			[maxvertexcount(8)]
 			[instance(2)]
-			void geo( point v2g input[1], inout PointStream<g2f> stream,
+			void geo( triangle v2g input[3], inout PointStream<g2f> stream,
 				uint instanceID : SV_GSInstanceID, uint geoPrimID : SV_PrimitiveID )
 			{
 				// Just FYI you get 64kB of local variable space.

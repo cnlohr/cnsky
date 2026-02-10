@@ -58,10 +58,10 @@ Shader "SatelliteStuff/RTComputeSatellites"
 			v2g vert( appdata_customrendertexture IN )
 			{
 				v2g o;
-				o.batchID = IN.vertexID / 3;
+				o.batchID = IN.vertexID / 6;
 
 				// This is unused, but must be initialized otherwise things get janky.
-				o.vertex = 0.;
+				o.vertex = float4( 0.0, 0.0, 0.5, 0.5 );
 				return o;
 			}
 
@@ -99,7 +99,7 @@ Shader "SatelliteStuff/RTComputeSatellites"
 			[maxvertexcount(16)] // Position + Velocity, 6 points  + 4 Bonus
 			[instance(INSTANCE_CT)]
 
-			void geo( point v2g input[1], inout PointStream<g2f> stream,
+			void geo( triangle v2g input[3], inout PointStream<g2f> stream,
 				uint instanceID : SV_GSInstanceID, uint geoPrimID : SV_PrimitiveID )
 			{
 				g2f o;
