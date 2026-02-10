@@ -6,9 +6,15 @@ using UnityEditor.SceneManagement;
 
 public class StarMeshScript : MonoBehaviour
 {
-	public MeshFilter starMesh;
-	public MeshFilter constellationMesh;
+	public GameObject stars;
+	public GameObject constellations;
 	
+	public Material starMaterialQuest;
+	public Material starMaterialPC;
+	
+	const string starAssetName = "Assets/cnlohr/Stars/starpoints.asset";
+	const string constellationAssetName = "Assets/cnlohr/Stars/constellationpoints.asset";
+
 	public void RefreshMesh( bool first, BuildTarget newTarget )
 	{
 		if( newTarget == BuildTarget.Android )
@@ -19,29 +25,39 @@ public class StarMeshScript : MonoBehaviour
 		{
 			Debug.Log( "Targeting stars for Windows" );
 		}
-		
-		if( !starMesh )
-		{
-			Debug.LogError( "Componet does not have star mesh." );
-			return;
-		}
+	
+		MeshFilter starMesh = stars.GetComponent<MeshFilter>();
+		MeshFilter constellationMesh = constellations.GetComponent<MeshFilter>();;
 
-//		Mesh mesh = new Mesh();
-		Mesh mesh = starMesh.sharedMesh;
-		if( !mesh )
-		{
-			Debug.Log( "Star Mesh did not exist. Creating" );
-			mesh = starMesh.mesh = new Mesh();
-		}
-
-
-		int vertices = 117955; // Generate 118k points. *4 for quads.
-		mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
-		mesh.vertices = new Vector3[vertices];
-		mesh.bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(1000000, 1000000, 1000000));
-		int [] inds = new int[0];
 		if( newTarget == BuildTarget.Android )
 		{
+			stars.GetComponent<Renderer>().material = starMaterialQuest;
+		}
+		else
+		{
+			stars.GetComponent<Renderer>().material = starMaterialPC;
+		}	
+
+		{
+			if( !starMesh )
+			{
+				Debug.LogError( "Componet does not have star mesh." );
+				return;
+			}
+
+			Mesh mesh = starMesh.sharedMesh;
+			if( !mesh )
+			{
+				Debug.Log( "Star Mesh did not exist. Creating" );
+				mesh = starMesh.mesh = new Mesh();
+			}
+
+			int vertices = 117955; // Generate 118k points. *4 for quads.
+			mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+			mesh.vertices = new Vector3[vertices];
+			mesh.bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(1000000, 1000000, 1000000));
+			int [] inds;
+
 			// For OpenGL we need actual indices.
 			inds = new int[vertices];
 			int i;
@@ -49,24 +65,40 @@ public class StarMeshScript : MonoBehaviour
 			{
 				inds[i] = i;
 			}
-		}
 
-		mesh.SetIndices(inds, MeshTopology.Points, 0, false, 0);
-		//AssetDatabase.CreateAsset(mesh, "Assets/Stars/starpoints.asset");
-		//((target as MonoBehaviour).GetComponent<MeshFilter>()).mesh = mesh;
+			mesh.SetIndices(inds, MeshTopology.Points, 0, false, 0);
+
+			AssetDatabase.CreateAsset(mesh, starAssetName );
+		}
 		
-		AssetDatabase.CreateAsset(mesh, "Assets/cnlohr/Stars/starpoints.asset");
-		GetComponent<MeshFilter>().mesh = mesh;
+		{
+			if( !constellationMesh )
+			{
+				Debug.LogError( "Componet does not have constellation mesh." );
+				return;
+			}
 
-/*		{
-			int vertices = 1024; // Generate line points
-			Mesh mesh = new Mesh();
-			mesh.vertices = new Vector3[1];
+			Mesh mesh = constellationMesh.sharedMesh;
+			if( !mesh )
+			{
+				Debug.Log( "Constellation Mesh did not exist. Creating" );
+				mesh = constellationMesh.mesh = new Mesh();
+			}
+
+			int vertices = 676; // Generate line points (Will be triangles)
+			mesh.vertices = new Vector3[vertices];
+			int [] inds = new int[vertices];
+			int i;
+			for( i = 0; i < vertices; i++ )
+			{
+				inds[i] = i;
+			}
+
 			mesh.bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(1000000, 1000000, 1000000));
-			mesh.SetIndices(new int[vertices], MeshTopology.Points, 0, false, 0);
-			AssetDatabase.CreateAsset(mesh, "Assets/Stars/constellationpoints.asset");
+			mesh.SetIndices(inds, MeshTopology.Points, 0, false, 0);
+			AssetDatabase.CreateAsset(mesh, constellationAssetName );
 		}
-*/
+
 /*
 		int vertices = 128; // Generate 118k points. *4 for quads.
 		Mesh mesh = new Mesh();

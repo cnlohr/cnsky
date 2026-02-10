@@ -165,6 +165,9 @@ v2f_init_customrendertexture DefaultInitCustomRenderTextureVertexShader (appdata
 	v2f_init_customrendertexture o;
 	o.vertex = UnityObjectToClipPos(v.vertex);
 	o.texcoord = float2(v.texcoord.xy);
+#if !UNITY_UV_STARTS_AT_TOP
+	o.texcoord.y = 1.0 - o.texcoord.y;
+#endif
 	return o;
 }
 

@@ -84,8 +84,13 @@ Shader "Unlit/Constellationship"
 				return t;
 			}
 
+
+#if defined(UNITY_STEREO_MULTIVIEW_ENABLED) && defined(SHADER_API_GLES3)
+			[maxvertexcount(16)]
+#else
 			[maxvertexcount(8)]
 			[instance(2)]
+#endif
 			void geo(point v2g p[1], inout TriangleStream<g2f> triStream,
 				//uint InstanceID : SV_GSInstanceID,
 				uint pid : SV_PrimitiveID

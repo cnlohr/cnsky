@@ -6,6 +6,7 @@ Shader "SatelliteStuff/FloatImport"
 	{
 		_ImportTexture ("ImportTexture", 2D) = "white" {}
 		[ToggleUI] _DoNotSRGBConvert ("Don't SRGB Convert", float) = 0.0
+		[ToggleUI] TextureYPadConditionally ( "Flip Y Conditionally", float ) = 1.0
 	}
 	SubShader
 	{
@@ -30,7 +31,9 @@ Shader "SatelliteStuff/FloatImport"
 			#include "UnityCG.cginc"
 			
 			Texture2D<float4> _ImportTexture;
+			float4 _ImportTexture_TexelSize;
 			float _DoNotSRGBConvert;
+			bool TextureYPadConditionally;
 			
 			/*
 			inline float GammaToLinearSpaceExact (float value)
@@ -57,14 +60,22 @@ Shader "SatelliteStuff/FloatImport"
 			
 			uint4 frag (v2f_customrendertexture IN) : SV_Target
 			{
-
 				//int2 Coord = float2(IN.localTexcoord.x,1.-IN.localTexcoord.y) * float2( _CustomRenderTextureWidth, _CustomRenderTextureHeight );
-				int2 Coord = IN.localTexcoord.xy * float2( _CustomRenderTextureWidth, _CustomRenderTextureHeight );
+				float2 ltc = IN.localTexcoord.xy;
+				int2 Coord = ltc * float2( _CustomRenderTextureWidth, _CustomRenderTextureHeight );
 
+				if( TextureYPadConditionally )
+				{
+#if !UNITY_UV_STARTS_AT_TOP
+					// Ok, I legit have no idea why.
+					Coord.y -= _CustomRenderTextureHeight - _ImportTexture_TexelSize.a;
+#endif
+				}
+				
 				uint4 im0 = ColorCorrect4( _ImportTexture[ int2( Coord.x * 4 + 0, Coord.y ) ] ) * 255.55;
 				uint4 im1 = ColorCorrect4( _ImportTexture[ int2( Coord.x * 4 + 1, Coord.y ) ] ) * 255.55;
 				uint4 im2 = ColorCorrect4( _ImportTexture[ int2( Coord.x * 4 + 2, Coord.y ) ] ) * 255.55;
-				uint4 im3 = ColorCorrect4( _ImportTexture[ int2( Coord.x * 4 + 3, Coord.y) ] ) * 255.55;
+				uint4 im3 = ColorCorrect4( _ImportTexture[ int2( Coord.x * 4 + 3, Coord.y ) ] ) * 255.55;
 
 				uint4 binrep = uint4(
 					(im0.a << (uint)24) + (im0.b << (uint)16) + (im0.g << (uint)8) + (im0.r << (uint)0),

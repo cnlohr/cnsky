@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: FloatImport-Constellations
-  m_Shader: {fileID: 4800000, guid: ff4802af37858fb428cf9a5db2d0af0f, type: 3}
+  m_Name: HIPFloatImport-Stars
+  m_Shader: {fileID: 4800000, guid: 671c0eb24fb9ebc478e1990d2ec814e6, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -43,8 +43,12 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _ImportTexture:
+        m_Texture: {fileID: 2800000, guid: d83f79ae9194aad448b394215cb9865e, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: 358f87dc3fa060c4f98ea600ab3a58da, type: 3}
+        m_Texture: {fileID: 8600000, guid: b915d054af05c09448c334de67fc6001, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -61,9 +65,13 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - FlipYConditionally: 1
+    - FlipYOnDX: 0
+    - TextureYPadConditionally: 1
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
+    - _DoNotSRGBConvert: 0
     - _DstBlend: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5

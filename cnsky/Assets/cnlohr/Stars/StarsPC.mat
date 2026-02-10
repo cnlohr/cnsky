@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: FloatImportConstellation
-  m_Shader: {fileID: 4800000, guid: 408e65a4bd09dfe49aca8183b63d1e69, type: 3}
+  m_Name: StarsPC
+  m_Shader: {fileID: 4800000, guid: 5a6e25ef6741d1d439d311006c53254f, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -43,12 +43,16 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _ImportTexture:
-        m_Texture: {fileID: 2800000, guid: 358f87dc3fa060c4f98ea600ab3a58da, type: 3}
+    - _Hip2:
+        m_Texture: {fileID: 8600000, guid: 140cdcf9a7446664892beb68a221268b, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _ManagementTexture:
+        m_Texture: {fileID: 8600000, guid: ae34c900ecad5aa4e93964f4458c1344, type: 2}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -65,16 +69,17 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - FlipYConditionally: 1
-    - TextureYPadConditionally: 0
+    - _AlphaMultiplier: 1
+    - _AlphaMultiply: 1
+    - _BaseSizeUpscale: 1
     - _BumpScale: 1
     - _Cutoff: 0.5
     - _DetailNormalMapScale: 1
-    - _DoNotSRGBConvert: 1
     - _DstBlend: 0
     - _GlossMapScale: 1
     - _Glossiness: 0.5
     - _GlossyReflections: 1
+    - _InverseScale: 6000
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1
@@ -82,6 +87,9 @@ Material:
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
     - _SrcBlend: 1
+    - _StarSize: 0.51
+    - _StarSizeBase: 0.001
+    - _StarSizeRel: 0.0002
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:

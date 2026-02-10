@@ -204,7 +204,6 @@ Shader "Unlit/Stars-Geo-Shader"
 				fixed4 col = float4( i.starcolor.rgb, 1.0 );
 
 				float sedge = length(i.cppos.xy) * .9; // better fill
-				
 				float disa = i.starcolor.a - sedge;
 				col.a = saturate( disa );
 

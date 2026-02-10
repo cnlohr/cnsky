@@ -38,7 +38,7 @@ CustomRenderTexture:
   m_Dimension: 2
   m_VolumeDepth: 1
   m_ShadowSamplingMode: 2
-  m_Material: {fileID: 2100000, guid: 7b76c8bc4abcf824e82c582a0496d9ec, type: 2}
+  m_Material: {fileID: 2100000, guid: 3fcfa401d817cba47a56de24fc1cad54, type: 2}
   m_InitSource: 0
   m_InitMaterial: {fileID: 0}
   m_InitColor: {r: 0, g: 0, b: 0, a: 1}

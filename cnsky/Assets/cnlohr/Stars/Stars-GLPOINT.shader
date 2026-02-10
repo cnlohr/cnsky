@@ -102,7 +102,7 @@ Shader "Unlit/Stars-GLPOINT"
 				t.starcolor = StarBlockB.rgba;
 				float initmag = StarBlockB.a;
 				
-				float relsize = _StarSizeRel * initmag+.00015;
+				float relsize = _StarSizeRel * initmag * 0.5 +.00015;
 				float4 rsize = float4( _ScreenParams.y/_ScreenParams.x, 1, 0, 1. ) * relsize +
 					float4( 2.0/_ScreenParams.xy, 0.0, 0.0 );
 
@@ -114,7 +114,7 @@ Shader "Unlit/Stars-GLPOINT"
 					t.vertex = csCenter;// + vtx_ofs[io] * rsize * (farPlane*.98);
 					UNITY_TRANSFER_FOG(t,t.vertex);
 				}
-				t.ps = length(2.0*relsize*_ScreenParams.xy) - 0.5;
+				t.ps = length(2.0*relsize*_ScreenParams.xy)+.9;
 
 				return t;
 			}
