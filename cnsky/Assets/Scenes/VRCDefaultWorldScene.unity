@@ -24844,10 +24844,25 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 168197600854927821, guid: 8585eff579082994293b561b83ac5854,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 4300000, guid: ffa8dc9c8dfa46446b718cde41e73c5b, type: 2}
+    - target: {fileID: 1281329245102985512, guid: 8585eff579082994293b561b83ac5854,
+        type: 3}
+      propertyPath: m_Mesh
+      value: 
+      objectReference: {fileID: 4300000, guid: 16f041123283dc04ba4c826cf8b02f8f, type: 2}
     - target: {fileID: 2888767415393174875, guid: 8585eff579082994293b561b83ac5854,
         type: 3}
       propertyPath: m_Name
       value: StarSystem-cnlohr
+      objectReference: {fileID: 0}
+    - target: {fileID: 2888767415393174875, guid: 8585eff579082994293b561b83ac5854,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5333302110923311694, guid: 8585eff579082994293b561b83ac5854,
         type: 3}
@@ -24899,6 +24914,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7462136406204600180, guid: 8585eff579082994293b561b83ac5854,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: 3cf8441a03688904db8ce60ff214a7da, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -24948,7 +24968,7 @@ MonoBehaviour:
   - {fileID: 2100000, guid: 0f125b2e74625fe4a846a24c4181b8c8, type: 2}
   - {fileID: 2100000, guid: 5c715e9c7c1c4e0448f7ecf0f478a217, type: 2}
   - {fileID: 2100000, guid: d95fc552403df0e418cef3aa0a311fd0, type: 2}
-  - {fileID: 2100000, guid: f5a4c1809b41ffd41a974909cf123a53, type: 2}
+  - {fileID: 2100000, guid: 3cf8441a03688904db8ce60ff214a7da, type: 2}
   - {fileID: 2100000, guid: 7495a1846e6934f4badf7c4f514e378c, type: 2}
   - {fileID: 2100000, guid: 9afc4b106e391b84e881d5363ac12413, type: 2}
   - {fileID: 2100000, guid: 32e8ab006d01bd548adecd20efa8619d, type: 2}

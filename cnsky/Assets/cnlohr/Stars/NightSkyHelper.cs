@@ -44,11 +44,11 @@ public class StarMeshScript : MonoBehaviour
 				Debug.LogError( "Componet does not have star mesh." );
 				return;
 			}
+			try{ AssetDatabase.DeleteAsset( starAssetName ); } catch( System.Exception ) { }
 
 			Mesh mesh = starMesh.sharedMesh;
 			if( !mesh )
 			{
-				Debug.Log( "Star Mesh did not exist. Creating" );
 				mesh = starMesh.mesh = new Mesh();
 			}
 
@@ -67,7 +67,6 @@ public class StarMeshScript : MonoBehaviour
 			}
 
 			mesh.SetIndices(inds, MeshTopology.Points, 0, false, 0);
-
 			AssetDatabase.CreateAsset(mesh, starAssetName );
 		}
 		
@@ -78,27 +77,14 @@ public class StarMeshScript : MonoBehaviour
 				return;
 			}
 
+			try{ AssetDatabase.DeleteAsset( constellationAssetName ); } catch( System.Exception ) { }
+
 			Mesh mesh = constellationMesh.sharedMesh;
 			if( !mesh )
 			{
-				Debug.Log( "Constellation Mesh did not exist. Creating" );
 				mesh = constellationMesh.mesh = new Mesh();
 			}
 
-/*
-			int vertices = 676; // Generate line points (Will be triangles)
-			mesh.vertices = new Vector3[vertices];
-			int [] inds = new int[vertices];
-			int i;
-			for( i = 0; i < vertices; i++ )
-			{
-				inds[i] = i;
-			}
-
-			mesh.bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(1000000, 1000000, 1000000));
-			mesh.SetIndices(inds, MeshTopology.Points, 0, false, 0);
-			AssetDatabase.CreateAsset(mesh, constellationAssetName );
-			*/
 			int csegs = 676; // Generate line points (Will be triangles)
 			mesh.vertices = new Vector3[csegs*6];
 			int [] inds = new int[csegs*6];
@@ -116,23 +102,11 @@ public class StarMeshScript : MonoBehaviour
 			mesh.SetIndices(inds, MeshTopology.Triangles, 0, false, 0);
 			AssetDatabase.CreateAsset(mesh, constellationAssetName );
 		}
+		
+		EditorUtility.SetDirty(constellationMesh);
+		EditorUtility.SetDirty(starMesh);
 
-/*
-		int vertices = 128; // Generate 118k points. *4 for quads.
-		Mesh mesh = new Mesh();
-		mesh.vertices = new Vector3[vertices];
-		mesh.bounds = new Bounds(new Vector3(0, 0, 0), new Vector3(1000000, 1000000, 1000000));
-		int [] inds = new int[vertices];
-		int i;
-		for( i = 0; i < vertices; i++ )
-			inds[i] = i;
-		mesh.SetIndices(inds, MeshTopology.Points, 0, false, 0);
-		AssetDatabase.CreateAsset(mesh, "Assets/PointTest/testpoints.asset");
-*/
-
-//		((target as MonoBehaviour).GetComponent<MeshFilter>()).mesh = mesh;
-		//add everthing the button would do.
-
+		AssetDatabase.SaveAssets();
 	}
 }
 
