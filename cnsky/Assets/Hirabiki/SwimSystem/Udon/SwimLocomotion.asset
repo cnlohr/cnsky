@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: SwimLocomotion
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 0a80aade8f9049c41acec0267089b50b,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 79d1fb28f1d9473599b88b793809d9f6,
     type: 2}
   udonAssembly: 
   assemblyError: 
@@ -618,8 +618,8 @@ MonoBehaviour:
         Disabled:
         Ability to swim backwards and sideways
 
-        Enabled: Trigger can be
-        kept held when swimming'
+        Enabled: Trigger can be kept
+        held when swimming'
     - Name: 
       Entry: 8
       Data: 
@@ -745,20 +745,18 @@ MonoBehaviour:
         EnableSimpleFootSwim
         to enable from script::
 
-        
 
-        Players with FBT setup can use
-        their legs to swim.
+        Players with FBT setup can use their legs
+        to swim.
 
-        if RealisticFullBodySwim is disabled, player
-        can swim by simply swinging their legs.
+        if RealisticFullBodySwim is disabled, player can swim by
+        simply swinging their legs.
 
-        Swimming locomotion for
-        regular VR player with FBT swim enabled will not work correctly.
+        Swimming locomotion for regular VR player
+        with FBT swim enabled will not work correctly.
 
-        It
-        is not possible to tell regular VR and FBT players apart so put a warning
-        in your world.'
+        It is not possible
+        to tell regular VR and FBT players apart so put a warning in your world.'
     - Name: 
       Entry: 8
       Data: 
@@ -817,7 +815,6 @@ MonoBehaviour:
       Entry: 1
       Data: '::Call EnableRealFootSwim to enable from script::
 
-        
 
         UseFullBodySwim
         must be enabled to use this setting.

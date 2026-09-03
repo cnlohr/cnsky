@@ -12,31 +12,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
   m_Name: UGHeadFollower
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: d007eaff3af65614aad0e131f047f3ee,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: c161c4c16cd31e647be3e3ca98e95819,
     type: 2}
-  udonAssembly: ".data_start\r\n\r\n    \r\n    __Boolean_0: %SystemBoolean, null\r\n   
-    __Object_0: %SystemObject, null\r\n    __Object_1: %SystemObject, null\r\n   
-    __var_0: %SystemObject, null\r\n    __instance_0: %UnityEngineTransform, this\r\n   
-    __position_0: %UnityEngineVector3, null\r\n    __rotation_0: %UnityEngineQuaternion,
-    null\r\n    __instance_1: %VRCSDKBaseVRCPlayerApiTrackingData, null\r\n    __instance_3:
-    %VRCSDKBaseVRCPlayerApiTrackingData, null\r\n    __instance_2: %VRCSDKBaseVRCPlayerApi,
-    null\r\n    __tt_0: %VRCSDKBaseVRCPlayerApiTrackingDataType, null\r\n\r\n.data_end\r\n\r\n.code_start\r\n\r\n   
-    .export _postLateUpdate\r\n    \r\n    _postLateUpdate:\r\n    \r\n        PUSH,
-    __var_0\r\n        PUSH, __Object_0\r\n        COPY\r\n        PUSH, __Object_1\r\n       
-    EXTERN, \"VRCSDKBaseNetworking.__get_LocalPlayer__VRCSDKBaseVRCPlayerApi\"\r\n       
-    PUSH, __Object_0\r\n        PUSH, __Object_1\r\n        PUSH, __Boolean_0\r\n       
-    EXTERN, \"SystemObject.__op_Equality__SystemObject_SystemObject__SystemBoolean\"\r\n       
-    PUSH, __Boolean_0\r\n        JUMP_IF_FALSE, 0x0000005C\r\n        JUMP, 0x00000108\r\n       
-    PUSH, __Object_1\r\n        PUSH, __instance_2\r\n        COPY\r\n        PUSH,
-    __Object_1\r\n        PUSH, __tt_0\r\n        PUSH, __instance_1\r\n        EXTERN,
-    \"VRCSDKBaseVRCPlayerApi.__GetTrackingData__VRCSDKBaseVRCPlayerApiTrackingDataType__VRCSDKBaseVRCPlayerApiTrackingData\"\r\n       
-    PUSH, __instance_1\r\n        PUSH, __position_0\r\n        EXTERN, \"VRCSDKBaseVRCPlayerApiTrackingData.__get_position__UnityEngineVector3\"\r\n       
-    PUSH, __Object_1\r\n        PUSH, __instance_2\r\n        COPY\r\n        PUSH,
-    __instance_1\r\n        PUSH, __instance_3\r\n        COPY\r\n        PUSH, __instance_1\r\n       
-    PUSH, __rotation_0\r\n        EXTERN, \"VRCSDKBaseVRCPlayerApiTrackingData.__get_rotation__UnityEngineQuaternion\"\r\n       
-    PUSH, __instance_0\r\n        PUSH, __position_0\r\n        PUSH, __rotation_0\r\n       
-    EXTERN, \"UnityEngineTransform.__SetPositionAndRotation__UnityEngineVector3_UnityEngineQuaternion__SystemVoid\"\r\n       
-    JUMP, 0xFFFFFFFC\r\n    \r\n\r\n.code_end\r\n"
+  udonAssembly: ".data_start\n\n    \n    __Boolean_0: %SystemBoolean, null\n   
+    __Object_0: %SystemObject, null\n    __Object_1: %SystemObject, null\n    __var_0:
+    %SystemObject, null\n    __instance_0: %UnityEngineTransform, this\n    __position_0:
+    %UnityEngineVector3, null\n    __rotation_0: %UnityEngineQuaternion, null\n   
+    __instance_1: %VRCSDKBaseVRCPlayerApiTrackingData, null\n    __instance_3: %VRCSDKBaseVRCPlayerApiTrackingData,
+    null\n    __instance_2: %VRCSDKBaseVRCPlayerApi, null\n    __tt_0: %VRCSDKBaseVRCPlayerApiTrackingDataType,
+    null\n\n.data_end\n\n.code_start\n\n    .export _postLateUpdate\n    \n    _postLateUpdate:\n   
+    \n        PUSH, __var_0\n        PUSH, __Object_0\n        COPY\n        PUSH,
+    __Object_1\n        EXTERN, \"VRCSDKBaseNetworking.__get_LocalPlayer__VRCSDKBaseVRCPlayerApi\"\n       
+    PUSH, __Object_0\n        PUSH, __Object_1\n        PUSH, __Boolean_0\n       
+    EXTERN, \"SystemObject.__op_Equality__SystemObject_SystemObject__SystemBoolean\"\n       
+    PUSH, __Boolean_0\n        JUMP_IF_FALSE, 0x0000005C\n        JUMP, 0x00000108\n       
+    PUSH, __Object_1\n        PUSH, __instance_2\n        COPY\n        PUSH, __Object_1\n       
+    PUSH, __tt_0\n        PUSH, __instance_1\n        EXTERN, \"VRCSDKBaseVRCPlayerApi.__GetTrackingData__VRCSDKBaseVRCPlayerApiTrackingDataType__VRCSDKBaseVRCPlayerApiTrackingData\"\n       
+    PUSH, __instance_1\n        PUSH, __position_0\n        EXTERN, \"VRCSDKBaseVRCPlayerApiTrackingData.__get_position__UnityEngineVector3\"\n       
+    PUSH, __Object_1\n        PUSH, __instance_2\n        COPY\n        PUSH, __instance_1\n       
+    PUSH, __instance_3\n        COPY\n        PUSH, __instance_1\n        PUSH, __rotation_0\n       
+    EXTERN, \"VRCSDKBaseVRCPlayerApiTrackingData.__get_rotation__UnityEngineQuaternion\"\n       
+    PUSH, __instance_0\n        PUSH, __position_0\n        PUSH, __rotation_0\n       
+    EXTERN, \"UnityEngineTransform.__SetPositionAndRotation__UnityEngineVector3_UnityEngineQuaternion__SystemVoid\"\n       
+    JUMP, 0xFFFFFFFC\n    \n\n.code_end\n"
   assemblyError: 
   graphData:
     name: 

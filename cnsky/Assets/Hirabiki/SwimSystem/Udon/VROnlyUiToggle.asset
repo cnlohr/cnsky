@@ -12,27 +12,26 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f11136daadff0b44ac2278a314682ab, type: 3}
   m_Name: VROnlyUiToggle
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: fc563b897b380414d9a72f36d8f3e76a,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 06d68055610efe35caa009ea192cc79b,
     type: 2}
-  udonAssembly: ".data_start\r\n\r\n    \r\n    __Boolean_0: %SystemBoolean, null\r\n   
-    __Object_0: %SystemObject, null\r\n    __Object_1: %SystemObject, null\r\n   
-    __var_0: %SystemObject, null\r\n    __instance_0: %UnityEngineUIToggle, null\r\n   
-    __value_0: %SystemBoolean, null\r\n    __instance_1: %UnityEngineComponent, null\r\n   
-    __type_0: %SystemType, null\r\n    __instance_2: %UnityEngineTransform, this\r\n   
-    __Type_0: %SystemType, null\r\n    __instance_3: %VRCSDKBaseVRCPlayerApi, null\r\n\r\n.data_end\r\n\r\n.code_start\r\n\r\n   
-    .export _start\r\n    \r\n    _start:\r\n    \r\n        PUSH, __var_0\r\n       
-    PUSH, __Object_0\r\n        COPY\r\n        PUSH, __Object_1\r\n        EXTERN,
-    \"VRCSDKBaseNetworking.__get_LocalPlayer__VRCSDKBaseVRCPlayerApi\"\r\n       
-    PUSH, __Object_0\r\n        PUSH, __Object_1\r\n        PUSH, __Boolean_0\r\n       
-    EXTERN, \"SystemObject.__op_Equality__SystemObject_SystemObject__SystemBoolean\"\r\n       
-    PUSH, __Boolean_0\r\n        JUMP_IF_FALSE, 0x0000005C\r\n        JUMP, 0x000000EC\r\n       
-    PUSH, __instance_2\r\n        PUSH, __instance_1\r\n        EXTERN, \"UnityEngineTransform.__get_transform__UnityEngineTransform\"\r\n       
-    PUSH, __Type_0\r\n        PUSH, __type_0\r\n        COPY\r\n        PUSH, __instance_1\r\n       
-    PUSH, __type_0\r\n        PUSH, __instance_0\r\n        EXTERN, \"UnityEngineComponent.__GetComponent__SystemType__UnityEngineComponent\"\r\n       
-    PUSH, __Object_1\r\n        PUSH, __instance_3\r\n        COPY\r\n        PUSH,
-    __Object_1\r\n        PUSH, __value_0\r\n        EXTERN, \"VRCSDKBaseVRCPlayerApi.__IsUserInVR__SystemBoolean\"\r\n       
-    PUSH, __instance_0\r\n        PUSH, __value_0\r\n        EXTERN, \"UnityEngineUIToggle.__set_interactable__SystemBoolean__SystemVoid\"\r\n       
-    JUMP, 0xFFFFFFFC\r\n    \r\n\r\n.code_end\r\n"
+  udonAssembly: ".data_start\n\n    \n    __Boolean_0: %SystemBoolean, null\n   
+    __Object_0: %SystemObject, null\n    __Object_1: %SystemObject, null\n    __var_0:
+    %SystemObject, null\n    __instance_0: %UnityEngineUIToggle, null\n    __value_0:
+    %SystemBoolean, null\n    __instance_1: %UnityEngineComponent, null\n    __type_0:
+    %SystemType, null\n    __instance_2: %UnityEngineTransform, this\n    __Type_0:
+    %SystemType, null\n    __instance_3: %VRCSDKBaseVRCPlayerApi, null\n\n.data_end\n\n.code_start\n\n   
+    .export _start\n    \n    _start:\n    \n        PUSH, __var_0\n        PUSH,
+    __Object_0\n        COPY\n        PUSH, __Object_1\n        EXTERN, \"VRCSDKBaseNetworking.__get_LocalPlayer__VRCSDKBaseVRCPlayerApi\"\n       
+    PUSH, __Object_0\n        PUSH, __Object_1\n        PUSH, __Boolean_0\n       
+    EXTERN, \"SystemObject.__op_Equality__SystemObject_SystemObject__SystemBoolean\"\n       
+    PUSH, __Boolean_0\n        JUMP_IF_FALSE, 0x0000005C\n        JUMP, 0x000000EC\n       
+    PUSH, __instance_2\n        PUSH, __instance_1\n        EXTERN, \"UnityEngineTransform.__get_transform__UnityEngineTransform\"\n       
+    PUSH, __Type_0\n        PUSH, __type_0\n        COPY\n        PUSH, __instance_1\n       
+    PUSH, __type_0\n        PUSH, __instance_0\n        EXTERN, \"UnityEngineComponent.__GetComponent__SystemType__UnityEngineComponent\"\n       
+    PUSH, __Object_1\n        PUSH, __instance_3\n        COPY\n        PUSH, __Object_1\n       
+    PUSH, __value_0\n        EXTERN, \"VRCSDKBaseVRCPlayerApi.__IsUserInVR__SystemBoolean\"\n       
+    PUSH, __instance_0\n        PUSH, __value_0\n        EXTERN, \"UnityEngineUIToggle.__set_interactable__SystemBoolean__SystemVoid\"\n       
+    JUMP, 0xFFFFFFFC\n    \n\n.code_end\n"
   assemblyError: 
   graphData:
     name: 

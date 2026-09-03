@@ -221,6 +221,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &6918651
 MeshFilter:
@@ -403,6 +404,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &46887847
 MeshFilter:
@@ -462,7 +464,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stringUrl:
     <url>k__BackingField: https://cnvr.io/cnsky/fullcatalog.png
-  btn: {fileID: 70522830}
+  btn: {fileID: 0}
   defaultTexture: {fileID: 2800000, guid: 5023ea98f54aaa544a718e0713375b34, type: 3}
   crt: {fileID: 8600000, guid: 52aee7bea85337c479fbf2022ba6ebed, type: 2}
   doInitial: 0
@@ -513,6 +515,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &70522829
 MeshFilter:
@@ -534,6 +537,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b69dc8bbb99013e41a6620d36e35fa7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: BasisExamples::ExampleButtonInteractable
+  _colliderRefs: []
   Inputs:
     desktopCenterEye:
       Source: {fileID: 0}
@@ -680,6 +684,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &139297098
 MeshFilter:
@@ -791,6 +796,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &166013750
 MeshFilter:
@@ -902,6 +908,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &217010039
 MeshFilter:
@@ -1013,6 +1020,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &224036894
 MeshFilter:
@@ -1124,6 +1132,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &293390889
 MeshFilter:
@@ -1235,6 +1244,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &294076649
 MeshFilter:
@@ -1347,6 +1357,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &302885270
 MeshFilter:
@@ -1437,6 +1448,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &338442363
 MeshFilter:
@@ -1569,6 +1581,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &350707054
 MeshFilter:
@@ -1681,6 +1694,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &362544318
 MeshFilter:
@@ -2043,7 +2057,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   stringUrl:
     <url>k__BackingField: https://cnvr.io/cnsky/lastsat.png
-  btn: {fileID: 554919113}
+  btn: {fileID: 0}
   defaultTexture: {fileID: 2800000, guid: 5023ea98f54aaa544a718e0713375b34, type: 3}
   crt: {fileID: 8600000, guid: 52aee7bea85337c479fbf2022ba6ebed, type: 2}
   doInitial: 1
@@ -2094,6 +2108,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &554919112
 MeshFilter:
@@ -2115,6 +2130,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b69dc8bbb99013e41a6620d36e35fa7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: BasisExamples::ExampleButtonInteractable
+  _colliderRefs: []
   Inputs:
     desktopCenterEye:
       Source: {fileID: 0}
@@ -2306,6 +2322,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &598580835
 MeshFilter:
@@ -2417,6 +2434,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &602306758
 MeshFilter:
@@ -2529,6 +2547,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &646591807
 MeshFilter:
@@ -2641,6 +2660,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &655931162
 MeshFilter:
@@ -2873,6 +2893,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &724889464
 MeshFilter:
@@ -3020,6 +3041,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &757864541
 MeshFilter:
@@ -3109,6 +3131,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &775176251
 MeshFilter:
@@ -3260,6 +3283,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &828323579
 MeshFilter:
@@ -3387,6 +3411,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &847127181
 MeshFilter:
@@ -3498,6 +3523,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &871867625
 MeshFilter:
@@ -3625,6 +3651,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &904838919
 MeshFilter:
@@ -3769,6 +3796,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &923930105
 MeshFilter:
@@ -3951,6 +3979,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &948017988
 MeshFilter:
@@ -4063,6 +4092,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &986028135
 MeshFilter:
@@ -4248,7 +4278,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41a29b28a2ac302409a0fd77d867cc7f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Basis Framework::Basis.Scripts.UI.BasisGraphicUIRayCaster
-  Canvas: {fileID: 1004534055}
+  Canvas: {fileID: 0}
 --- !u!1 &1019767056
 GameObject:
   m_ObjectHideFlags: 0
@@ -4384,6 +4414,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1033655432
 MeshFilter:
@@ -4496,6 +4527,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1068517623
 MeshFilter:
@@ -4762,6 +4794,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1077716199
 MeshFilter:
@@ -4851,6 +4884,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1078556532
 MeshFilter:
@@ -4978,6 +5012,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1098125702
 MeshFilter:
@@ -5082,6 +5117,7 @@ MonoBehaviour:
   m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
+  m_characterHorizontalScale: 1
   m_wordSpacing: 0
   m_lineSpacing: 0
   m_lineSpacingMax: 0
@@ -5225,6 +5261,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1212423091
 MeshFilter:
@@ -5350,6 +5387,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1340359418
 MeshFilter:
@@ -5371,7 +5409,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1a20cb5cad1a134c87687e574539fdb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  btn: {fileID: 1340359421}
+  btn: {fileID: 0}
   rt: {fileID: 8600000, guid: ae34c900ecad5aa4e93964f4458c1344, type: 2}
 --- !u!114 &1340359421
 MonoBehaviour:
@@ -5385,6 +5423,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b69dc8bbb99013e41a6620d36e35fa7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: BasisExamples::ExampleButtonInteractable
+  _colliderRefs: []
   Inputs:
     desktopCenterEye:
       Source: {fileID: 0}
@@ -5531,6 +5570,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1353450253
 MeshFilter:
@@ -5642,6 +5682,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1388168517
 MeshFilter:
@@ -5753,6 +5794,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1410907974
 MeshFilter:
@@ -5979,6 +6021,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1502444605
 MeshFilter:
@@ -6090,6 +6133,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1614575505
 MeshFilter:
@@ -6280,6 +6324,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1755049795
 MeshFilter:
@@ -6320,14 +6365,14 @@ Light:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1787983409}
   m_Enabled: 1
-  serializedVersion: 11
+  serializedVersion: 12
   m_Type: 1
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
   m_Range: 10
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
-  m_CookieSize: 10
+  m_CookieSize2D: {x: 10, y: 10}
   m_Shadows:
     m_Type: 0
     m_Resolution: -1
@@ -6523,6 +6568,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1793625181
 MeshFilter:
@@ -6635,6 +6681,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1801203879
 MeshFilter:
@@ -6764,6 +6811,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1833357425
 MeshFilter:
@@ -6875,6 +6923,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1850036795
 MeshFilter:
@@ -7019,6 +7068,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1969686346
 MeshFilter:
@@ -7146,6 +7196,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1979781391
 MeshFilter:
@@ -7263,6 +7314,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1986752499
 MeshFilter:
@@ -7432,6 +7484,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1996955226
 MeshFilter:
@@ -7544,6 +7597,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &1997042447
 MeshFilter:
@@ -7752,6 +7806,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &2075706573
 MeshFilter:
@@ -7844,6 +7899,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!33 &2083712189
 MeshFilter:
@@ -7865,7 +7921,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1a20cb5cad1a134c87687e574539fdb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  btn: {fileID: 2083712192}
+  btn: {fileID: 0}
   rt: {fileID: 8600000, guid: a5c278a2e9225e34e861e4c6935b8fa9, type: 2}
 --- !u!114 &2083712192
 MonoBehaviour:
@@ -7879,6 +7935,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b69dc8bbb99013e41a6620d36e35fa7a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: BasisExamples::ExampleButtonInteractable
+  _colliderRefs: []
   Inputs:
     desktopCenterEye:
       Source: {fileID: 0}
@@ -8052,6 +8109,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!4 &7606902903243430487
 Transform:
