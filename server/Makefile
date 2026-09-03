@@ -1,15 +1,23 @@
-all : tle2image
+all : csv2image
 
 tle2image : tle2image.c
 	gcc -o $@ $^ -O2 -lm -g -I. -lz
 
+csv2image : csv2image.c
+	gcc -o $@ $^ -O2 -lm -g -I. -lz
+
 download :
-	wget -O active_satellites.tle "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle"
-	wget -O full_catalog.tle "https://celestrak.org/NORAD/elements/catalog.txt"
+	wget https://celestrak.org/NORAD/elements/gp.php?SPECIAL=full-catalog -O full_catalog.csv
+	wget https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=csv -O active_satellites.csv
 
 update : tle2image
 	./tle2image active_satellites.tle /var/www/html/cnsky/lastsat.png
 	./tle2image full_catalog.tle /var/www/html/cnsky/fullcatalog.png
+	cp /var/www/html/cnsky/fullcatalog.png /var/www/html/cnsky/history/fullcatalog.`date +%Y%m%d-%H%M%S`.png
+
+update : csv2image
+	./csv2image active_satellites.csv /var/www/html/cnsky/lastsat.png
+	./csv2image full_catalog.csv /var/www/html/cnsky/fullcatalog.png
 	cp /var/www/html/cnsky/fullcatalog.png /var/www/html/cnsky/history/fullcatalog.`date +%Y%m%d-%H%M%S`.png
 
 
