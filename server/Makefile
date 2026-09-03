@@ -8,7 +8,7 @@ csv2image : csv2image.c
 
 download :
 	wget https://celestrak.org/NORAD/elements/gp.php?SPECIAL=full-catalog -O full_catalog.csv
-	wget https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=csv -O active_satellites.csv
+	wget "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=csv" -O active_satellites.csv
 
 update : tle2image
 	./tle2image active_satellites.tle /var/www/html/cnsky/lastsat.png
@@ -43,4 +43,4 @@ initial : hip2.dat constellationship.fab star_texture_maker
 	./star_texture_maker hip2.dat constellationship.fab /var/www/html/cnsky/hip2.png /var/www/html/cnsky/constallationship.png
 
 clean :
-	rm -rf tle2image hip2.dat constellationship.fab star_texture_maker
+	rm -rf tle2image hip2.dat constellationship.fab star_texture_maker csv2image
